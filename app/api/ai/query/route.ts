@@ -87,6 +87,106 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
+    // Enhanced CTR detection with multiple variations
+    const ctrKeywords = ['ctr', 'click-through rate', 'click through rate', 'click rate', 'click-through', 'clickthrough']
+    const isCTRQuery = ctrKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Enhanced ROAS detection with multiple variations
+    const roasKeywords = ['roas', 'return on ad spend', 'return on advertising spend', 'return on investment', 'roi']
+    const isROASQuery = roasKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Enhanced count detection
+    const countKeywords = ['how many', 'count', 'number', 'total number', 'amount of', 'quantity']
+    const isCountQuery = countKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Enhanced spend detection
+    const spendKeywords = ['spend', 'cost', 'budget', 'expense', 'expenditure', 'investment']
+    const isSpendQuery = spendKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Enhanced campaign detection
+    const campaignKeywords = ['campaign', 'campaigns', 'ad campaign', 'ad campaigns']
+    const isCampaignQuery = campaignKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Enhanced platform detection
+    const platformKeywords = ['platform', 'platforms', 'channel', 'channels', 'network', 'networks']
+    const isPlatformQuery = platformKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Enhanced visualization detection
+    const vizKeywords = ['visual', 'visualize', 'chart', 'graph', 'plot', 'show me', 'display', 'visualization']
+    const isVizQuery = vizKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Enhanced top/best detection
+    const topKeywords = ['top', 'best', 'highest', 'leading', 'top performing', 'best performing']
+    const isTopQuery = topKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Handle "metric for each campaign" queries (HIGH PRIORITY - moved to top)
+    if (isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual'))) {
+      // Determine which metric is being asked for
+      let metricType = 'ctr'
+      let metricName = 'CTR'
+      let formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      
+      if (isCTRQuery) {
+        metricType = 'ctr'
+        metricName = 'CTR'
+        formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      } else if (isROASQuery) {
+        metricType = 'roas'
+        metricName = 'ROAS'
+        formatFunction = (value: number) => `${value.toFixed(2)}x`
+      } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+        metricType = 'cpc'
+        metricName = 'CPC'
+        formatFunction = (value: number) => `$${value.toFixed(2)}`
+      } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+        metricType = 'cpa'
+        metricName = 'CPA'
+        formatFunction = (value: number) => `$${value.toFixed(2)}`
+      }
+      
+      // Normalize campaign names
+      const normalizedData = data.map(item => ({
+        ...item,
+        dimensions: {
+          ...item.dimensions,
+          campaign: item.dimensions.campaign.trim()
+        }
+      }))
+      
+      // Group data by campaign and calculate average metric per campaign
+      const campaignGroups: Record<string, { totalMetric: number, count: number }> = {}
+      normalizedData.forEach(item => {
+        const campaignName = item.dimensions.campaign
+        if (!campaignGroups[campaignName]) {
+          campaignGroups[campaignName] = { totalMetric: 0, count: 0 }
+        }
+        campaignGroups[campaignName].totalMetric += item.metrics[metricType as keyof typeof item.metrics] as number
+        campaignGroups[campaignName].count++
+      })
+      
+      // Calculate average metric for each campaign
+      const campaignMetrics = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          avgMetric: data.count > 0 ? data.totalMetric / data.count : 0
+        }))
+        .sort((a, b) => b.avgMetric - a.avgMetric) // Sort by metric descending
+      
+      const content = `${metricName} for each campaign:\n${campaignMetrics.map((item, index) => 
+        `${index + 1}. ${item.campaign}: ${formatFunction(item.avgMetric)}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'campaign_metric_breakdown',
+          metric: metricType,
+          campaigns: campaignMetrics,
+          query: query
+        }
+      }
+    }
+    
     // Check for platform-specific queries first and handle them with keyword processing
     const platforms = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
     const hasPlatform = platforms.some(platform => lowerQuery.includes(platform))
@@ -111,9 +211,9 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     if (config.openai.apiKey) {
       try {
         return await processWithOpenAI(query, data)
-          } catch (openaiError) {
-      return processWithKeywords(query, data)
-    }
+      } catch (openaiError) {
+        return processWithKeywords(query, data)
+      }
     } else {
       // Fallback to enhanced keyword processing
       return processWithKeywords(query, data)
@@ -656,6 +756,74 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   // Enhanced top/best detection
   const topKeywords = ['top', 'best', 'highest', 'leading', 'top performing', 'best performing']
   const isTopQuery = topKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  // Handle "metric for each campaign" queries (HIGH PRIORITY)
+  if (isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual'))) {
+    // Determine which metric is being asked for
+    let metricType = 'ctr'
+    let metricName = 'CTR'
+    let formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    
+    if (isCTRQuery) {
+      metricType = 'ctr'
+      metricName = 'CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    } else if (isROASQuery) {
+      metricType = 'roas'
+      metricName = 'ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+    } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+      metricType = 'cpc'
+      metricName = 'CPC'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+      metricType = 'cpa'
+      metricName = 'CPA'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    }
+    
+    // Normalize campaign names
+    const normalizedData = data.map(item => ({
+      ...item,
+      dimensions: {
+        ...item.dimensions,
+        campaign: item.dimensions.campaign.trim()
+      }
+    }))
+    
+    // Group data by campaign and calculate average metric per campaign
+    const campaignGroups: Record<string, { totalMetric: number, count: number }> = {}
+    normalizedData.forEach(item => {
+      const campaignName = item.dimensions.campaign
+      if (!campaignGroups[campaignName]) {
+        campaignGroups[campaignName] = { totalMetric: 0, count: 0 }
+      }
+      campaignGroups[campaignName].totalMetric += item.metrics[metricType as keyof typeof item.metrics] as number
+      campaignGroups[campaignName].count++
+    })
+    
+    // Calculate average metric for each campaign
+    const campaignMetrics = Object.entries(campaignGroups)
+      .map(([campaign, data]) => ({
+        campaign,
+        avgMetric: data.count > 0 ? data.totalMetric / data.count : 0
+      }))
+      .sort((a, b) => b.avgMetric - a.avgMetric) // Sort by metric descending
+    
+    const content = `${metricName} for each campaign:\n${campaignMetrics.map((item, index) => 
+      `${index + 1}. ${item.campaign}: ${formatFunction(item.avgMetric)}`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'campaign_metric_breakdown',
+        metric: metricType,
+        campaigns: campaignMetrics,
+        query: query
+      }
+    }
+  }
   
   // Handle platform-specific queries
   const platforms = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
@@ -1233,74 +1401,6 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       data: {
         type: 'campaign_ctr_breakdown',
         campaigns: campaignCTR,
-        query: query
-      }
-    }
-  }
-
-  // Handle "metric for each campaign" queries (NEW - general handler)
-  if (isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual'))) {
-    // Determine which metric is being asked for
-    let metricType = 'ctr'
-    let metricName = 'CTR'
-    let formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
-    
-    if (isCTRQuery) {
-      metricType = 'ctr'
-      metricName = 'CTR'
-      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
-    } else if (isROASQuery) {
-      metricType = 'roas'
-      metricName = 'ROAS'
-      formatFunction = (value: number) => `${value.toFixed(2)}x`
-    } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
-      metricType = 'cpc'
-      metricName = 'CPC'
-      formatFunction = (value: number) => `$${value.toFixed(2)}`
-    } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
-      metricType = 'cpa'
-      metricName = 'CPA'
-      formatFunction = (value: number) => `$${value.toFixed(2)}`
-    }
-    
-    // Normalize campaign names
-    const normalizedData = data.map(item => ({
-      ...item,
-      dimensions: {
-        ...item.dimensions,
-        campaign: item.dimensions.campaign.trim()
-      }
-    }))
-    
-    // Group data by campaign and calculate average metric per campaign
-    const campaignGroups: Record<string, { totalMetric: number, count: number }> = {}
-    normalizedData.forEach(item => {
-      const campaignName = item.dimensions.campaign
-      if (!campaignGroups[campaignName]) {
-        campaignGroups[campaignName] = { totalMetric: 0, count: 0 }
-      }
-      campaignGroups[campaignName].totalMetric += item.metrics[metricType as keyof typeof item.metrics] as number
-      campaignGroups[campaignName].count++
-    })
-    
-    // Calculate average metric for each campaign
-    const campaignMetrics = Object.entries(campaignGroups)
-      .map(([campaign, data]) => ({
-        campaign,
-        avgMetric: data.count > 0 ? data.totalMetric / data.count : 0
-      }))
-      .sort((a, b) => b.avgMetric - a.avgMetric) // Sort by metric descending
-    
-    const content = `${metricName} for each campaign:\n${campaignMetrics.map((item, index) => 
-      `${index + 1}. ${item.campaign}: ${formatFunction(item.avgMetric)}`
-    ).join('\n')}`
-    
-    return {
-      content,
-      data: {
-        type: 'campaign_metric_breakdown',
-        metric: metricType,
-        campaigns: campaignMetrics,
         query: query
       }
     }
