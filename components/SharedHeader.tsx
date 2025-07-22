@@ -49,9 +49,16 @@ export default function SharedHeader({ showNavigation = false, currentPage }: Sh
             )}
           </div>
 
-          {/* Right Side - Empty for now */}
+          {/* Right Side - Transparent Partners Logo */}
           <div className="flex items-center space-x-2">
-            {/* Logo and branding removed */}
+            <img 
+              src="/images/transparent-partners-logo.png" 
+              alt="Transparent Partners" 
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-sm text-gray-500 font-medium">
+              Powered by Transparent Partners
+            </span>
           </div>
         </div>
       </div>
