@@ -1194,6 +1194,118 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
+  // Handle "CTR for each campaign" queries (NEW)
+  if (isCTRQuery && isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual'))) {
+    // Normalize campaign names to handle trailing spaces and duplicates
+    const normalizedData = data.map(item => ({
+      ...item,
+      dimensions: {
+        ...item.dimensions,
+        campaign: item.dimensions.campaign.trim() // Remove trailing spaces
+      }
+    }))
+    
+    // Group data by normalized campaign name and calculate average CTR per campaign
+    const campaignGroups: Record<string, { totalCTR: number, count: number }> = {}
+    normalizedData.forEach(item => {
+      const campaignName = item.dimensions.campaign
+      if (!campaignGroups[campaignName]) {
+        campaignGroups[campaignName] = { totalCTR: 0, count: 0 }
+      }
+      campaignGroups[campaignName].totalCTR += item.metrics.ctr
+      campaignGroups[campaignName].count++
+    })
+    
+    // Calculate average CTR for each campaign and format response
+    const campaignCTR = Object.entries(campaignGroups)
+      .map(([campaign, data]) => ({
+        campaign,
+        avgCTR: data.count > 0 ? data.totalCTR / data.count : 0
+      }))
+      .sort((a, b) => b.avgCTR - a.avgCTR) // Sort by CTR descending
+    
+    const content = `CTR for each campaign:\n${campaignCTR.map((item, index) => 
+      `${index + 1}. ${item.campaign}: ${(item.avgCTR * 100).toFixed(2)}% CTR`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'campaign_ctr_breakdown',
+        campaigns: campaignCTR,
+        query: query
+      }
+    }
+  }
+
+  // Handle "metric for each campaign" queries (NEW - general handler)
+  if (isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual'))) {
+    // Determine which metric is being asked for
+    let metricType = 'ctr'
+    let metricName = 'CTR'
+    let formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    
+    if (isCTRQuery) {
+      metricType = 'ctr'
+      metricName = 'CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    } else if (isROASQuery) {
+      metricType = 'roas'
+      metricName = 'ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+    } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+      metricType = 'cpc'
+      metricName = 'CPC'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+      metricType = 'cpa'
+      metricName = 'CPA'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    }
+    
+    // Normalize campaign names
+    const normalizedData = data.map(item => ({
+      ...item,
+      dimensions: {
+        ...item.dimensions,
+        campaign: item.dimensions.campaign.trim()
+      }
+    }))
+    
+    // Group data by campaign and calculate average metric per campaign
+    const campaignGroups: Record<string, { totalMetric: number, count: number }> = {}
+    normalizedData.forEach(item => {
+      const campaignName = item.dimensions.campaign
+      if (!campaignGroups[campaignName]) {
+        campaignGroups[campaignName] = { totalMetric: 0, count: 0 }
+      }
+      campaignGroups[campaignName].totalMetric += item.metrics[metricType as keyof typeof item.metrics] as number
+      campaignGroups[campaignName].count++
+    })
+    
+    // Calculate average metric for each campaign
+    const campaignMetrics = Object.entries(campaignGroups)
+      .map(([campaign, data]) => ({
+        campaign,
+        avgMetric: data.count > 0 ? data.totalMetric / data.count : 0
+      }))
+      .sort((a, b) => b.avgMetric - a.avgMetric) // Sort by metric descending
+    
+    const content = `${metricName} for each campaign:\n${campaignMetrics.map((item, index) => 
+      `${index + 1}. ${item.campaign}: ${formatFunction(item.avgMetric)}`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'campaign_metric_breakdown',
+        metric: metricType,
+        campaigns: campaignMetrics,
+        query: query
+      }
+    }
+  }
+
   // Default response with more helpful suggestions
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:
