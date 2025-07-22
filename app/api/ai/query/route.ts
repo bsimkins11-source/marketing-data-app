@@ -108,7 +108,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
     
     // If OpenAI is configured, use it for natural language processing
-    if (config.apis.openai) {
+    if (config.openai.apiKey) {
       try {
         return await processWithOpenAI(query, data)
           } catch (openaiError) {
@@ -172,11 +172,11 @@ Please analyze this query and return the appropriate operation.`
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${config.apis.openai}`,
+        'Authorization': `Bearer ${config.openai.apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: config.apis.openaiModel,
+        model: config.openai.model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
