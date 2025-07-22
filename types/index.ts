@@ -15,20 +15,25 @@ export interface MarketingMetrics {
   revenue: number
   ctr: number
   cpc: number
+  cpm: number
   cpa: number
   roas: number
 }
 
 export interface MarketingDimensions {
   campaign: string
+  campaignId: string
   adGroup: string
+  adGroupId: string
   keyword?: string
-  device: string
+  platform: string
   location: string
   audience: string
+  creativeId: string
+  creativeName: string
 }
 
-export type DataSource = 'google_analytics' | 'facebook_ads' | 'twitter_ads' | 'linkedin_ads' | 'tiktok_ads'
+export type DataSource = 'google_analytics' | 'facebook_ads' | 'twitter_ads' | 'linkedin_ads' | 'tiktok_ads' | 'csv_backend' | 'firebase' | 'sample'
 
 // Query Types
 export interface QueryFilter {

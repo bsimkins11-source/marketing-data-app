@@ -30,7 +30,6 @@ ENV/
 .ipynb_checkpoints
 
 # Data files
-*.csv
 *.xlsx
 *.xls
 *.parquet
@@ -39,6 +38,9 @@ ENV/
 *.hdf5
 *.pkl
 *.pickle
+
+# Sample data (keep for development)
+!sample-campaign-data.csv
 
 # Environment variables
 .env

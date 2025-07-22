@@ -5,6 +5,39 @@
 @layer base {
   html {
     font-family: Inter, system-ui, sans-serif;
+    scroll-behavior: smooth;
+    height: 100%;
+  }
+  
+  body {
+    overflow-x: hidden;
+    height: 100%;
+    position: relative;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Prevent scroll jumping */
+  .prevent-scroll-jump {
+    scroll-behavior: auto;
+    overflow-anchor: none;
+  }
+  
+  /* Ensure content can scroll to top */
+  .scrollable-content {
+    scroll-padding-top: 0;
+    scroll-margin-top: 0;
+  }
+  
+  /* Fix for page scrolling */
+  body {
+    overflow-x: hidden;
+  }
+  
+  html {
+    scroll-behavior: smooth;
   }
 }
 
