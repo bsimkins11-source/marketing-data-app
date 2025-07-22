@@ -616,6 +616,38 @@ function formatValue(value: number | undefined, metric: string): string {
 function processWithKeywords(query: string, data: MarketingData[]) {
   const lowerQuery = query.toLowerCase()
   
+  // Enhanced CTR detection with multiple variations
+  const ctrKeywords = ['ctr', 'click-through rate', 'click through rate', 'click rate', 'click-through', 'clickthrough']
+  const isCTRQuery = ctrKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  // Enhanced ROAS detection with multiple variations
+  const roasKeywords = ['roas', 'return on ad spend', 'return on advertising spend', 'return on investment', 'roi']
+  const isROASQuery = roasKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  // Enhanced count detection
+  const countKeywords = ['how many', 'count', 'number', 'total number', 'amount of', 'quantity']
+  const isCountQuery = countKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  // Enhanced spend detection
+  const spendKeywords = ['spend', 'cost', 'budget', 'expense', 'expenditure', 'investment']
+  const isSpendQuery = spendKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  // Enhanced campaign detection
+  const campaignKeywords = ['campaign', 'campaigns', 'ad campaign', 'ad campaigns']
+  const isCampaignQuery = campaignKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  // Enhanced platform detection
+  const platformKeywords = ['platform', 'platforms', 'channel', 'channels', 'network', 'networks']
+  const isPlatformQuery = platformKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  // Enhanced visualization detection
+  const vizKeywords = ['visual', 'visualize', 'chart', 'graph', 'plot', 'show me', 'display', 'visualization']
+  const isVizQuery = vizKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  // Enhanced top/best detection
+  const topKeywords = ['top', 'best', 'highest', 'leading', 'top performing', 'best performing']
+  const isTopQuery = topKeywords.some(keyword => lowerQuery.includes(keyword))
+  
   // Handle platform-specific queries
   const platforms = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
   const detectedPlatform = platforms.find(platform => lowerQuery.includes(platform))
@@ -634,9 +666,43 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     const actualPlatform = platformMap[detectedPlatform]
     const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
     
-    // Handle average queries for specific platforms
+    // Handle CTR queries for specific platforms (FIXED: was returning ROAS)
+    if (isCTRQuery) {
+      const totalCTR = filteredData.reduce((sum, item) => sum + item.metrics.ctr, 0)
+      const averageCTR = filteredData.length > 0 ? totalCTR / filteredData.length : 0
+      return {
+        content: `Average CTR for ${actualPlatform}: ${(averageCTR * 100).toFixed(2)}%`,
+        data: {
+          type: 'average',
+          metric: 'ctr',
+          value: averageCTR,
+          count: filteredData.length,
+          platform: actualPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // Handle ROAS queries for specific platforms
+    if (isROASQuery) {
+      const totalROAS = filteredData.reduce((sum, item) => sum + item.metrics.roas, 0)
+      const averageROAS = filteredData.length > 0 ? totalROAS / filteredData.length : 0
+      return {
+        content: `Average ROAS for ${actualPlatform}: ${averageROAS.toFixed(2)}x`,
+        data: {
+          type: 'average',
+          metric: 'roas',
+          value: averageROAS,
+          count: filteredData.length,
+          platform: actualPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // Handle average queries for specific platforms (generic)
     if (lowerQuery.includes('average') || lowerQuery.includes('avg')) {
-      if (lowerQuery.includes('ctr')) {
+      if (isCTRQuery) {
         const totalCTR = filteredData.reduce((sum, item) => sum + item.metrics.ctr, 0)
         const averageCTR = filteredData.length > 0 ? totalCTR / filteredData.length : 0
         return {
@@ -651,7 +717,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
           }
         }
       }
-      if (lowerQuery.includes('roas')) {
+      if (isROASQuery) {
         const totalROAS = filteredData.reduce((sum, item) => sum + item.metrics.roas, 0)
         const averageROAS = filteredData.length > 0 ? totalROAS / filteredData.length : 0
         return {
@@ -666,7 +732,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
           }
         }
       }
-      if (lowerQuery.includes('spend')) {
+      if (isSpendQuery) {
         const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
         const averageSpend = filteredData.length > 0 ? totalSpend / filteredData.length : 0
         return {
@@ -685,7 +751,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     
     // Handle total queries for specific platforms
     if (lowerQuery.includes('total')) {
-      if (lowerQuery.includes('spend')) {
+      if (isSpendQuery) {
         const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
         return {
           content: `Total spend for ${actualPlatform}: $${totalSpend.toLocaleString()}`,
@@ -716,8 +782,80 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Handle "how many campaigns" queries with proper grouping
-  if (lowerQuery.includes('how many') && lowerQuery.includes('campaign')) {
+  // Handle CTR ranking queries (FIXED: was returning ROAS)
+  if (isTopQuery && isCTRQuery && isCampaignQuery) {
+    // Group data by campaign name and calculate average CTR per campaign
+    const campaignGroups: Record<string, { totalCTR: number, count: number }> = {}
+    data.forEach(item => {
+      const campaignName = item.dimensions.campaign
+      if (!campaignGroups[campaignName]) {
+        campaignGroups[campaignName] = { totalCTR: 0, count: 0 }
+      }
+      campaignGroups[campaignName].totalCTR += item.metrics.ctr
+      campaignGroups[campaignName].count++
+    })
+    
+    // Calculate average CTR for each campaign and sort
+    const campaignCTR = Object.entries(campaignGroups)
+      .map(([campaign, data]) => ({
+        campaign,
+        avgCTR: data.count > 0 ? data.totalCTR / data.count : 0
+      }))
+      .sort((a, b) => b.avgCTR - a.avgCTR)
+      .slice(0, 3) // Top 3
+    
+    const content = `Top 3 campaigns by CTR:\n${campaignCTR.map((item, index) => 
+      `${index + 1}. ${item.campaign}: ${(item.avgCTR * 100).toFixed(2)}% CTR`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'top_ctr',
+        campaigns: campaignCTR,
+        query: query
+      }
+    }
+  }
+  
+  // Handle ROAS ranking queries
+  if (isTopQuery && isROASQuery && isCampaignQuery) {
+    // Group data by campaign name and calculate average ROAS per campaign
+    const campaignGroups: Record<string, { totalROAS: number, count: number }> = {}
+    data.forEach(item => {
+      const campaignName = item.dimensions.campaign
+      if (!campaignGroups[campaignName]) {
+        campaignGroups[campaignName] = { totalROAS: 0, count: 0 }
+      }
+      campaignGroups[campaignName].totalROAS += item.metrics.roas
+      campaignGroups[campaignName].count++
+    })
+    
+    // Calculate average ROAS for each campaign and sort
+    const campaignROAS = Object.entries(campaignGroups)
+      .map(([campaign, data]) => ({
+        campaign,
+        avgROAS: data.count > 0 ? data.totalROAS / data.count : 0
+      }))
+      .sort((a, b) => b.avgROAS - a.avgROAS)
+      .slice(0, 3) // Top 3
+    
+    const content = `Top 3 campaigns by ROAS:\n${campaignROAS.map((item, index) => 
+      `${index + 1}. ${item.campaign}: ${item.avgROAS.toFixed(2)}x ROAS`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'top_roas',
+        campaigns: campaignROAS,
+        query: query
+      }
+    }
+  }
+  
+  // Handle "how many campaigns" queries with proper grouping (IMPROVED)
+  if (isCountQuery && isCampaignQuery) {
     const uniqueCampaigns = Array.from(new Set(data.map(item => item.dimensions.campaign)))
     const campaignCount = uniqueCampaigns.length
     
@@ -752,8 +890,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   }
   
   // Handle visualization requests for platform data
-  if ((lowerQuery.includes('visual') || lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('plot')) && 
-      (lowerQuery.includes('platform') || lowerQuery.includes('roas'))) {
+  if (isVizQuery && (isPlatformQuery || isROASQuery)) {
     
     // Group data by platform and calculate ROAS
     const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
@@ -805,7 +942,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Enhanced keyword processing with more sophisticated matching
+  // Enhanced keyword processing with more sophisticated matching (IMPROVED)
   if (lowerQuery.includes('total') && (lowerQuery.includes('impression') || lowerQuery.includes('impressions'))) {
     const total = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
     return {
@@ -819,7 +956,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  if (lowerQuery.includes('total') && (lowerQuery.includes('spend') || lowerQuery.includes('cost'))) {
+  if (isSpendQuery && (lowerQuery.includes('total') || lowerQuery.includes('sum') || lowerQuery.includes('overall'))) {
     const total = data.reduce((sum, item) => sum + item.metrics.spend, 0)
     return {
       content: `Total spend across all campaigns: $${total.toLocaleString()}`,
@@ -845,21 +982,79 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  if ((lowerQuery.includes('best') || lowerQuery.includes('top')) && lowerQuery.includes('campaign')) {
-    const bestCampaign = data.reduce((best, current) => 
-      current.metrics.roas > best.metrics.roas ? current : best
-    )
-    return {
-      content: `The best performing campaign by ROAS is "${bestCampaign.dimensions.campaign}" with a ROAS of ${bestCampaign.metrics.roas.toFixed(2)}x`,
-      data: { 
-        campaign: bestCampaign, 
-        type: 'best_performer',
-        query: query
+  // Handle best performing campaign queries (IMPROVED: distinguish between CTR and ROAS)
+  if (isTopQuery && isCampaignQuery) {
+    if (isCTRQuery) {
+      // Find campaign with highest average CTR
+      const campaignGroups: Record<string, { totalCTR: number, count: number }> = {}
+      data.forEach(item => {
+        const campaignName = item.dimensions.campaign
+        if (!campaignGroups[campaignName]) {
+          campaignGroups[campaignName] = { totalCTR: 0, count: 0 }
+        }
+        campaignGroups[campaignName].totalCTR += item.metrics.ctr
+        campaignGroups[campaignName].count++
+      })
+      
+      const bestCampaign = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          avgCTR: data.count > 0 ? data.totalCTR / data.count : 0
+        }))
+        .reduce((best, current) => current.avgCTR > best.avgCTR ? current : best)
+      
+      return {
+        content: `The best performing campaign by CTR is "${bestCampaign.campaign}" with an average CTR of ${(bestCampaign.avgCTR * 100).toFixed(2)}%`,
+        data: { 
+          campaign: bestCampaign, 
+          type: 'best_ctr_performer',
+          query: query
+        }
+      }
+    } else if (isROASQuery) {
+      // Find campaign with highest average ROAS
+      const campaignGroups: Record<string, { totalROAS: number, count: number }> = {}
+      data.forEach(item => {
+        const campaignName = item.dimensions.campaign
+        if (!campaignGroups[campaignName]) {
+          campaignGroups[campaignName] = { totalROAS: 0, count: 0 }
+        }
+        campaignGroups[campaignName].totalROAS += item.metrics.roas
+        campaignGroups[campaignName].count++
+      })
+      
+      const bestCampaign = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          avgROAS: data.count > 0 ? data.totalROAS / data.count : 0
+        }))
+        .reduce((best, current) => current.avgROAS > best.avgROAS ? current : best)
+      
+      return {
+        content: `The best performing campaign by ROAS is "${bestCampaign.campaign}" with an average ROAS of ${bestCampaign.avgROAS.toFixed(2)}x`,
+        data: { 
+          campaign: bestCampaign, 
+          type: 'best_roas_performer',
+          query: query
+        }
+      }
+    } else {
+      // Default to ROAS if no specific metric mentioned
+      const bestCampaign = data.reduce((best, current) => 
+        current.metrics.roas > best.metrics.roas ? current : best
+      )
+      return {
+        content: `The best performing campaign by ROAS is "${bestCampaign.dimensions.campaign}" with a ROAS of ${bestCampaign.metrics.roas.toFixed(2)}x`,
+        data: { 
+          campaign: bestCampaign, 
+          type: 'best_performer',
+          query: query
+        }
       }
     }
   }
   
-  if (lowerQuery.includes('average') && lowerQuery.includes('ctr')) {
+  if (lowerQuery.includes('average') && isCTRQuery) {
     const avgCTR = data.reduce((sum, item) => sum + item.metrics.ctr, 0) / data.length
     return {
       content: `Average CTR across all campaigns: ${(avgCTR * 100).toFixed(2)}%`,
@@ -872,7 +1067,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  if (lowerQuery.includes('campaign') && (lowerQuery.includes('list') || lowerQuery.includes('all'))) {
+  if (isCampaignQuery && (lowerQuery.includes('list') || lowerQuery.includes('all'))) {
     const campaigns = Array.from(new Set(data.map(item => item.dimensions.campaign)))
     return {
       content: `Here are all the campaigns in your data:\n${campaigns.map(c => `• ${c}`).join('\n')}`,
@@ -884,8 +1079,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Handle platform queries
-  if (lowerQuery.includes('platform') && (lowerQuery.includes('highest') || lowerQuery.includes('best') || lowerQuery.includes('top'))) {
+  // Handle platform queries (IMPROVED)
+  if (isPlatformQuery && isTopQuery && isROASQuery) {
     // Group data by platform and calculate ROAS
     const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
     
@@ -927,13 +1122,14 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Handle graph/chart requests
-  if (lowerQuery.includes('graph') || lowerQuery.includes('chart')) {
+  // Handle graph/chart requests (IMPROVED)
+  if (isVizQuery) {
     let metric = 'spend' // default to spend
     if (lowerQuery.includes('impression')) metric = 'impressions'
     if (lowerQuery.includes('click')) metric = 'clicks'
     if (lowerQuery.includes('revenue')) metric = 'revenue'
-    if (lowerQuery.includes('roas')) metric = 'roas'
+    if (isROASQuery) metric = 'roas'
+    if (isCTRQuery) metric = 'ctr'
     
     // Group data by campaign name and calculate totals
     const campaignGroups: Record<string, number> = {}
@@ -975,8 +1171,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:
 • Total impressions, spend, or revenue
-• Best performing campaigns
-• Average CTR or other metrics
+• Best performing campaigns by CTR or ROAS
+• Average CTR or ROAS for specific platforms
 • List all campaigns
 • Generate graphs/charts by spend, impressions, clicks, or revenue
 • Compare performance by device or location
