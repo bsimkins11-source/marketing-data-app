@@ -503,12 +503,21 @@ function executeCompare(data: MarketingData[], metric: string, filters: any, que
 }
 
 function executeCountCampaigns(data: MarketingData[], query: string) {
-  const uniqueCampaigns = Array.from(new Set(data.map(item => item.dimensions.campaign)))
+  // Normalize campaign names to handle trailing spaces and duplicates
+  const normalizedData = data.map(item => ({
+    ...item,
+    dimensions: {
+      ...item.dimensions,
+      campaign: item.dimensions.campaign.trim() // Remove trailing spaces
+    }
+  }))
+  
+  const uniqueCampaigns = Array.from(new Set(normalizedData.map(item => item.dimensions.campaign)))
   const campaignCount = uniqueCampaigns.length
   
-  // Group data by campaign name and calculate total spend per campaign
+  // Group data by normalized campaign name and calculate total spend per campaign
   const campaignGroups: Record<string, { spend: number, impressions: number, clicks: number }> = {}
-  data.forEach(item => {
+  normalizedData.forEach(item => {
     const campaignName = item.dimensions.campaign
     if (!campaignGroups[campaignName]) {
       campaignGroups[campaignName] = { spend: 0, impressions: 0, clicks: 0 }
@@ -525,7 +534,7 @@ function executeCountCampaigns(data: MarketingData[], query: string) {
   }).join('\n')
   
   return {
-    content: `Found campaigns matching your criteria:\n${campaignList}`,
+    content: `Found ${campaignCount} campaigns:\n${campaignList}`,
     data: { 
       uniqueCampaigns,
       campaignCount,
@@ -784,9 +793,18 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   
   // Handle CTR ranking queries (FIXED: was returning ROAS)
   if (isTopQuery && isCTRQuery && isCampaignQuery) {
-    // Group data by campaign name and calculate average CTR per campaign
+    // Normalize campaign names to handle trailing spaces and duplicates
+    const normalizedData = data.map(item => ({
+      ...item,
+      dimensions: {
+        ...item.dimensions,
+        campaign: item.dimensions.campaign.trim() // Remove trailing spaces
+      }
+    }))
+    
+    // Group data by normalized campaign name and calculate average CTR per campaign
     const campaignGroups: Record<string, { totalCTR: number, count: number }> = {}
-    data.forEach(item => {
+    normalizedData.forEach(item => {
       const campaignName = item.dimensions.campaign
       if (!campaignGroups[campaignName]) {
         campaignGroups[campaignName] = { totalCTR: 0, count: 0 }
@@ -856,12 +874,21 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   
   // Handle "how many campaigns" queries with proper grouping (IMPROVED)
   if (isCountQuery && isCampaignQuery) {
-    const uniqueCampaigns = Array.from(new Set(data.map(item => item.dimensions.campaign)))
+    // Normalize campaign names to handle trailing spaces and duplicates
+    const normalizedData = data.map(item => ({
+      ...item,
+      dimensions: {
+        ...item.dimensions,
+        campaign: item.dimensions.campaign.trim() // Remove trailing spaces
+      }
+    }))
+    
+    const uniqueCampaigns = Array.from(new Set(normalizedData.map(item => item.dimensions.campaign)))
     const campaignCount = uniqueCampaigns.length
     
-    // Group data by campaign name and calculate total spend per campaign
+    // Group data by normalized campaign name and calculate total spend per campaign
     const campaignGroups: Record<string, { spend: number, impressions: number, clicks: number }> = {}
-    data.forEach(item => {
+    normalizedData.forEach(item => {
       const campaignName = item.dimensions.campaign
       if (!campaignGroups[campaignName]) {
         campaignGroups[campaignName] = { spend: 0, impressions: 0, clicks: 0 }
@@ -878,7 +905,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }).join('\n')
     
     return {
-      content: `Found ${campaignCount} campaigns matching your criteria:\n${campaignList}`,
+      content: `Found ${campaignCount} campaigns:\n${campaignList}`,
       data: { 
         uniqueCampaigns,
         campaignCount,
