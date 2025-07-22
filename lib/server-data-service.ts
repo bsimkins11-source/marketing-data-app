@@ -72,30 +72,53 @@ export function getDataSummary(data: MarketingData[]) {
   // Aggregate metrics per campaign
   const campaignAggregates = uniqueCampaigns.map(name => {
     const group = campaignGroups[name]
+    const impressions = group.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const clicks = group.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const conversions = group.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    const spend = group.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const revenue = group.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    
+    // Calculate metrics from aggregated totals (CORRECTED)
+    const ctr = impressions > 0 ? clicks / impressions : 0
+    const cpc = clicks > 0 ? spend / clicks : 0
+    const cpa = conversions > 0 ? spend / conversions : 0
+    const roas = spend > 0 ? revenue / spend : 0
+    
     return {
       campaign: name,
-      impressions: group.reduce((sum, item) => sum + item.metrics.impressions, 0),
-      clicks: group.reduce((sum, item) => sum + item.metrics.clicks, 0),
-      conversions: group.reduce((sum, item) => sum + item.metrics.conversions, 0),
-      spend: group.reduce((sum, item) => sum + item.metrics.spend, 0),
-      revenue: group.reduce((sum, item) => sum + item.metrics.revenue, 0),
-      ctr: group.reduce((sum, item) => sum + item.metrics.ctr, 0) / group.length, // Average CTR from CSV values
-      cpc: group.reduce((sum, item) => sum + item.metrics.cpc, 0) / group.length,
-      cpa: group.reduce((sum, item) => sum + item.metrics.cpa, 0) / group.length,
-      roas: group.reduce((sum, item) => sum + item.metrics.roas, 0) / group.length
+      impressions,
+      clicks,
+      conversions,
+      spend,
+      revenue,
+      ctr,
+      cpc,
+      cpa,
+      roas
     }
   })
 
   // Aggregate overall metrics from campaign aggregates
+  const totalImpressions = campaignAggregates.reduce((sum, c) => sum + c.impressions, 0)
+  const totalClicks = campaignAggregates.reduce((sum, c) => sum + c.clicks, 0)
+  const totalConversions = campaignAggregates.reduce((sum, c) => sum + c.conversions, 0)
+  const totalSpend = campaignAggregates.reduce((sum, c) => sum + c.spend, 0)
+  const totalRevenue = campaignAggregates.reduce((sum, c) => sum + c.revenue, 0)
+  
+  // Calculate overall averages from totals (CORRECTED)
+  const averageCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+  const averageROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+  
   return {
     totalRecords: data.length, // Internal use only
     totalCampaigns: uniqueCampaigns.length,
-    totalImpressions: campaignAggregates.reduce((sum, c) => sum + c.impressions, 0),
-    totalClicks: campaignAggregates.reduce((sum, c) => sum + c.clicks, 0),
-    totalSpend: campaignAggregates.reduce((sum, c) => sum + c.spend, 0),
-    totalRevenue: campaignAggregates.reduce((sum, c) => sum + c.revenue, 0),
-    averageCTR: campaignAggregates.reduce((sum, c) => sum + c.ctr, 0) / campaignAggregates.length,
-    averageROAS: campaignAggregates.reduce((sum, c) => sum + c.roas, 0) / campaignAggregates.length,
+    totalImpressions,
+    totalClicks,
+    totalConversions,
+    totalSpend,
+    totalRevenue,
+    averageCTR,
+    averageROAS,
     campaignAggregates
   }
 }
