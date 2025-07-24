@@ -120,7 +120,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     const isTopQuery = topKeywords.some(keyword => lowerQuery.includes(keyword))
     
     // Handle "metric for each campaign" queries (HIGH PRIORITY - moved to top)
-    if (isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual'))) {
+    if (isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual') || lowerQuery.includes('for each'))) {
       // Determine which metric is being asked for
       let metricType = 'ctr'
       let metricName = 'CTR'
@@ -195,8 +195,13 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       return processWithKeywords(query, data)
     }
     
-    // Check for platform queries with "platform" keyword
-    if (lowerQuery.includes('platform') && (lowerQuery.includes('highest') || lowerQuery.includes('best') || lowerQuery.includes('top'))) {
+    // Check for platform queries with "platform" keyword (IMPROVED: Better detection)
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('highest') || lowerQuery.includes('best') || lowerQuery.includes('top') || lowerQuery.includes('which'))) {
+      return processWithKeywords(query, data)
+    }
+    
+    // Check for "which platform" queries specifically
+    if (lowerQuery.includes('which platform')) {
       return processWithKeywords(query, data)
     }
     
