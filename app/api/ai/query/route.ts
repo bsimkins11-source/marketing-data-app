@@ -840,9 +840,9 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       'meta': 'Meta',
       'dv360': 'Dv360', 
       'cm360': 'Cm360',
-      'sa360': 'SA360',
+      'sa360': 'Sa360',
       'amazon': 'Amazon',
-      'tradedesk': 'TradeDesk'
+      'tradedesk': 'Tradedesk'
     }
     
     const actualPlatform = platformMap[detectedPlatform]
