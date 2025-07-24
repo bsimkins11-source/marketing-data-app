@@ -1274,45 +1274,166 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Handle platform queries (IMPROVED)
-  if (isPlatformQuery && isTopQuery && isROASQuery) {
-    // Group data by platform and calculate ROAS
-    const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
-    
-    data.forEach(item => {
-      const platform = item.dimensions.platform
-      if (!platformGroups[platform]) {
-        platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, count: 0 }
+  // Handle platform ranking queries (IMPROVED: Added CTR ranking and better detection)
+  if (isPlatformQuery && isTopQuery) {
+    if (isCTRQuery) {
+      // Group data by platform and calculate average CTR
+      const platformGroups: Record<string, { totalCTR: number, count: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalCTR: 0, count: 0 }
+        }
+        platformGroups[platform].totalCTR += item.metrics.ctr
+        platformGroups[platform].count++
+      })
+      
+      // Calculate average CTR for each platform
+      const platformCTR = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          avgCTR: data.count > 0 ? data.totalCTR / data.count : 0,
+          count: data.count
+        }))
+        .sort((a, b) => b.avgCTR - a.avgCTR)
+      
+      const bestPlatform = platformCTR[0]
+      
+      const content = `Platform with the highest CTR:\n${platformCTR.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${(item.avgCTR * 100).toFixed(2)}% CTR`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_ctr',
+          platforms: platformCTR,
+          bestPlatform,
+          query: query
+        }
       }
-      platformGroups[platform].totalSpend += item.metrics.spend || 0
-      platformGroups[platform].totalRevenue += item.metrics.revenue || 0
-      platformGroups[platform].count++
-    })
-    
-    // Calculate ROAS for each platform
-    const platformROAS = Object.entries(platformGroups)
-      .map(([platform, data]) => ({
-        platform,
-        roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
-        spend: data.totalSpend,
-        revenue: data.totalRevenue,
-        count: data.count
-      }))
-      .sort((a, b) => b.roas - a.roas)
-    
-    const bestPlatform = platformROAS[0]
-    
-    const content = `Platform with the highest ROAS:\n${platformROAS.map((item, index) => 
-      `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x ROAS ($${item.spend.toLocaleString()} spend, $${item.revenue.toLocaleString()} revenue)`
-    ).join('\n')}`
-    
-    return {
-      content,
-      data: {
-        type: 'platform_roas',
-        platforms: platformROAS,
-        bestPlatform,
-        query: query
+    } else if (isROASQuery) {
+      // Group data by platform and calculate ROAS
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, count: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend || 0
+        platformGroups[platform].totalRevenue += item.metrics.revenue || 0
+        platformGroups[platform].count++
+      })
+      
+      // Calculate ROAS for each platform
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+          spend: data.totalSpend,
+          revenue: data.totalRevenue,
+          count: data.count
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const bestPlatform = platformROAS[0]
+      
+      const content = `Platform with the highest ROAS:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x ROAS ($${item.spend.toLocaleString()} spend, $${item.revenue.toLocaleString()} revenue)`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_roas',
+          platforms: platformROAS,
+          bestPlatform,
+          query: query
+        }
+      }
+    }
+  }
+  
+  // Handle "which platform" queries (NEW: More comprehensive detection)
+  if (lowerQuery.includes('which platform') && (isCTRQuery || isROASQuery)) {
+    if (isCTRQuery) {
+      // Group data by platform and calculate average CTR
+      const platformGroups: Record<string, { totalCTR: number, count: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalCTR: 0, count: 0 }
+        }
+        platformGroups[platform].totalCTR += item.metrics.ctr
+        platformGroups[platform].count++
+      })
+      
+      // Calculate average CTR for each platform
+      const platformCTR = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          avgCTR: data.count > 0 ? data.totalCTR / data.count : 0,
+          count: data.count
+        }))
+        .sort((a, b) => b.avgCTR - a.avgCTR)
+      
+      const bestPlatform = platformCTR[0]
+      
+      const content = `Platform with the highest CTR:\n${platformCTR.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${(item.avgCTR * 100).toFixed(2)}% CTR`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_ctr',
+          platforms: platformCTR,
+          bestPlatform,
+          query: query
+        }
+      }
+    } else if (isROASQuery) {
+      // Group data by platform and calculate ROAS
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, count: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend || 0
+        platformGroups[platform].totalRevenue += item.metrics.revenue || 0
+        platformGroups[platform].count++
+      })
+      
+      // Calculate ROAS for each platform
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+          spend: data.totalSpend,
+          revenue: data.totalRevenue,
+          count: data.count
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const bestPlatform = platformROAS[0]
+      
+      const content = `Platform with the highest ROAS:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x ROAS ($${item.spend.toLocaleString()} spend, $${item.revenue.toLocaleString()} revenue)`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_roas',
+          platforms: platformROAS,
+          bestPlatform,
+          query: query
+        }
       }
     }
   }
@@ -1362,8 +1483,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "CTR for each campaign" queries (NEW)
-  if (isCTRQuery && isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual'))) {
+  // Handle "CTR for each campaign" queries (IMPROVED: Better detection)
+  if (isCTRQuery && isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual') || lowerQuery.includes('for each'))) {
     // Normalize campaign names to handle trailing spaces and duplicates
     const normalizedData = data.map(item => ({
       ...item,
