@@ -871,6 +871,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
   
   if (detectedCampaign && isCTRQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+    console.log('[DEBUG] CTR HANDLER TRIGGERED:', { query, detectedCampaign });
     // Normalize campaign name to match CSV data
     const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
@@ -899,6 +900,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
 
   // Handle campaign-specific ROAS queries (HIGHEST PRIORITY - moved to very top)
   if (detectedCampaign && isROASQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+    console.log('[DEBUG] ROAS HANDLER TRIGGERED:', { query, detectedCampaign });
     // Normalize campaign name to match CSV data
     const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
