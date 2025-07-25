@@ -832,6 +832,7 @@ function formatValue(value: number | undefined, metric: string): string {
 }
 
 function processWithKeywords(query: string, data: MarketingData[]) {
+  console.log('[DEBUG] processWithKeywords called with query:', query);
   const lowerQuery = query.toLowerCase()
   
   // Enhanced CTR detection with multiple variations
