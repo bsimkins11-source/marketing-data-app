@@ -867,6 +867,199 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   const topKeywords = ['top', 'best', 'highest', 'leading', 'top performing', 'best performing']
   const isTopQuery = topKeywords.some(keyword => lowerQuery.includes(keyword))
   
+  // Platform detection for specific platform queries
+  const platformNames = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
+  const detectedPlatform = platformNames.find(platform => lowerQuery.includes(platform))
+  
+  // CRITICAL FIXES - HIGHEST PRIORITY HANDLERS
+  
+  // Handle platform-specific revenue queries (HIGHEST PRIORITY)
+  if (detectedPlatform && (lowerQuery.includes('revenue') || lowerQuery.includes('earnings'))) {
+    const platformMap: Record<string, string> = {
+      'meta': 'Meta',
+      'dv360': 'Dv360', 
+      'cm360': 'Cm360',
+      'sa360': 'Sa360',
+      'amazon': 'Amazon',
+      'tradedesk': 'Tradedesk'
+    }
+    
+    const actualPlatform = platformMap[detectedPlatform]
+    const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
+    const totalRevenue = filteredData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+    
+    return {
+      content: `Total revenue from ${actualPlatform}: $${totalRevenue.toLocaleString()}`,
+      data: {
+        type: 'platform_revenue',
+        platform: actualPlatform,
+        value: totalRevenue,
+        count: filteredData.length,
+        query: query
+      }
+    }
+  }
+
+  // Handle platform count queries (HIGHEST PRIORITY)
+  if (lowerQuery.includes('how many platforms') || lowerQuery.includes('number of platforms') || lowerQuery.includes('count of platforms')) {
+    const uniquePlatforms = Array.from(new Set(data.map(item => item.dimensions.platform)))
+    const platformCount = uniquePlatforms.length
+    
+    return {
+      content: `Found ${platformCount} platforms: ${uniquePlatforms.join(', ')}`,
+      data: {
+        type: 'platform_count',
+        platforms: uniquePlatforms,
+        count: platformCount,
+        query: query
+      }
+    }
+  }
+
+  // Handle "CTR for each platform" queries (HIGHEST PRIORITY)
+  if (lowerQuery.includes('ctr for each platform') || lowerQuery.includes('click-through rate for each platform')) {
+    const platformGroups: Record<string, { totalCTR: number, count: number }> = {}
+    
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { totalCTR: 0, count: 0 }
+      }
+      platformGroups[platform].totalCTR += item.metrics.ctr
+      platformGroups[platform].count++
+    })
+    
+    const platformCTR = Object.entries(platformGroups)
+      .map(([platform, data]) => ({
+        platform,
+        avgCTR: data.count > 0 ? data.totalCTR / data.count : 0
+      }))
+      .sort((a, b) => b.avgCTR - a.avgCTR)
+    
+    const content = `CTR for each platform:\n${platformCTR.map((item, index) => 
+      `${index + 1}. ${item.platform}: ${(item.avgCTR * 100).toFixed(2)}% CTR`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_ctr_breakdown',
+        platforms: platformCTR,
+        query: query
+      }
+    }
+  }
+
+  // Handle "ROAS for each platform" queries (HIGHEST PRIORITY)
+  if (lowerQuery.includes('roas for each platform') || lowerQuery.includes('return on ad spend for each platform')) {
+    const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
+    
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, count: 0 }
+      }
+      platformGroups[platform].totalSpend += item.metrics.spend || 0
+      platformGroups[platform].totalRevenue += item.metrics.revenue || 0
+      platformGroups[platform].count++
+    })
+    
+    const platformROAS = Object.entries(platformGroups)
+      .map(([platform, data]) => ({
+        platform,
+        roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+      }))
+      .sort((a, b) => b.roas - a.roas)
+    
+    const content = `ROAS for each platform:\n${platformROAS.map((item, index) => 
+      `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x ROAS`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_roas_breakdown',
+        platforms: platformROAS,
+        query: query
+      }
+    }
+  }
+
+  // Handle "how much revenue did we generate" queries (HIGHEST PRIORITY)
+  if (lowerQuery.includes('how much revenue') || lowerQuery.includes('revenue did we generate') || lowerQuery.includes('revenue did we get')) {
+    const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+    return {
+      content: `Total revenue across all campaigns: $${totalRevenue.toLocaleString()}`,
+      data: {
+        type: 'total_revenue',
+        value: totalRevenue,
+        query: query
+      }
+    }
+  }
+
+  // Handle "how many impressions did we get" queries (HIGHEST PRIORITY)
+  if (lowerQuery.includes('how many impressions') || lowerQuery.includes('impressions did we get') || lowerQuery.includes('impressions did we receive')) {
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    return {
+      content: `Total impressions across all campaigns: ${totalImpressions.toLocaleString()}`,
+      data: {
+        type: 'total_impressions',
+        value: totalImpressions,
+        query: query
+      }
+    }
+  }
+
+  // Handle "how many clicks did we get" queries (HIGHEST PRIORITY)
+  if (lowerQuery.includes('how many clicks') || lowerQuery.includes('clicks did we get') || lowerQuery.includes('clicks did we receive')) {
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    return {
+      content: `Total clicks across all campaigns: ${totalClicks.toLocaleString()}`,
+      data: {
+        type: 'total_clicks',
+        value: totalClicks,
+        query: query
+      }
+    }
+  }
+
+  // Handle "overall CTR" queries (HIGHEST PRIORITY)
+  if (lowerQuery.includes('overall ctr') || lowerQuery.includes('overall click-through rate') || lowerQuery.includes('overall click through rate')) {
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    
+    return {
+      content: `Overall CTR across all campaigns: ${(overallCTR * 100).toFixed(2)}%`,
+      data: {
+        type: 'overall_ctr',
+        value: overallCTR,
+        totalClicks,
+        totalImpressions,
+        query: query
+      }
+    }
+  }
+
+  // Handle "average ROAS" queries (HIGHEST PRIORITY)
+  if (lowerQuery.includes('average roas') || lowerQuery.includes('avg roas') || lowerQuery.includes('average return on ad spend')) {
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+    const averageROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    
+    return {
+      content: `Average ROAS across all campaigns: ${averageROAS.toFixed(2)}x`,
+      data: {
+        type: 'average_roas',
+        value: averageROAS,
+        totalSpend,
+        totalRevenue,
+        query: query
+      }
+    }
+  }
+  
   // Handle campaign-specific CTR queries (HIGHEST PRIORITY - moved to very top)
   const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
   const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
@@ -1098,139 +1291,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
 
 
   
-  // Handle platform-specific queries
-  const platforms = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
-  const detectedPlatform = platforms.find(platform => lowerQuery.includes(platform))
-  
-  if (detectedPlatform) {
-    // Map platform names to actual platform values in data (FIXED: Correct casing)
-    const platformMap: Record<string, string> = {
-      'meta': 'Meta',
-      'dv360': 'Dv360', 
-      'cm360': 'Cm360',
-      'sa360': 'Sa360',
-      'amazon': 'Amazon',
-      'tradedesk': 'Tradedesk'
-    }
-    
-    const actualPlatform = platformMap[detectedPlatform]
-    const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
-    
-    // Handle CTR queries for specific platforms (FIXED: was returning ROAS)
-    if (isCTRQuery) {
-      const totalCTR = filteredData.reduce((sum, item) => sum + item.metrics.ctr, 0)
-      const averageCTR = filteredData.length > 0 ? totalCTR / filteredData.length : 0
-      return {
-        content: `Average CTR for ${actualPlatform}: ${(averageCTR * 100).toFixed(2)}%`,
-        data: {
-          type: 'average',
-          metric: 'ctr',
-          value: averageCTR,
-          count: filteredData.length,
-          platform: actualPlatform,
-          query: query
-        }
-      }
-    }
-    
-    // Handle ROAS queries for specific platforms
-    if (isROASQuery) {
-      const totalROAS = filteredData.reduce((sum, item) => sum + item.metrics.roas, 0)
-      const averageROAS = filteredData.length > 0 ? totalROAS / filteredData.length : 0
-      return {
-        content: `Average ROAS for ${actualPlatform}: ${averageROAS.toFixed(2)}x`,
-        data: {
-          type: 'average',
-          metric: 'roas',
-          value: averageROAS,
-          count: filteredData.length,
-          platform: actualPlatform,
-          query: query
-        }
-      }
-    }
-    
-    // Handle average queries for specific platforms (generic)
-    if (lowerQuery.includes('average') || lowerQuery.includes('avg')) {
-      if (isCTRQuery) {
-        const totalCTR = filteredData.reduce((sum, item) => sum + item.metrics.ctr, 0)
-        const averageCTR = filteredData.length > 0 ? totalCTR / filteredData.length : 0
-        return {
-          content: `Average CTR for ${actualPlatform}: ${(averageCTR * 100).toFixed(2)}%`,
-          data: {
-            type: 'average',
-            metric: 'ctr',
-            value: averageCTR,
-            count: filteredData.length,
-            platform: actualPlatform,
-            query: query
-          }
-        }
-      }
-      if (isROASQuery) {
-        const totalROAS = filteredData.reduce((sum, item) => sum + item.metrics.roas, 0)
-        const averageROAS = filteredData.length > 0 ? totalROAS / filteredData.length : 0
-        return {
-          content: `Average ROAS for ${actualPlatform}: ${averageROAS.toFixed(2)}x`,
-          data: {
-            type: 'average',
-            metric: 'roas',
-            value: averageROAS,
-            count: filteredData.length,
-            platform: actualPlatform,
-            query: query
-          }
-        }
-      }
-      if (isSpendQuery) {
-        const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
-        const averageSpend = filteredData.length > 0 ? totalSpend / filteredData.length : 0
-        return {
-          content: `Average spend for ${actualPlatform}: $${averageSpend.toLocaleString()}`,
-          data: {
-            type: 'average',
-            metric: 'spend',
-            value: averageSpend,
-            count: filteredData.length,
-            platform: actualPlatform,
-            query: query
-          }
-        }
-      }
-    }
-    
-    // Handle total queries for specific platforms
-    if (lowerQuery.includes('total')) {
-      if (isSpendQuery) {
-        const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
-        return {
-          content: `Total spend for ${actualPlatform}: $${totalSpend.toLocaleString()}`,
-          data: {
-            type: 'sum',
-            metric: 'spend',
-            value: totalSpend,
-            count: filteredData.length,
-            platform: actualPlatform,
-            query: query
-          }
-        }
-      }
-      if (lowerQuery.includes('impression')) {
-        const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
-        return {
-          content: `Total impressions for ${actualPlatform}: ${totalImpressions.toLocaleString()}`,
-          data: {
-            type: 'sum',
-            metric: 'impressions',
-            value: totalImpressions,
-            count: filteredData.length,
-            platform: actualPlatform,
-            query: query
-          }
-        }
-      }
-    }
-  }
+
   
   // Handle CTR ranking queries (FIXED: was returning ROAS)
   if (isTopQuery && isCTRQuery && isCampaignQuery) {
