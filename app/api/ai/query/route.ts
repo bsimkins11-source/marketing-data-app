@@ -186,6 +186,74 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         }
       }
     }
+
+    // Handle campaign-specific CTR queries (HIGH PRIORITY - moved to top)
+    if (isCTRQuery && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+      // Check for specific campaign names
+      const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+      const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+      
+      if (detectedCampaign) {
+        // Normalize campaign name to match CSV data
+        const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ')
+        
+        const campaignData = data.filter(item => 
+          item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+        )
+        
+        if (campaignData.length > 0) {
+          const totalCTR = campaignData.reduce((sum, item) => sum + item.metrics.ctr, 0)
+          const averageCTR = totalCTR / campaignData.length
+          
+          return {
+            content: `Average CTR for ${normalizedCampaignName}: ${(averageCTR * 100).toFixed(2)}%`,
+            data: {
+              type: 'campaign_ctr',
+              campaign: normalizedCampaignName,
+              value: averageCTR,
+              count: campaignData.length,
+              query: query
+            }
+          }
+        }
+      }
+    }
+
+    // Handle campaign-specific ROAS queries (HIGH PRIORITY - moved to top)
+    if (isROASQuery && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+      // Check for specific campaign names
+      const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+      const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+      
+      if (detectedCampaign) {
+        // Normalize campaign name to match CSV data
+        const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ')
+        
+        const campaignData = data.filter(item => 
+          item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+        )
+        
+        if (campaignData.length > 0) {
+          const totalROAS = campaignData.reduce((sum, item) => sum + item.metrics.roas, 0)
+          const averageROAS = totalROAS / campaignData.length
+          
+          return {
+            content: `Average ROAS for ${normalizedCampaignName}: ${averageROAS.toFixed(2)}x`,
+            data: {
+              type: 'campaign_roas',
+              campaign: normalizedCampaignName,
+              value: averageROAS,
+              count: campaignData.length,
+              query: query
+            }
+          }
+        }
+      }
+    }
     
     // Check for platform-specific queries first and handle them with keyword processing
     const platforms = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
@@ -928,73 +996,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle campaign-specific CTR queries (NEW: Critical missing functionality)
-  if (isCTRQuery && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
-    // Check for specific campaign names
-    const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
-    const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
-    
-    if (detectedCampaign) {
-      // Normalize campaign name to match CSV data
-      const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ')
-      
-      const campaignData = data.filter(item => 
-        item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
-      )
-      
-      if (campaignData.length > 0) {
-        const totalCTR = campaignData.reduce((sum, item) => sum + item.metrics.ctr, 0)
-        const averageCTR = totalCTR / campaignData.length
-        
-        return {
-          content: `Average CTR for ${normalizedCampaignName}: ${(averageCTR * 100).toFixed(2)}%`,
-          data: {
-            type: 'campaign_ctr',
-            campaign: normalizedCampaignName,
-            value: averageCTR,
-            count: campaignData.length,
-            query: query
-          }
-        }
-      }
-    }
-  }
 
-  // Handle campaign-specific ROAS queries (NEW: Critical missing functionality)
-  if (isROASQuery && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
-    // Check for specific campaign names
-    const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
-    const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
-    
-    if (detectedCampaign) {
-      // Normalize campaign name to match CSV data
-      const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ')
-      
-      const campaignData = data.filter(item => 
-        item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
-      )
-      
-      if (campaignData.length > 0) {
-        const totalROAS = campaignData.reduce((sum, item) => sum + item.metrics.roas, 0)
-        const averageROAS = totalROAS / campaignData.length
-        
-        return {
-          content: `Average ROAS for ${normalizedCampaignName}: ${averageROAS.toFixed(2)}x`,
-          data: {
-            type: 'campaign_roas',
-            campaign: normalizedCampaignName,
-            value: averageROAS,
-            count: campaignData.length,
-            query: query
-          }
-        }
-      }
-    }
-  }
   
   // Handle platform-specific queries
   const platforms = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
