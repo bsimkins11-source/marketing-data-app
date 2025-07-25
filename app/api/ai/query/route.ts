@@ -103,9 +103,11 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     const spendKeywords = ['spend', 'cost', 'budget', 'expense', 'expenditure', 'investment']
     const isSpendQuery = spendKeywords.some(keyword => lowerQuery.includes(keyword))
     
-    // Enhanced campaign detection
+    // Enhanced campaign detection (IMPROVED: Include specific campaign names)
     const campaignKeywords = ['campaign', 'campaigns', 'ad campaign', 'ad campaigns']
-    const isCampaignQuery = campaignKeywords.some(keyword => lowerQuery.includes(keyword))
+    const specificCampaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+    const isCampaignQuery = campaignKeywords.some(keyword => lowerQuery.includes(keyword)) || 
+                           specificCampaignNames.some(campaign => lowerQuery.includes(campaign))
     
     // Enhanced platform detection
     const platformKeywords = ['platform', 'platforms', 'channel', 'channels', 'network', 'networks']
@@ -255,8 +257,40 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
     
-    // Check for platform-specific queries first and handle them with keyword processing
+    // Handle platform spend queries (NEW: Critical missing functionality)
     const platforms = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
+    const detectedPlatform = platforms.find(platform => lowerQuery.includes(platform))
+    
+    if (detectedPlatform && isSpendQuery) {
+      // Map platform names to actual platform values in data
+      const platformMap: Record<string, string> = {
+        'meta': 'Meta',
+        'dv360': 'Dv360', 
+        'cm360': 'Cm360',
+        'sa360': 'Sa360',
+        'amazon': 'Amazon',
+        'tradedesk': 'Tradedesk'
+      }
+      
+      const actualPlatform = platformMap[detectedPlatform]
+      const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
+      
+      if (filteredData.length > 0) {
+        const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
+        return {
+          content: `Total spend for ${actualPlatform}: $${totalSpend.toLocaleString()}`,
+          data: {
+            type: 'platform_spend',
+            platform: actualPlatform,
+            value: totalSpend,
+            count: filteredData.length,
+            query: query
+          }
+        }
+      }
+    }
+    
+    // Check for other platform-specific queries and handle them with keyword processing
     const hasPlatform = platforms.some(platform => lowerQuery.includes(platform))
     
     if (hasPlatform) {
@@ -898,8 +932,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle overall ROAS calculation (NEW: Critical missing metric)
-  if (lowerQuery.includes('overall roas') || lowerQuery.includes('total roas') || (isROASQuery && (lowerQuery.includes('overall') || lowerQuery.includes('total') || lowerQuery.includes('across all')))) {
+  // Handle overall ROAS calculation (IMPROVED: Better detection)
+  if (lowerQuery.includes('overall roas') || lowerQuery.includes('total roas') || lowerQuery.includes('return on ad spend') || (isROASQuery && (lowerQuery.includes('overall') || lowerQuery.includes('total') || lowerQuery.includes('across all')))) {
     const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
     const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
     const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
@@ -916,8 +950,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle overall CPC calculation (NEW: Critical missing metric)
-  if (lowerQuery.includes('average cpc') || lowerQuery.includes('cost per click') || (lowerQuery.includes('cpc') && lowerQuery.includes('average'))) {
+  // Handle overall CPC calculation (IMPROVED: Better detection)
+  if (lowerQuery.includes('average cpc') || lowerQuery.includes('cost per click') || lowerQuery.includes('cpc') || (lowerQuery.includes('cost') && lowerQuery.includes('click'))) {
     const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
     const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
     const averageCPC = totalClicks > 0 ? totalSpend / totalClicks : 0
@@ -934,8 +968,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle overall CPM calculation (NEW: Critical missing metric)
-  if (lowerQuery.includes('average cpm') || lowerQuery.includes('cost per thousand') || (lowerQuery.includes('cpm') && lowerQuery.includes('average'))) {
+  // Handle overall CPM calculation (IMPROVED: Better detection)
+  if (lowerQuery.includes('average cpm') || lowerQuery.includes('cost per thousand') || lowerQuery.includes('cpm') || (lowerQuery.includes('cost') && lowerQuery.includes('thousand'))) {
     const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
     const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
     const averageCPM = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
@@ -952,8 +986,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle overall CPA calculation (NEW: Critical missing metric)
-  if (lowerQuery.includes('average cpa') || lowerQuery.includes('cost per acquisition') || (lowerQuery.includes('cpa') && lowerQuery.includes('average'))) {
+  // Handle overall CPA calculation (IMPROVED: Better detection)
+  if (lowerQuery.includes('average cpa') || lowerQuery.includes('cost per acquisition') || lowerQuery.includes('cpa') || (lowerQuery.includes('cost') && lowerQuery.includes('acquisition'))) {
     const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
     const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
     const averageCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
