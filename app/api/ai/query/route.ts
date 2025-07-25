@@ -934,6 +934,65 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
+  // Handle campaign-specific CTR queries (ADDED: Direct implementation)
+  const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+  const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+  
+  if (detectedCampaign && isCTRQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+    // Normalize campaign name to match CSV data
+    const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ')
+    
+    const campaignData = data.filter(item => 
+      item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+    )
+    
+    if (campaignData.length > 0) {
+      const totalCTR = campaignData.reduce((sum, item) => sum + item.metrics.ctr, 0)
+      const averageCTR = totalCTR / campaignData.length
+      
+      return {
+        content: `Average CTR for ${normalizedCampaignName}: ${(averageCTR * 100).toFixed(2)}%`,
+        data: {
+          type: 'campaign_ctr',
+          campaign: normalizedCampaignName,
+          value: averageCTR,
+          count: campaignData.length,
+          query: query
+        }
+      }
+    }
+  }
+
+  // Handle campaign-specific ROAS queries (ADDED: Direct implementation)
+  if (detectedCampaign && isROASQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+    // Normalize campaign name to match CSV data
+    const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ')
+    
+    const campaignData = data.filter(item => 
+      item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+    )
+    
+    if (campaignData.length > 0) {
+      const totalROAS = campaignData.reduce((sum, item) => sum + item.metrics.roas, 0)
+      const averageROAS = totalROAS / campaignData.length
+      
+      return {
+        content: `Average ROAS for ${normalizedCampaignName}: ${averageROAS.toFixed(2)}x`,
+        data: {
+          type: 'campaign_roas',
+          campaign: normalizedCampaignName,
+          value: averageROAS,
+          count: campaignData.length,
+          query: query
+        }
+      }
+    }
+  }
+
   // Handle overall ROAS calculation (IMPROVED: Better detection)
   if (lowerQuery.includes('overall roas') || lowerQuery.includes('total roas') || lowerQuery.includes('return on ad spend') || (isROASQuery && (lowerQuery.includes('overall') || lowerQuery.includes('total') || lowerQuery.includes('across all')))) {
     const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
