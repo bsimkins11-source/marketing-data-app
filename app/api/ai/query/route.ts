@@ -140,6 +140,31 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
 
+    // Handle "return on ad spend for [platform]" queries (HIGHEST PRIORITY)
+    if (detectedPlatform && (lowerQuery.includes('return on ad spend') || lowerQuery.includes('roas'))) {
+      const actualPlatform = PLATFORM_MAP[detectedPlatform]
+      const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
+      
+      if (filteredData.length > 0) {
+        const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
+        const totalRevenue = filteredData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+        const platformROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+        
+        return {
+          content: `Average ROAS for ${actualPlatform}: ${platformROAS.toFixed(2)}x`,
+          data: {
+            type: 'platform_roas',
+            platform: actualPlatform,
+            value: platformROAS,
+            totalSpend,
+            totalRevenue,
+            count: filteredData.length,
+            query: query
+          }
+        }
+      }
+    }
+
     // Handle platform count queries (HIGHEST PRIORITY)
     if (lowerQuery.includes('how many platforms') || lowerQuery.includes('number of platforms') || lowerQuery.includes('count of platforms')) {
       const uniquePlatforms = Array.from(new Set(data.map(item => item.dimensions.platform)))
@@ -226,6 +251,74 @@ async function processAIQuery(query: string, data: MarketingData[]) {
           value: averageROAS,
           totalSpend,
           totalRevenue,
+          query: query
+        }
+      }
+    }
+
+    // Handle "CTR for each platform" queries (HIGHEST PRIORITY)
+    if (lowerQuery.includes('ctr for each platform') || lowerQuery.includes('click-through rate for each platform') || lowerQuery.includes('click through rate for each platform')) {
+      const platformGroups: Record<string, { totalCTR: number, count: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalCTR: 0, count: 0 }
+        }
+        platformGroups[platform].totalCTR += item.metrics.ctr
+        platformGroups[platform].count++
+      })
+      
+      const platformCTRs = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          avgCTR: data.count > 0 ? data.totalCTR / data.count : 0
+        }))
+        .sort((a, b) => b.avgCTR - a.avgCTR)
+      
+      const content = `CTR for each platform:\n${platformCTRs.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${(item.avgCTR * 100).toFixed(2)}%`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_ctr_breakdown',
+          platforms: platformCTRs,
+          query: query
+        }
+      }
+    }
+
+    // Handle "ROAS for each platform" queries (HIGHEST PRIORITY)
+    if (lowerQuery.includes('roas for each platform') || lowerQuery.includes('return on ad spend for each platform')) {
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const content = `ROAS for each platform:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_roas_breakdown',
+          platforms: platformROAS,
           query: query
         }
       }
@@ -390,9 +483,10 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
     
     // Check for other platform-specific queries and handle them with keyword processing
+    // BUT ONLY if they haven't been caught by our critical handlers above
     const hasPlatform = KEYWORDS.PLATFORMS.some(platform => lowerQuery.includes(platform))
     
-    if (hasPlatform) {
+    if (hasPlatform && !lowerQuery.includes('revenue') && !lowerQuery.includes('roas') && !lowerQuery.includes('return on ad spend')) {
       return processWithKeywords(query, data)
     }
     
