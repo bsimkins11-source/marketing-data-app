@@ -107,20 +107,9 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
-    // Keyword detection using shared constants
-    const isCTRQuery = KEYWORDS.CTR.some(keyword => lowerQuery.includes(keyword))
-    const isROASQuery = KEYWORDS.ROAS.some(keyword => lowerQuery.includes(keyword))
-    const isCountQuery = KEYWORDS.COUNT.some(keyword => lowerQuery.includes(keyword))
-    const isSpendQuery = KEYWORDS.SPEND.some(keyword => lowerQuery.includes(keyword))
-    const isCampaignQuery = KEYWORDS.CAMPAIGN.some(keyword => lowerQuery.includes(keyword)) || 
-                           KEYWORDS.CAMPAIGN_NAMES.some(campaign => lowerQuery.includes(campaign))
-    const isPlatformQuery = KEYWORDS.PLATFORM.some(keyword => lowerQuery.includes(keyword))
-    const isVizQuery = KEYWORDS.VIZ.some(keyword => lowerQuery.includes(keyword))
-    const isTopQuery = KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword))
+    // CRITICAL FIXES - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
-    // CRITICAL FIXES - HIGHEST PRIORITY HANDLERS (MOVED TO VERY TOP)
-    
-    // Handle platform-specific revenue queries (HIGHEST PRIORITY)
+    // Handle platform-specific revenue queries (ABSOLUTE HIGHEST PRIORITY)
     const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => lowerQuery.includes(platform))
     
     if (detectedPlatform && (lowerQuery.includes('revenue') || lowerQuery.includes('earnings'))) {
@@ -164,6 +153,17 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         }
       }
     }
+
+    // Now add keyword detection for the rest of the function
+    const isCTRQuery = KEYWORDS.CTR.some(keyword => lowerQuery.includes(keyword))
+    const isROASQuery = KEYWORDS.ROAS.some(keyword => lowerQuery.includes(keyword))
+    const isCountQuery = KEYWORDS.COUNT.some(keyword => lowerQuery.includes(keyword))
+    const isSpendQuery = KEYWORDS.SPEND.some(keyword => lowerQuery.includes(keyword))
+    const isCampaignQuery = KEYWORDS.CAMPAIGN.some(keyword => lowerQuery.includes(keyword)) || 
+                           KEYWORDS.CAMPAIGN_NAMES.some(campaign => lowerQuery.includes(campaign))
+    const isPlatformQuery = KEYWORDS.PLATFORM.some(keyword => lowerQuery.includes(keyword))
+    const isVizQuery = KEYWORDS.VIZ.some(keyword => lowerQuery.includes(keyword))
+    const isTopQuery = KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword))
 
     // Handle platform count queries (HIGHEST PRIORITY)
     if (lowerQuery.includes('how many platforms') || lowerQuery.includes('number of platforms') || lowerQuery.includes('count of platforms')) {
