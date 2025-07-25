@@ -763,7 +763,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   const isTopQuery = topKeywords.some(keyword => lowerQuery.includes(keyword))
   
   // Handle "metric for each campaign" queries (HIGH PRIORITY)
-  if (isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual'))) {
+  if (isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual') || lowerQuery.includes('for each'))) {
     // Determine which metric is being asked for
     let metricType = 'ctr'
     let metricName = 'CTR'
@@ -829,13 +829,179 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       }
     }
   }
+
+  // Handle overall ROAS calculation (NEW: Critical missing metric)
+  if (lowerQuery.includes('overall roas') || lowerQuery.includes('total roas') || (isROASQuery && (lowerQuery.includes('overall') || lowerQuery.includes('total') || lowerQuery.includes('across all')))) {
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    
+    return {
+      content: `Overall ROAS across all campaigns: ${overallROAS.toFixed(2)}x`,
+      data: {
+        type: 'overall_roas',
+        value: overallROAS,
+        totalSpend,
+        totalRevenue,
+        query: query
+      }
+    }
+  }
+
+  // Handle overall CPC calculation (NEW: Critical missing metric)
+  if (lowerQuery.includes('average cpc') || lowerQuery.includes('cost per click') || (lowerQuery.includes('cpc') && lowerQuery.includes('average'))) {
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const averageCPC = totalClicks > 0 ? totalSpend / totalClicks : 0
+    
+    return {
+      content: `Average CPC across all campaigns: $${averageCPC.toFixed(2)}`,
+      data: {
+        type: 'average_cpc',
+        value: averageCPC,
+        totalSpend,
+        totalClicks,
+        query: query
+      }
+    }
+  }
+
+  // Handle overall CPM calculation (NEW: Critical missing metric)
+  if (lowerQuery.includes('average cpm') || lowerQuery.includes('cost per thousand') || (lowerQuery.includes('cpm') && lowerQuery.includes('average'))) {
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const averageCPM = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    
+    return {
+      content: `Average CPM across all campaigns: $${averageCPM.toFixed(2)}`,
+      data: {
+        type: 'average_cpm',
+        value: averageCPM,
+        totalSpend,
+        totalImpressions,
+        query: query
+      }
+    }
+  }
+
+  // Handle overall CPA calculation (NEW: Critical missing metric)
+  if (lowerQuery.includes('average cpa') || lowerQuery.includes('cost per acquisition') || (lowerQuery.includes('cpa') && lowerQuery.includes('average'))) {
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    const averageCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    return {
+      content: `Average CPA across all campaigns: $${averageCPA.toFixed(2)}`,
+      data: {
+        type: 'average_cpa',
+        value: averageCPA,
+        totalSpend,
+        totalConversions,
+        query: query
+      }
+    }
+  }
+
+  // Handle total clicks queries (NEW: Missing metric)
+  if (lowerQuery.includes('total clicks') || (lowerQuery.includes('clicks') && lowerQuery.includes('total'))) {
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    return {
+      content: `Total clicks across all campaigns: ${totalClicks.toLocaleString()}`,
+      data: {
+        type: 'total_clicks',
+        value: totalClicks,
+        query: query
+      }
+    }
+  }
+
+  // Handle total conversions queries (NEW: Missing metric)
+  if (lowerQuery.includes('total conversions') || (lowerQuery.includes('conversions') && lowerQuery.includes('total'))) {
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    return {
+      content: `Total conversions across all campaigns: ${totalConversions.toLocaleString()}`,
+      data: {
+        type: 'total_conversions',
+        value: totalConversions,
+        query: query
+      }
+    }
+  }
+
+  // Handle campaign-specific CTR queries (NEW: Critical missing functionality)
+  if (isCTRQuery && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+    // Check for specific campaign names
+    const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+    const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+    
+    if (detectedCampaign) {
+      // Normalize campaign name to match CSV data
+      const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ')
+      
+      const campaignData = data.filter(item => 
+        item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+      )
+      
+      if (campaignData.length > 0) {
+        const totalCTR = campaignData.reduce((sum, item) => sum + item.metrics.ctr, 0)
+        const averageCTR = totalCTR / campaignData.length
+        
+        return {
+          content: `Average CTR for ${normalizedCampaignName}: ${(averageCTR * 100).toFixed(2)}%`,
+          data: {
+            type: 'campaign_ctr',
+            campaign: normalizedCampaignName,
+            value: averageCTR,
+            count: campaignData.length,
+            query: query
+          }
+        }
+      }
+    }
+  }
+
+  // Handle campaign-specific ROAS queries (NEW: Critical missing functionality)
+  if (isROASQuery && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+    // Check for specific campaign names
+    const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+    const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+    
+    if (detectedCampaign) {
+      // Normalize campaign name to match CSV data
+      const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ')
+      
+      const campaignData = data.filter(item => 
+        item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+      )
+      
+      if (campaignData.length > 0) {
+        const totalROAS = campaignData.reduce((sum, item) => sum + item.metrics.roas, 0)
+        const averageROAS = totalROAS / campaignData.length
+        
+        return {
+          content: `Average ROAS for ${normalizedCampaignName}: ${averageROAS.toFixed(2)}x`,
+          data: {
+            type: 'campaign_roas',
+            campaign: normalizedCampaignName,
+            value: averageROAS,
+            count: campaignData.length,
+            query: query
+          }
+        }
+      }
+    }
+  }
   
   // Handle platform-specific queries
   const platforms = ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk']
   const detectedPlatform = platforms.find(platform => lowerQuery.includes(platform))
   
   if (detectedPlatform) {
-    // Map platform names to actual platform values in data
+    // Map platform names to actual platform values in data (FIXED: Correct casing)
     const platformMap: Record<string, string> = {
       'meta': 'Meta',
       'dv360': 'Dv360', 
