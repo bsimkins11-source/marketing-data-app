@@ -320,9 +320,9 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     if (config.openai.apiKey) {
       try {
         return await processWithOpenAI(query, data)
-      } catch (openaiError) {
-        return processWithKeywords(query, data)
-      }
+          } catch (openaiError) {
+      return processWithKeywords(query, data)
+    }
     } else {
       // Fallback to enhanced keyword processing
       return processWithKeywords(query, data)
@@ -888,26 +888,26 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
     const totalRevenue = filteredData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
     
-    return {
+        return {
       content: `Total revenue from ${actualPlatform}: $${totalRevenue.toLocaleString()}`,
-      data: {
+          data: {
         type: 'platform_revenue',
-        platform: actualPlatform,
+            platform: actualPlatform,
         value: totalRevenue,
         count: filteredData.length,
-        query: query
+            query: query
+          }
+        }
       }
-    }
-  }
 
   // Handle platform count queries (HIGHEST PRIORITY)
   if (lowerQuery.includes('how many platforms') || lowerQuery.includes('number of platforms') || lowerQuery.includes('count of platforms')) {
     const uniquePlatforms = Array.from(new Set(data.map(item => item.dimensions.platform)))
     const platformCount = uniquePlatforms.length
     
-    return {
+        return {
       content: `Found ${platformCount} platforms: ${uniquePlatforms.join(', ')}`,
-      data: {
+          data: {
         type: 'platform_count',
         platforms: uniquePlatforms,
         count: platformCount,
@@ -1052,13 +1052,13 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       content: `Average ROAS across all campaigns: ${averageROAS.toFixed(2)}x`,
       data: {
         type: 'average_roas',
-        value: averageROAS,
+            value: averageROAS,
         totalSpend,
         totalRevenue,
-        query: query
+            query: query
+          }
+        }
       }
-    }
-  }
   
   // Handle campaign-specific CTR queries (HIGHEST PRIORITY - moved to very top)
   const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
@@ -1079,19 +1079,19 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       const totalCTR = campaignData.reduce((sum, item) => sum + item.metrics.ctr, 0)
       const averageCTR = totalCTR / campaignData.length
       
-      return {
+        return {
         content: `Average CTR for ${normalizedCampaignName}: ${(averageCTR * 100).toFixed(2)}%`,
-        data: {
+          data: {
           type: 'campaign_ctr',
           campaign: normalizedCampaignName,
           value: averageCTR,
           count: campaignData.length,
-          query: query
+            query: query
+          }
         }
       }
     }
-  }
-
+    
   // Handle campaign-specific ROAS queries (HIGHEST PRIORITY - moved to very top)
   if (detectedCampaign && isROASQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
     console.log('[DEBUG] ROAS HANDLER TRIGGERED:', { query, detectedCampaign });
@@ -1108,9 +1108,9 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       const totalROAS = campaignData.reduce((sum, item) => sum + item.metrics.roas, 0)
       const averageROAS = totalROAS / campaignData.length
       
-      return {
+        return {
         content: `Average ROAS for ${normalizedCampaignName}: ${averageROAS.toFixed(2)}x`,
-        data: {
+          data: {
           type: 'campaign_roas',
           campaign: normalizedCampaignName,
           value: averageROAS,
@@ -1490,7 +1490,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     return {
       content: `Total spend across all campaigns: $${total.toLocaleString()}`,
       data: { 
-        metric: 'spend', 
+            metric: 'spend',
         value: total, 
         type: 'total',
         query: query
@@ -1880,22 +1880,22 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       content: `Total revenue from ${actualPlatform}: $${totalRevenue.toLocaleString()}`,
       data: {
         type: 'platform_revenue',
-        platform: actualPlatform,
+            platform: actualPlatform,
         value: totalRevenue,
         count: filteredData.length,
-        query: query
+            query: query
+          }
+        }
       }
-    }
-  }
 
   // Handle platform count queries (FIXED: Improved detection)
   if ((isCountQuery && isPlatformQuery) || lowerQuery.includes('how many platforms') || lowerQuery.includes('number of platforms') || lowerQuery.includes('count of platforms')) {
     const uniquePlatforms = Array.from(new Set(data.map(item => item.dimensions.platform)))
     const platformCount = uniquePlatforms.length
     
-    return {
+        return {
       content: `Found ${platformCount} platforms: ${uniquePlatforms.join(', ')}`,
-      data: {
+          data: {
         type: 'platform_count',
         platforms: uniquePlatforms,
         count: platformCount,
@@ -1995,10 +1995,10 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       content: `Total impressions across all campaigns: ${totalImpressions.toLocaleString()}`,
       data: {
         type: 'total_impressions',
-        value: totalImpressions,
-        query: query
-      }
-    }
+            value: totalImpressions,
+            query: query
+          }
+        }
   }
 
   // Handle "how many clicks did we get" queries (FIXED: Improved detection)
@@ -2093,7 +2093,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       }
     }
   }
-
+  
   // Handle visualization requests for platform data (RESTORED)
   if (isVizQuery && (isPlatformQuery || isROASQuery)) {
     
@@ -2146,7 +2146,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       }
     }
   }
-
+  
   // Enhanced keyword processing with more sophisticated matching (RESTORED)
   if (lowerQuery.includes('total') && (lowerQuery.includes('impression') || lowerQuery.includes('impressions'))) {
     const total = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
@@ -2245,15 +2245,15 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       }
     } else {
       // Default to ROAS if no specific metric mentioned
-      const bestCampaign = data.reduce((best, current) => 
-        current.metrics.roas > best.metrics.roas ? current : best
-      )
-      return {
-        content: `The best performing campaign by ROAS is "${bestCampaign.dimensions.campaign}" with a ROAS of ${bestCampaign.metrics.roas.toFixed(2)}x`,
-        data: { 
-          campaign: bestCampaign, 
-          type: 'best_performer',
-          query: query
+    const bestCampaign = data.reduce((best, current) => 
+      current.metrics.roas > best.metrics.roas ? current : best
+    )
+    return {
+      content: `The best performing campaign by ROAS is "${bestCampaign.dimensions.campaign}" with a ROAS of ${bestCampaign.metrics.roas.toFixed(2)}x`,
+      data: { 
+        campaign: bestCampaign, 
+        type: 'best_performer',
+        query: query
         }
       }
     }
@@ -2324,43 +2324,43 @@ function processWithKeywords(query: string, data: MarketingData[]) {
         }
       }
     } else if (isROASQuery) {
-      // Group data by platform and calculate ROAS
-      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
-      
-      data.forEach(item => {
-        const platform = item.dimensions.platform
-        if (!platformGroups[platform]) {
-          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, count: 0 }
-        }
-        platformGroups[platform].totalSpend += item.metrics.spend || 0
-        platformGroups[platform].totalRevenue += item.metrics.revenue || 0
-        platformGroups[platform].count++
-      })
-      
-      // Calculate ROAS for each platform
-      const platformROAS = Object.entries(platformGroups)
-        .map(([platform, data]) => ({
-          platform,
-          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
-          spend: data.totalSpend,
-          revenue: data.totalRevenue,
-          count: data.count
-        }))
-        .sort((a, b) => b.roas - a.roas)
-      
-      const bestPlatform = platformROAS[0]
-      
-      const content = `Platform with the highest ROAS:\n${platformROAS.map((item, index) => 
-        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x ROAS ($${item.spend.toLocaleString()} spend, $${item.revenue.toLocaleString()} revenue)`
-      ).join('\n')}`
-      
-      return {
-        content,
-        data: {
-          type: 'platform_roas',
-          platforms: platformROAS,
-          bestPlatform,
-          query: query
+    // Group data by platform and calculate ROAS
+    const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
+    
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, count: 0 }
+      }
+      platformGroups[platform].totalSpend += item.metrics.spend || 0
+      platformGroups[platform].totalRevenue += item.metrics.revenue || 0
+      platformGroups[platform].count++
+    })
+    
+    // Calculate ROAS for each platform
+    const platformROAS = Object.entries(platformGroups)
+      .map(([platform, data]) => ({
+        platform,
+        roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+        spend: data.totalSpend,
+        revenue: data.totalRevenue,
+        count: data.count
+      }))
+      .sort((a, b) => b.roas - a.roas)
+    
+    const bestPlatform = platformROAS[0]
+    
+    const content = `Platform with the highest ROAS:\n${platformROAS.map((item, index) => 
+      `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x ROAS ($${item.spend.toLocaleString()} spend, $${item.revenue.toLocaleString()} revenue)`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_roas',
+        platforms: platformROAS,
+        bestPlatform,
+        query: query
         }
       }
     }
