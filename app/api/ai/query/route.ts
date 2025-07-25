@@ -1800,7 +1800,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle platform-specific revenue queries (NEW: Missing functionality)
+  // Handle platform-specific revenue queries (FIXED: Higher priority)
   if (detectedPlatform && (lowerQuery.includes('revenue') || lowerQuery.includes('earnings'))) {
     const platformMap: Record<string, string> = {
       'meta': 'Meta',
@@ -1827,8 +1827,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle platform count queries (NEW: Missing functionality)
-  if (isCountQuery && isPlatformQuery) {
+  // Handle platform count queries (FIXED: Improved detection)
+  if ((isCountQuery && isPlatformQuery) || lowerQuery.includes('how many platforms') || lowerQuery.includes('number of platforms') || lowerQuery.includes('count of platforms')) {
     const uniquePlatforms = Array.from(new Set(data.map(item => item.dimensions.platform)))
     const platformCount = uniquePlatforms.length
     
@@ -1843,8 +1843,9 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "CTR for each platform" queries (NEW: Missing functionality)
-  if (isCTRQuery && isPlatformQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual') || lowerQuery.includes('for each'))) {
+  // Handle "CTR for each platform" queries (FIXED: Higher priority)
+  if ((isCTRQuery && isPlatformQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual') || lowerQuery.includes('for each'))) || 
+      lowerQuery.includes('ctr for each platform') || lowerQuery.includes('click-through rate for each platform')) {
     const platformGroups: Record<string, { totalCTR: number, count: number }> = {}
     
     data.forEach(item => {
@@ -1877,8 +1878,9 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "ROAS for each platform" queries (NEW: Missing functionality)
-  if (isROASQuery && isPlatformQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual') || lowerQuery.includes('for each'))) {
+  // Handle "ROAS for each platform" queries (FIXED: Higher priority)
+  if ((isROASQuery && isPlatformQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual') || lowerQuery.includes('for each'))) ||
+      lowerQuery.includes('roas for each platform') || lowerQuery.includes('return on ad spend for each platform')) {
     const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, count: number }> = {}
     
     data.forEach(item => {
@@ -1912,8 +1914,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "how much revenue did we generate" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('how much revenue') || lowerQuery.includes('revenue did we generate')) {
+  // Handle "how much revenue did we generate" queries (FIXED: Improved detection)
+  if (lowerQuery.includes('how much revenue') || lowerQuery.includes('revenue did we generate') || lowerQuery.includes('revenue did we get')) {
     const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
     return {
       content: `Total revenue across all campaigns: $${totalRevenue.toLocaleString()}`,
@@ -1925,8 +1927,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "how many impressions did we get" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('how many impressions') || lowerQuery.includes('impressions did we get')) {
+  // Handle "how many impressions did we get" queries (FIXED: Improved detection)
+  if (lowerQuery.includes('how many impressions') || lowerQuery.includes('impressions did we get') || lowerQuery.includes('impressions did we receive')) {
     const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
     return {
       content: `Total impressions across all campaigns: ${totalImpressions.toLocaleString()}`,
@@ -1938,8 +1940,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "how many clicks did we get" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('how many clicks') || lowerQuery.includes('clicks did we get')) {
+  // Handle "how many clicks did we get" queries (FIXED: Improved detection)
+  if (lowerQuery.includes('how many clicks') || lowerQuery.includes('clicks did we get') || lowerQuery.includes('clicks did we receive')) {
     const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
     return {
       content: `Total clicks across all campaigns: ${totalClicks.toLocaleString()}`,
@@ -1951,8 +1953,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "overall CTR" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('overall ctr') || lowerQuery.includes('overall click-through rate')) {
+  // Handle "overall CTR" queries (FIXED: Correct calculation)
+  if (lowerQuery.includes('overall ctr') || lowerQuery.includes('overall click-through rate') || lowerQuery.includes('overall click through rate')) {
     const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
     const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
     const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
@@ -1969,8 +1971,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "average ROAS" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('average roas') || lowerQuery.includes('avg roas')) {
+  // Handle "average ROAS" queries (FIXED: Improved detection)
+  if (lowerQuery.includes('average roas') || lowerQuery.includes('avg roas') || lowerQuery.includes('average return on ad spend')) {
     const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
     const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
     const averageROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
@@ -1987,7 +1989,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "how many campaigns" queries with proper grouping (IMPROVED)
+  // Handle "how many campaigns" queries with proper grouping (RESTORED)
   if (isCountQuery && isCampaignQuery) {
     // Normalize campaign names to handle trailing spaces and duplicates
     const normalizedData = data.map(item => ({
@@ -2031,7 +2033,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle visualization requests for platform data
+  // Handle visualization requests for platform data (RESTORED)
   if (isVizQuery && (isPlatformQuery || isROASQuery)) {
     
     // Group data by platform and calculate ROAS
@@ -2084,7 +2086,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Enhanced keyword processing with more sophisticated matching (IMPROVED)
+  // Enhanced keyword processing with more sophisticated matching (RESTORED)
   if (lowerQuery.includes('total') && (lowerQuery.includes('impression') || lowerQuery.includes('impressions'))) {
     const total = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
     return {
@@ -2124,7 +2126,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Handle best performing campaign queries (IMPROVED: distinguish between CTR and ROAS)
+  // Handle best performing campaign queries (RESTORED)
   if (isTopQuery && isCampaignQuery) {
     if (isCTRQuery) {
       // Find campaign with highest average CTR
@@ -2221,7 +2223,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Handle platform ranking queries (IMPROVED: Added CTR ranking and better detection)
+  // Handle platform ranking queries (RESTORED)
   if (isPlatformQuery && isTopQuery) {
     if (isCTRQuery) {
       // Group data by platform and calculate average CTR
@@ -2303,7 +2305,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Handle "which platform" queries (NEW: More comprehensive detection)
+  // Handle "which platform" queries (RESTORED)
   if (lowerQuery.includes('which platform') && (isCTRQuery || isROASQuery)) {
     if (isCTRQuery) {
       // Group data by platform and calculate average CTR
@@ -2385,7 +2387,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
-  // Handle graph/chart requests (IMPROVED)
+  // Handle graph/chart requests (RESTORED)
   if (isVizQuery) {
     let metric = 'spend' // default to spend
     if (lowerQuery.includes('impression')) metric = 'impressions'
@@ -2430,7 +2432,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
-  // Handle "CTR for each campaign" queries (IMPROVED: Better detection)
+  // Handle "CTR for each campaign" queries (RESTORED)
   if (isCTRQuery && isCampaignQuery && (lowerQuery.includes('each') || lowerQuery.includes('individual') || lowerQuery.includes('for each'))) {
     // Normalize campaign names to handle trailing spaces and duplicates
     const normalizedData = data.map(item => ({
@@ -2469,81 +2471,6 @@ function processWithKeywords(query: string, data: MarketingData[]) {
       data: {
         type: 'campaign_ctr_breakdown',
         campaigns: campaignCTR,
-        query: query
-      }
-    }
-  }
-
-  // Handle "how much revenue did we generate" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('how much revenue') || lowerQuery.includes('revenue did we generate')) {
-    const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
-    return {
-      content: `Total revenue across all campaigns: $${totalRevenue.toLocaleString()}`,
-      data: {
-        type: 'total_revenue',
-        value: totalRevenue,
-        query: query
-      }
-    }
-  }
-
-  // Handle "how many impressions did we get" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('how many impressions') || lowerQuery.includes('impressions did we get')) {
-    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
-    return {
-      content: `Total impressions across all campaigns: ${totalImpressions.toLocaleString()}`,
-      data: {
-        type: 'total_impressions',
-        value: totalImpressions,
-        query: query
-      }
-    }
-  }
-
-  // Handle "how many clicks did we get" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('how many clicks') || lowerQuery.includes('clicks did we get')) {
-    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
-    return {
-      content: `Total clicks across all campaigns: ${totalClicks.toLocaleString()}`,
-      data: {
-        type: 'total_clicks',
-        value: totalClicks,
-        query: query
-      }
-    }
-  }
-
-  // Handle "overall CTR" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('overall ctr') || lowerQuery.includes('overall click-through rate')) {
-    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
-    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
-    const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-    
-    return {
-      content: `Overall CTR across all campaigns: ${(overallCTR * 100).toFixed(2)}%`,
-      data: {
-        type: 'overall_ctr',
-        value: overallCTR,
-        totalClicks,
-        totalImpressions,
-        query: query
-      }
-    }
-  }
-
-  // Handle "average ROAS" queries (NEW: Missing functionality)
-  if (lowerQuery.includes('average roas') || lowerQuery.includes('avg roas')) {
-    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
-    const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
-    const averageROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
-    
-    return {
-      content: `Average ROAS across all campaigns: ${averageROAS.toFixed(2)}x`,
-      data: {
-        type: 'average_roas',
-        value: averageROAS,
-        totalSpend,
-        totalRevenue,
         query: query
       }
     }
