@@ -111,7 +111,8 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     // These handle placement, creative, audience, and optimization queries
     
     // PLACEMENT OPTIMIZATION HANDLERS
-    if (lowerQuery.includes('placement') && (lowerQuery.includes('performing best') || lowerQuery.includes('best performing') || lowerQuery.includes('top placement'))) {
+    if (lowerQuery.includes('placement') && (lowerQuery.includes('performing best') || lowerQuery.includes('best performing') || lowerQuery.includes('top placement') ||
+        lowerQuery.includes('highest ctr') || lowerQuery.includes('placements performing') || lowerQuery.includes('placement has'))) {
       const placementGroups: Record<string, { totalSpend: number, totalRevenue: number, totalImpressions: number, totalClicks: number }> = {}
       
       data.forEach(item => {
@@ -241,7 +242,8 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
     
     // INDIVIDUAL CREATIVE OPTIMIZATION HANDLERS
-    if (lowerQuery.includes('creative') && (lowerQuery.includes('performing') || lowerQuery.includes('performance') || lowerQuery.includes('best creative'))) {
+    if (lowerQuery.includes('creative') && (lowerQuery.includes('performing') || lowerQuery.includes('performance') || lowerQuery.includes('best creative') ||
+        lowerQuery.includes('creatives should replace') || lowerQuery.includes('replace creatives'))) {
       const creativeGroups: Record<string, { totalSpend: number, totalRevenue: number, totalImpressions: number, totalClicks: number }> = {}
       
       data.forEach(item => {
@@ -287,8 +289,9 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
     
     // CAMPAIGN MANAGEMENT QUALITY HANDLERS
-    if (lowerQuery.includes('campaign managed well') || lowerQuery.includes('management quality') || lowerQuery.includes('campaign health') ||
-        lowerQuery.includes('pacing') || lowerQuery.includes('anomalies') || lowerQuery.includes('optimization patterns')) {
+    if (lowerQuery.includes('campaign managed well') || lowerQuery.includes('campaigns managed') || lowerQuery.includes('management quality') || lowerQuery.includes('campaign health') ||
+        lowerQuery.includes('campaigns healthy') || lowerQuery.includes('pacing') || lowerQuery.includes('anomalies') || lowerQuery.includes('optimization patterns') ||
+        lowerQuery.includes('consistent spend') || lowerQuery.includes('spend volatility') || lowerQuery.includes('zero-spend days') || lowerQuery.includes('daily spend')) {
       
       // Analyze campaign management quality
       const campaignGroups: Record<string, any[]> = {}
@@ -537,7 +540,8 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     
     // ADVANCED OPTIMIZATION RECOMMENDATION HANDLERS
     if (lowerQuery.includes('optimize') || lowerQuery.includes('optimization') || lowerQuery.includes('improve') || 
-        lowerQuery.includes('reallocate') || lowerQuery.includes('budget optimization') || lowerQuery.includes('how can i improve')) {
+        lowerQuery.includes('reallocate') || lowerQuery.includes('budget optimization') || lowerQuery.includes('how can i improve') ||
+        lowerQuery.includes('increase revenue') || lowerQuery.includes('boost revenue') || lowerQuery.includes('revenue optimization')) {
       
       // Calculate comprehensive optimization insights
       const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
@@ -1438,7 +1442,8 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
     
     // "What should I do next" or "recommendations" - provide actionable advice
-    if (lowerQuery.includes('should i do') || lowerQuery.includes('recommendations') || lowerQuery.includes('what next') || lowerQuery.includes('apply to next')) {
+    if (lowerQuery.includes('should i do') || lowerQuery.includes('recommendations') || lowerQuery.includes('what next') || lowerQuery.includes('apply to next') ||
+        lowerQuery.includes('put more money into') || lowerQuery.includes('invest more in') || lowerQuery.includes('increase spend on')) {
       const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, totalClicks: number, totalImpressions: number }> = {}
       
       data.forEach(item => {
