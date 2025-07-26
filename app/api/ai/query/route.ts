@@ -267,6 +267,41 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         }
       }
     }
+
+    // Check for "which platform spent the most" pattern
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('spent the most') || lowerQuery.includes('spend the most') || lowerQuery.includes('highest spend') || lowerQuery.includes('cost the most') || lowerQuery.includes('spend most'))) {
+      const platformGroups: Record<string, { totalSpend: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+      })
+      
+      const platformSpends = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          totalSpend: data.totalSpend
+        }))
+        .sort((a, b) => b.totalSpend - a.totalSpend)
+      
+      const topPlatform = platformSpends[0]
+      const content = `Platform with the highest spend:\n1. ${topPlatform.platform}: $${topPlatform.totalSpend.toLocaleString()}\n\nAll platforms by spend:\n${platformSpends.map((item, index) => 
+        `${index + 1}. ${item.platform}: $${item.totalSpend.toLocaleString()}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_spend_ranking',
+          platforms: platformSpends,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
     
     // CRITICAL FIXES - HIGHEST PRIORITY HANDLERS (MOVED TO VERY TOP)
     
