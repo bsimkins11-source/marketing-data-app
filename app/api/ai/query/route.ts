@@ -1574,7 +1574,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     if (!handlerTriggered && (lowerQuery.includes('visual') || lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('plot'))) {
       if (lowerQuery.includes('platform') || lowerQuery.includes('roas')) {
         handlerTriggered = true
-        handlerResult = await processWithKeywords(query, data)
+        handlerResult = processWithKeywords(query, data)
       }
     }
     
