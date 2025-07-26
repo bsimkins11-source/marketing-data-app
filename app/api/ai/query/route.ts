@@ -158,6 +158,46 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
     
+    // PLATFORM-SPECIFIC HANDLERS - HIGHEST PRIORITY (BEFORE GENERAL HANDLERS)
+    const detectedPlatformEarly = KEYWORDS.PLATFORMS.find(platform => lowerQuery.includes(platform))
+    
+    if (detectedPlatformEarly) {
+      const actualPlatform = PLATFORM_MAP[detectedPlatformEarly]
+      const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
+      
+      if (filteredData.length > 0) {
+        // Handle platform-specific impressions queries
+        if (lowerQuery.includes('impressions') && lowerQuery.includes('get')) {
+          const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+          return {
+            content: `Total impressions for ${actualPlatform}: ${totalImpressions.toLocaleString()}`,
+            data: {
+              type: 'platform_impressions',
+              platform: actualPlatform,
+              value: totalImpressions,
+              count: filteredData.length,
+              query: query
+            }
+          }
+        }
+        
+        // Handle platform-specific clicks queries
+        if (lowerQuery.includes('clicks') && lowerQuery.includes('get')) {
+          const totalClicks = filteredData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+          return {
+            content: `Total clicks for ${actualPlatform}: ${totalClicks.toLocaleString()}`,
+            data: {
+              type: 'platform_clicks',
+              platform: actualPlatform,
+              value: totalClicks,
+              count: filteredData.length,
+              query: query
+            }
+          }
+        }
+      }
+    }
+    
     // CRITICAL PATTERN HANDLERS - HIGH PRIORITY (AFTER COMPARATIVE HANDLERS)
     
     // Check for "how much revenue did we generate" pattern
