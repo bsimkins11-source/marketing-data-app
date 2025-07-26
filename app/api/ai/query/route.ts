@@ -243,7 +243,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     
     // INDIVIDUAL CREATIVE OPTIMIZATION HANDLERS
     if (lowerQuery.includes('creative') && (lowerQuery.includes('performing') || lowerQuery.includes('performance') || lowerQuery.includes('best creative') ||
-        lowerQuery.includes('creatives should replace') || lowerQuery.includes('replace creatives'))) {
+        lowerQuery.includes('creatives should replace') || lowerQuery.includes('replace creatives') || lowerQuery.includes('which creatives'))) {
       const creativeGroups: Record<string, { totalSpend: number, totalRevenue: number, totalImpressions: number, totalClicks: number }> = {}
       
       data.forEach(item => {
@@ -291,7 +291,8 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     // CAMPAIGN MANAGEMENT QUALITY HANDLERS
     if (lowerQuery.includes('campaign managed well') || lowerQuery.includes('campaigns managed') || lowerQuery.includes('management quality') || lowerQuery.includes('campaign health') ||
         lowerQuery.includes('campaigns healthy') || lowerQuery.includes('pacing') || lowerQuery.includes('anomalies') || lowerQuery.includes('optimization patterns') ||
-        lowerQuery.includes('consistent spend') || lowerQuery.includes('spend volatility') || lowerQuery.includes('zero-spend days') || lowerQuery.includes('daily spend')) {
+        lowerQuery.includes('consistent spend') || lowerQuery.includes('spend volatility') || lowerQuery.includes('zero-spend days') || lowerQuery.includes('daily spend') ||
+        lowerQuery.includes('how consistent was') || lowerQuery.includes('how healthy are')) {
       
       // Analyze campaign management quality
       const campaignGroups: Record<string, any[]> = {}
@@ -541,7 +542,8 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     // ADVANCED OPTIMIZATION RECOMMENDATION HANDLERS
     if (lowerQuery.includes('optimize') || lowerQuery.includes('optimization') || lowerQuery.includes('improve') || 
         lowerQuery.includes('reallocate') || lowerQuery.includes('budget optimization') || lowerQuery.includes('how can i improve') ||
-        lowerQuery.includes('increase revenue') || lowerQuery.includes('boost revenue') || lowerQuery.includes('revenue optimization')) {
+        lowerQuery.includes('increase revenue') || lowerQuery.includes('boost revenue') || lowerQuery.includes('revenue optimization') ||
+        lowerQuery.includes('how can i increase')) {
       
       // Calculate comprehensive optimization insights
       const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
