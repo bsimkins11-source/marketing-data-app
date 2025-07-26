@@ -964,11 +964,11 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
     
-    // Handle "average CPA" queries (HIGHEST PRIORITY) - using clicks as proxy for acquisitions
+    // Handle "average CPA" queries (HIGHEST PRIORITY) - using actual conversions
     if (lowerQuery.includes('average cpa') || lowerQuery.includes('avg cpa') || lowerQuery.includes('average cost per acquisition') || lowerQuery.includes('overall cpa')) {
       const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
-      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
-      const averageCPA = totalClicks > 0 ? totalSpend / totalClicks : 0
+      const totalConversions = data.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0)
+      const averageCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
       
       return {
         content: `Average CPA across all campaigns: $${averageCPA.toFixed(2)}`,
@@ -976,7 +976,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
           type: 'average_cpa',
           value: averageCPA,
           totalSpend,
-          totalClicks,
+          totalConversions,
           query: query
         }
       }
