@@ -302,6 +302,436 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         }
       }
     }
+    
+    // Handle comparative queries (HIGHEST PRIORITY)
+    
+    // "Which platform performed best" - based on ROAS
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('performed best') || lowerQuery.includes('was the best') || lowerQuery.includes('had the best performance'))) {
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topPlatform = platformROAS[0]
+      const content = `Platform with the best performance (highest ROAS):\n1. ${topPlatform.platform}: ${topPlatform.roas.toFixed(2)}x\n\nAll platforms by ROAS:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_performance_ranking',
+          platforms: platformROAS,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // "Which platform had the highest revenue"
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('highest revenue') || lowerQuery.includes('generated the most revenue') || lowerQuery.includes('most revenue'))) {
+      const platformGroups: Record<string, { totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalRevenue: 0 }
+        }
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const platformRevenues = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          totalRevenue: data.totalRevenue
+        }))
+        .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      
+      const topPlatform = platformRevenues[0]
+      const content = `Platform with the highest revenue:\n1. ${topPlatform.platform}: $${topPlatform.totalRevenue.toLocaleString()}\n\nAll platforms by revenue:\n${platformRevenues.map((item, index) => 
+        `${index + 1}. ${item.platform}: $${item.totalRevenue.toLocaleString()}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_revenue_ranking',
+          platforms: platformRevenues,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // "Which platform had the most impressions"
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('most impressions') || lowerQuery.includes('got the most impressions') || lowerQuery.includes('most traffic'))) {
+      const platformGroups: Record<string, { totalImpressions: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalImpressions: 0 }
+        }
+        platformGroups[platform].totalImpressions += item.metrics.impressions
+      })
+      
+      const platformImpressions = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          totalImpressions: data.totalImpressions
+        }))
+        .sort((a, b) => b.totalImpressions - a.totalImpressions)
+      
+      const topPlatform = platformImpressions[0]
+      const content = `Platform with the most impressions:\n1. ${topPlatform.platform}: ${topPlatform.totalImpressions.toLocaleString()}\n\nAll platforms by impressions:\n${platformImpressions.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.totalImpressions.toLocaleString()}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_impressions_ranking',
+          platforms: platformImpressions,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // "Which platform had the most clicks"
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('most clicks') || lowerQuery.includes('got the most clicks') || lowerQuery.includes('most engagement'))) {
+      const platformGroups: Record<string, { totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalClicks: 0 }
+        }
+        platformGroups[platform].totalClicks += item.metrics.clicks
+      })
+      
+      const platformClicks = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          totalClicks: data.totalClicks
+        }))
+        .sort((a, b) => b.totalClicks - a.totalClicks)
+      
+      const topPlatform = platformClicks[0]
+      const content = `Platform with the most clicks:\n1. ${topPlatform.platform}: ${topPlatform.totalClicks.toLocaleString()}\n\nAll platforms by clicks:\n${platformClicks.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.totalClicks.toLocaleString()}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_clicks_ranking',
+          platforms: platformClicks,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // "Which platform is the most expensive" - based on CPC
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('most expensive') || lowerQuery.includes('costs the most'))) {
+      const platformGroups: Record<string, { totalSpend: number, totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalClicks: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalClicks += item.metrics.clicks
+      })
+      
+      const platformCPC = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          cpc: data.totalClicks > 0 ? data.totalSpend / data.totalClicks : 0
+        }))
+        .sort((a, b) => b.cpc - a.cpc)
+      
+      const topPlatform = platformCPC[0]
+      const content = `Platform with the highest cost per click (most expensive):\n1. ${topPlatform.platform}: $${topPlatform.cpc.toFixed(2)}\n\nAll platforms by CPC:\n${platformCPC.map((item, index) => 
+        `${index + 1}. ${item.platform}: $${item.cpc.toFixed(2)}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_cpc_ranking',
+          platforms: platformCPC,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // "Which platform is the most profitable" - based on ROAS
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('most profitable') || lowerQuery.includes('makes the most money'))) {
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topPlatform = platformROAS[0]
+      const content = `Platform with the highest ROAS (most profitable):\n1. ${topPlatform.platform}: ${topPlatform.roas.toFixed(2)}x\n\nAll platforms by ROAS:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_profitability_ranking',
+          platforms: platformROAS,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // Handle campaign comparative queries (HIGHEST PRIORITY)
+    
+    // "Which campaign performed best" - based on ROAS
+    if (lowerQuery.includes('campaign') && (lowerQuery.includes('performed best') || lowerQuery.includes('was the best') || lowerQuery.includes('had the best performance'))) {
+      const campaignGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!campaignGroups[campaign]) {
+          campaignGroups[campaign] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        campaignGroups[campaign].totalSpend += item.metrics.spend
+        campaignGroups[campaign].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const campaignROAS = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topCampaign = campaignROAS[0]
+      const content = `Campaign with the best performance (highest ROAS):\n1. ${topCampaign.campaign}: ${topCampaign.roas.toFixed(2)}x\n\nAll campaigns by ROAS:\n${campaignROAS.map((item, index) => 
+        `${index + 1}. ${item.campaign}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'campaign_performance_ranking',
+          campaigns: campaignROAS,
+          topCampaign: topCampaign,
+          query: query
+        }
+      }
+    }
+    
+    // "Which campaign had the highest revenue"
+    if (lowerQuery.includes('campaign') && (lowerQuery.includes('highest revenue') || lowerQuery.includes('generated the most revenue') || lowerQuery.includes('most revenue'))) {
+      const campaignGroups: Record<string, { totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!campaignGroups[campaign]) {
+          campaignGroups[campaign] = { totalRevenue: 0 }
+        }
+        campaignGroups[campaign].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const campaignRevenues = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          totalRevenue: data.totalRevenue
+        }))
+        .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      
+      const topCampaign = campaignRevenues[0]
+      const content = `Campaign with the highest revenue:\n1. ${topCampaign.campaign}: $${topCampaign.totalRevenue.toLocaleString()}\n\nAll campaigns by revenue:\n${campaignRevenues.map((item, index) => 
+        `${index + 1}. ${item.campaign}: $${item.totalRevenue.toLocaleString()}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'campaign_revenue_ranking',
+          campaigns: campaignRevenues,
+          topCampaign: topCampaign,
+          query: query
+        }
+      }
+    }
+    
+    // "Which campaign had the most impressions"
+    if (lowerQuery.includes('campaign') && (lowerQuery.includes('most impressions') || lowerQuery.includes('got the most impressions') || lowerQuery.includes('most traffic'))) {
+      const campaignGroups: Record<string, { totalImpressions: number }> = {}
+      
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!campaignGroups[campaign]) {
+          campaignGroups[campaign] = { totalImpressions: 0 }
+        }
+        campaignGroups[campaign].totalImpressions += item.metrics.impressions
+      })
+      
+      const campaignImpressions = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          totalImpressions: data.totalImpressions
+        }))
+        .sort((a, b) => b.totalImpressions - a.totalImpressions)
+      
+      const topCampaign = campaignImpressions[0]
+      const content = `Campaign with the most impressions:\n1. ${topCampaign.campaign}: ${topCampaign.totalImpressions.toLocaleString()}\n\nAll campaigns by impressions:\n${campaignImpressions.map((item, index) => 
+        `${index + 1}. ${item.campaign}: ${item.totalImpressions.toLocaleString()}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'campaign_impressions_ranking',
+          campaigns: campaignImpressions,
+          topCampaign: topCampaign,
+          query: query
+        }
+      }
+    }
+    
+    // "Which campaign had the most clicks"
+    if (lowerQuery.includes('campaign') && (lowerQuery.includes('most clicks') || lowerQuery.includes('got the most clicks') || lowerQuery.includes('most engagement'))) {
+      const campaignGroups: Record<string, { totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!campaignGroups[campaign]) {
+          campaignGroups[campaign] = { totalClicks: 0 }
+        }
+        campaignGroups[campaign].totalClicks += item.metrics.clicks
+      })
+      
+      const campaignClicks = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          totalClicks: data.totalClicks
+        }))
+        .sort((a, b) => b.totalClicks - a.totalClicks)
+      
+      const topCampaign = campaignClicks[0]
+      const content = `Campaign with the most clicks:\n1. ${topCampaign.campaign}: ${topCampaign.totalClicks.toLocaleString()}\n\nAll campaigns by clicks:\n${campaignClicks.map((item, index) => 
+        `${index + 1}. ${item.campaign}: ${item.totalClicks.toLocaleString()}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'campaign_clicks_ranking',
+          campaigns: campaignClicks,
+          topCampaign: topCampaign,
+          query: query
+        }
+      }
+    }
+    
+    // "Which campaign is the most expensive" - based on CPC
+    if (lowerQuery.includes('campaign') && (lowerQuery.includes('most expensive') || lowerQuery.includes('costs the most'))) {
+      const campaignGroups: Record<string, { totalSpend: number, totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!campaignGroups[campaign]) {
+          campaignGroups[campaign] = { totalSpend: 0, totalClicks: 0 }
+        }
+        campaignGroups[campaign].totalSpend += item.metrics.spend
+        campaignGroups[campaign].totalClicks += item.metrics.clicks
+      })
+      
+      const campaignCPC = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          cpc: data.totalClicks > 0 ? data.totalSpend / data.totalClicks : 0
+        }))
+        .sort((a, b) => b.cpc - a.cpc)
+      
+      const topCampaign = campaignCPC[0]
+      const content = `Campaign with the highest cost per click (most expensive):\n1. ${topCampaign.campaign}: $${topCampaign.cpc.toFixed(2)}\n\nAll campaigns by CPC:\n${campaignCPC.map((item, index) => 
+        `${index + 1}. ${item.campaign}: $${item.cpc.toFixed(2)}`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'campaign_cpc_ranking',
+          campaigns: campaignCPC,
+          topCampaign: topCampaign,
+          query: query
+        }
+      }
+    }
+    
+    // "Which campaign is the most profitable" - based on ROAS
+    if (lowerQuery.includes('campaign') && (lowerQuery.includes('most profitable') || lowerQuery.includes('makes the most money'))) {
+      const campaignGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!campaignGroups[campaign]) {
+          campaignGroups[campaign] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        campaignGroups[campaign].totalSpend += item.metrics.spend
+        campaignGroups[campaign].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const campaignROAS = Object.entries(campaignGroups)
+        .map(([campaign, data]) => ({
+          campaign,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topCampaign = campaignROAS[0]
+      const content = `Campaign with the highest ROAS (most profitable):\n1. ${topCampaign.campaign}: ${topCampaign.roas.toFixed(2)}x\n\nAll campaigns by ROAS:\n${campaignROAS.map((item, index) => 
+        `${index + 1}. ${item.campaign}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'campaign_profitability_ranking',
+          campaigns: campaignROAS,
+          topCampaign: topCampaign,
+          query: query
+        }
+      }
+    }
 
 
     
@@ -361,6 +791,51 @@ async function processAIQuery(query: string, data: MarketingData[]) {
               type: 'platform_ctr',
               platform: actualPlatform,
               value: averageCTR,
+              count: filteredData.length,
+              query: query
+            }
+          }
+        }
+        
+        // Handle platform-specific spend queries
+        if (lowerQuery.includes('spend') || lowerQuery.includes('cost') || lowerQuery.includes('budget')) {
+          const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
+          return {
+            content: `Total spend on ${actualPlatform}: $${totalSpend.toLocaleString()}`,
+            data: {
+              type: 'platform_spend',
+              platform: actualPlatform,
+              value: totalSpend,
+              count: filteredData.length,
+              query: query
+            }
+          }
+        }
+        
+        // Handle platform-specific impressions queries
+        if (lowerQuery.includes('impressions') || lowerQuery.includes('views')) {
+          const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+          return {
+            content: `Total impressions from ${actualPlatform}: ${totalImpressions.toLocaleString()}`,
+            data: {
+              type: 'platform_impressions',
+              platform: actualPlatform,
+              value: totalImpressions,
+              count: filteredData.length,
+              query: query
+            }
+          }
+        }
+        
+        // Handle platform-specific clicks queries
+        if (lowerQuery.includes('clicks') || lowerQuery.includes('interactions')) {
+          const totalClicks = filteredData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+          return {
+            content: `Total clicks from ${actualPlatform}: ${totalClicks.toLocaleString()}`,
+            data: {
+              type: 'platform_clicks',
+              platform: actualPlatform,
+              value: totalClicks,
               count: filteredData.length,
               query: query
             }
@@ -484,6 +959,24 @@ async function processAIQuery(query: string, data: MarketingData[]) {
           value: overallCTR,
           totalClicks,
           totalImpressions,
+          query: query
+        }
+      }
+    }
+    
+    // Handle "average CPA" queries (HIGHEST PRIORITY) - using clicks as proxy for acquisitions
+    if (lowerQuery.includes('average cpa') || lowerQuery.includes('avg cpa') || lowerQuery.includes('average cost per acquisition') || lowerQuery.includes('overall cpa')) {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      const averageCPA = totalClicks > 0 ? totalSpend / totalClicks : 0
+      
+      return {
+        content: `Average CPA across all campaigns: $${averageCPA.toFixed(2)}`,
+        data: {
+          type: 'average_cpa',
+          value: averageCPA,
+          totalSpend,
+          totalClicks,
           query: query
         }
       }
@@ -617,6 +1110,130 @@ async function processAIQuery(query: string, data: MarketingData[]) {
               type: 'campaign_roas',
               campaign: normalizedCampaignName,
               value: averageROAS,
+              count: campaignData.length,
+              query: query
+            }
+          }
+        }
+      }
+    }
+    
+    // Handle campaign-specific revenue queries (HIGHEST PRIORITY)
+    if ((lowerQuery.includes('revenue') || lowerQuery.includes('earnings')) && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+      const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+      const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+      
+      if (detectedCampaign) {
+        const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ')
+        
+        const campaignData = data.filter(item => 
+          item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+        )
+        
+        if (campaignData.length > 0) {
+          const totalRevenue = campaignData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+          
+          return {
+            content: `Total revenue from ${normalizedCampaignName}: $${totalRevenue.toLocaleString()}`,
+            data: {
+              type: 'campaign_revenue',
+              campaign: normalizedCampaignName,
+              value: totalRevenue,
+              count: campaignData.length,
+              query: query
+            }
+          }
+        }
+      }
+    }
+    
+    // Handle campaign-specific spend queries (HIGHEST PRIORITY)
+    if ((lowerQuery.includes('spend') || lowerQuery.includes('cost') || lowerQuery.includes('budget')) && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+      const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+      const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+      
+      if (detectedCampaign) {
+        const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ')
+        
+        const campaignData = data.filter(item => 
+          item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+        )
+        
+        if (campaignData.length > 0) {
+          const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
+          
+          return {
+            content: `Total spend on ${normalizedCampaignName}: $${totalSpend.toLocaleString()}`,
+            data: {
+              type: 'campaign_spend',
+              campaign: normalizedCampaignName,
+              value: totalSpend,
+              count: campaignData.length,
+              query: query
+            }
+          }
+        }
+      }
+    }
+    
+    // Handle campaign-specific impressions queries (HIGHEST PRIORITY)
+    if ((lowerQuery.includes('impressions') || lowerQuery.includes('views')) && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+      const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+      const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+      
+      if (detectedCampaign) {
+        const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ')
+        
+        const campaignData = data.filter(item => 
+          item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+        )
+        
+        if (campaignData.length > 0) {
+          const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+          
+          return {
+            content: `Total impressions from ${normalizedCampaignName}: ${totalImpressions.toLocaleString()}`,
+            data: {
+              type: 'campaign_impressions',
+              campaign: normalizedCampaignName,
+              value: totalImpressions,
+              count: campaignData.length,
+              query: query
+            }
+          }
+        }
+      }
+    }
+    
+    // Handle campaign-specific clicks queries (HIGHEST PRIORITY)
+    if ((lowerQuery.includes('clicks') || lowerQuery.includes('interactions')) && isCampaignQuery && !lowerQuery.includes('each') && !lowerQuery.includes('individual')) {
+      const campaignNames = ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+      const detectedCampaign = campaignNames.find(campaign => lowerQuery.includes(campaign))
+      
+      if (detectedCampaign) {
+        const normalizedCampaignName = detectedCampaign.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ')
+        
+        const campaignData = data.filter(item => 
+          item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+        )
+        
+        if (campaignData.length > 0) {
+          const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+          
+          return {
+            content: `Total clicks from ${normalizedCampaignName}: ${totalClicks.toLocaleString()}`,
+            data: {
+              type: 'campaign_clicks',
+              campaign: normalizedCampaignName,
+              value: totalClicks,
               count: campaignData.length,
               query: query
             }
