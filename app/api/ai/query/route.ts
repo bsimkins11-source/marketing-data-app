@@ -111,6 +111,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     
     // Check for "how much revenue did we generate" pattern
     if (lowerQuery.includes('how much revenue') && lowerQuery.includes('generate')) {
+      console.log('DEBUG: Pattern handler triggered for "how much revenue did we generate"')
       const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
       return {
         content: `Total revenue across all campaigns: $${totalRevenue.toLocaleString()}`,
@@ -671,12 +672,13 @@ async function processAIQuery(query: string, data: MarketingData[]) {
 
     
     // If OpenAI is configured, use it for natural language processing
+    // BUT ONLY if none of our specific handlers matched
     if (config.openai.apiKey) {
       try {
         return await processWithOpenAI(query, data)
-          } catch (openaiError) {
-      return processWithKeywords(query, data)
-    }
+      } catch (openaiError) {
+        return processWithKeywords(query, data)
+      }
     } else {
       // Fallback to enhanced keyword processing
       return processWithKeywords(query, data)
