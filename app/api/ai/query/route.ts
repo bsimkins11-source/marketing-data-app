@@ -2015,11 +2015,11 @@ function executeCompare(data: MarketingData[], metric: string, filters: any, que
   }, {} as Record<string, MarketingData[]>)
 
   const comparisons = Object.entries(platformGroups).map(([platform, items]) => {
-    const total = items.reduce((sum, item) => {
+    const total = (items as MarketingData[]).reduce((sum, item) => {
       const value = item.metrics[metric as keyof typeof item.metrics]
       return sum + (typeof value === 'number' && value !== null && value !== undefined ? value : 0)
     }, 0)
-    return { platform, total, count: items.length }
+    return { platform, total, count: (items as MarketingData[]).length }
   })
 
   const content = `Comparison by platform for ${metric}:\n${comparisons.map(comp => 
