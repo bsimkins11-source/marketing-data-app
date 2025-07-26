@@ -111,6 +111,20 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     console.log('DEBUG: Lower query:', lowerQuery)
     console.log('DEBUG: Data length:', data.length)
     
+    // SIMPLE TEST HANDLER - SHOULD ALWAYS WORK
+    if (lowerQuery.includes('test debug')) {
+      console.log('DEBUG: Test debug handler triggered!')
+      return {
+        content: "DEBUG: Test handler is working! Function is being called correctly.",
+        data: {
+          type: 'test_debug',
+          query: query,
+          lowerQuery: lowerQuery,
+          dataLength: data.length
+        }
+      }
+    }
+    
     // CRITICAL COMPARATIVE HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
     // "Which platform performed best" - based on ROAS
