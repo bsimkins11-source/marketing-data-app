@@ -4,7 +4,7 @@
 export const config = {
   // OpenAI Configuration
   openai: {
-    apiKey: process.env.OPENAI_API_KEY || '',
+    apiKey: '', // TEMPORARILY DISABLED TO TEST HANDLERS
     model: process.env.OPENAI_MODEL || 'gpt-4',
   },
   
