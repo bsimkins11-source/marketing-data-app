@@ -109,8 +109,11 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     
     // CRITICAL COMPARATIVE HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
+    console.log('DEBUG: Checking comparative handlers for query:', query)
+    
     // "Which platform performed best" - based on ROAS
     if (lowerQuery.includes('platform') && (lowerQuery.includes('performed best') || lowerQuery.includes('was the best') || lowerQuery.includes('had the best performance'))) {
+      console.log('DEBUG: Platform performed best handler triggered!')
       const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
       
       data.forEach(item => {
@@ -147,6 +150,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     
     // Simple test handler to see if the issue is with complex handlers
     if (lowerQuery.includes('learn') && lowerQuery.includes('campaign')) {
+      console.log('DEBUG: Learn campaign handler triggered!')
       return {
         content: "Test: Strategic insights handler is working!",
         data: {
