@@ -2114,6 +2114,9 @@ function formatValue(value: number | undefined, metric: string): string {
 function processWithKeywords(query: string, data: MarketingData[]) {
   const lowerQuery = query.toLowerCase()
   
+  // DEBUG: Print the actual lowerQuery value
+  console.log('[DEBUG] lowerQuery in processWithKeywords:', lowerQuery)
+  
   // SIMPLE TEST - SHOULD ALWAYS WORK
   if (lowerQuery.includes('test debug')) {
     return {
