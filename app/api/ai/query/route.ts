@@ -107,6 +107,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     console.log('DEBUG: processAIQuery called with query:', query)
     const lowerQuery = query.toLowerCase()
+    console.log('DEBUG: lowerQuery created:', lowerQuery)
     
     // CRITICAL PATTERN HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
