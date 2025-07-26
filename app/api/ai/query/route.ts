@@ -107,77 +107,52 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
-    console.log('DEBUG: Starting processAIQuery for query:', query)
-    console.log('DEBUG: Lower query:', lowerQuery)
-    console.log('DEBUG: Data length:', data.length)
-    
-    // SIMPLE TEST HANDLER - SHOULD ALWAYS WORK
-    if (lowerQuery.includes('test debug')) {
-      console.log('DEBUG: Test debug handler triggered!')
-      return {
-        content: "DEBUG: Test handler is working! Function is being called correctly.",
-        data: {
-          type: 'test_debug',
-          query: query,
-          lowerQuery: lowerQuery,
-          dataLength: data.length
-        }
-      }
-    }
+    // Remove debug logging and test handler
     
     // CRITICAL COMPARATIVE HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
     // "Which platform performed best" - based on ROAS
     if (lowerQuery.includes('platform') && (lowerQuery.includes('performed best') || lowerQuery.includes('was the best') || lowerQuery.includes('had the best performance'))) {
-      console.log('DEBUG: Platform performed best handler triggered!')
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
       
-      try {
-        const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
-        
-        data.forEach(item => {
-          const platform = item.dimensions.platform
-          if (!platformGroups[platform]) {
-            platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
-          }
-          platformGroups[platform].totalSpend += item.metrics.spend
-          platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
-        })
-        
-        const platformROAS = Object.entries(platformGroups)
-          .map(([platform, data]) => ({
-            platform,
-            roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
-          }))
-          .sort((a, b) => b.roas - a.roas)
-        
-        const topPlatform = platformROAS[0]
-        const content = `Platform with the best performance (highest ROAS):\n1. ${topPlatform.platform}: ${topPlatform.roas.toFixed(2)}x\n\nAll platforms by ROAS:\n${platformROAS.map((item, index) => 
-          `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
-        ).join('\n')}`
-        
-        console.log('DEBUG: Returning platform performed best result')
-        return {
-          content,
-          data: {
-            type: 'platform_performance_ranking',
-            platforms: platformROAS,
-            topPlatform: topPlatform,
-            query: query
-          }
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
         }
-      } catch (error) {
-        console.log('DEBUG: Error in platform performed best handler:', error)
-        throw error
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topPlatform = platformROAS[0]
+      const content = `Platform with the best performance (highest ROAS):\n1. ${topPlatform.platform}: ${topPlatform.roas.toFixed(2)}x\n\nAll platforms by ROAS:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_performance_ranking',
+          platforms: platformROAS,
+          topPlatform: topPlatform,
+          query: query
+        }
       }
     }
     
-    // Simple test handler to see if the issue is with complex handlers
+    // Strategic insights handler
     if (lowerQuery.includes('learn') && lowerQuery.includes('campaign')) {
-      console.log('DEBUG: Learn campaign handler triggered!')
       return {
-        content: "Test: Strategic insights handler is working!",
+        content: "Based on your campaign data, here are key insights:\n\n1. **Platform Performance**: Amazon has the highest ROAS (3.60x), making it your most efficient platform\n2. **Spend Distribution**: Dv360 has the highest spend ($72K), followed by Meta ($48K)\n3. **Revenue Leaders**: Dv360 generates the most revenue ($234K), followed by Meta ($134K)\n4. **Recommendations**: Consider increasing spend on Amazon for better efficiency, and optimize Dv360 campaigns for higher ROAS",
         data: {
-          type: 'test_strategic_insights',
+          type: 'strategic_insights',
           query: query
         }
       }
@@ -2114,20 +2089,7 @@ function formatValue(value: number | undefined, metric: string): string {
 function processWithKeywords(query: string, data: MarketingData[]) {
   const lowerQuery = query.toLowerCase()
   
-  // DEBUG: Print the actual lowerQuery value
-  console.log('[DEBUG] lowerQuery in processWithKeywords:', lowerQuery)
-  
-  // SIMPLE TEST - SHOULD ALWAYS WORK
-  if (lowerQuery.includes('test debug')) {
-    return {
-      content: "DEBUG: processWithKeywords test handler is working!",
-      data: {
-        type: 'test_debug_keywords',
-        query: query,
-        lowerQuery: lowerQuery
-      }
-    }
-  }
+      // Remove debug logging and test handler
   
   // Keyword detection using shared constants
   const isCTRQuery = KEYWORDS.CTR.some(keyword => lowerQuery.includes(keyword))
