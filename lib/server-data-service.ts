@@ -40,12 +40,16 @@ export async function loadCampaignData(): Promise<MarketingData[]> {
           campaignId: row.campaign_id || '',
           adGroup: row.ad_group_name || 'Unknown Ad Group',
           adGroupId: row.ad_group_id || '',
+          ad_group_name: row.ad_group_name || 'Unknown Ad Group',
+          placement_name: row.placement_name || 'Unknown Placement',
           keyword: row.placement_name || '',
           platform: row.platform || 'Unknown',
           location: 'Unknown', // Not in your CSV
           audience: row.creative_format || 'Unknown',
           creativeId: row.creative_id || '',
-          creativeName: row.creative_name || ''
+          creativeName: row.creative_name || '',
+          creative_name: row.creative_name || '',
+          creative_format: row.creative_format || 'Unknown Format'
         }
       }
     }).filter(item => item.metrics.impressions > 0)

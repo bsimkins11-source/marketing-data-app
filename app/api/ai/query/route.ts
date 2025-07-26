@@ -107,7 +107,289 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
-    // Remove debug logging and test handler
+    // ADVANCED OPTIMIZATION HANDLERS - ABSOLUTE HIGHEST PRIORITY
+    // These handle placement, creative, audience, and optimization queries
+    
+    // PLACEMENT OPTIMIZATION HANDLERS
+    if (lowerQuery.includes('placement') && (lowerQuery.includes('performing best') || lowerQuery.includes('best performing') || lowerQuery.includes('top placement'))) {
+      const placementGroups: Record<string, { totalSpend: number, totalRevenue: number, totalImpressions: number, totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const placement = item.dimensions.placement_name || 'Unknown Placement'
+        if (!placementGroups[placement]) {
+          placementGroups[placement] = { totalSpend: 0, totalRevenue: 0, totalImpressions: 0, totalClicks: 0 }
+        }
+        placementGroups[placement].totalSpend += item.metrics.spend
+        placementGroups[placement].totalRevenue += (item.metrics.revenue || 0)
+        placementGroups[placement].totalImpressions += item.metrics.impressions
+        placementGroups[placement].totalClicks += item.metrics.clicks
+      })
+      
+      const placementMetrics = Object.entries(placementGroups)
+        .filter(([_, metrics]) => metrics.totalSpend > 1000) // Filter for meaningful spend
+        .map(([placement, metrics]) => ({
+          placement,
+          roas: metrics.totalSpend > 0 ? metrics.totalRevenue / metrics.totalSpend : 0,
+          ctr: metrics.totalImpressions > 0 ? metrics.totalClicks / metrics.totalImpressions : 0,
+          spend: metrics.totalSpend
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topPlacements = placementMetrics.slice(0, 5)
+      const content = `Top performing placements by ROAS:\n${topPlacements.map((item, index) => 
+        `${index + 1}. ${item.placement}: ${item.roas.toFixed(2)}x ROAS (${(item.ctr * 100).toFixed(2)}% CTR, $${item.spend.toLocaleString()} spend)`
+      ).join('\n')}\n\n💡 OPTIMIZATION: Focus budget on these high-performing placements for maximum efficiency.`
+      
+      return {
+        content,
+        data: {
+          type: 'placement_optimization',
+          placements: placementMetrics,
+          topPlacements: topPlacements,
+          query: query
+        }
+      }
+    }
+    
+    // CREATIVE FORMAT OPTIMIZATION HANDLERS
+    if (lowerQuery.includes('creative format') || lowerQuery.includes('ad format') || lowerQuery.includes('ad formats') || 
+        (lowerQuery.includes('format') && (lowerQuery.includes('work best') || lowerQuery.includes('performing best')))) {
+      const formatGroups: Record<string, { totalSpend: number, totalRevenue: number, totalImpressions: number, totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const format = item.dimensions.creative_format || 'Unknown Format'
+        if (!formatGroups[format]) {
+          formatGroups[format] = { totalSpend: 0, totalRevenue: 0, totalImpressions: 0, totalClicks: 0 }
+        }
+        formatGroups[format].totalSpend += item.metrics.spend
+        formatGroups[format].totalRevenue += (item.metrics.revenue || 0)
+        formatGroups[format].totalImpressions += item.metrics.impressions
+        formatGroups[format].totalClicks += item.metrics.clicks
+      })
+      
+      const formatMetrics = Object.entries(formatGroups)
+        .map(([format, metrics]) => ({
+          format,
+          roas: metrics.totalSpend > 0 ? metrics.totalRevenue / metrics.totalSpend : 0,
+          ctr: metrics.totalImpressions > 0 ? metrics.totalClicks / metrics.totalImpressions : 0,
+          spend: metrics.totalSpend,
+          count: data.filter(item => (item.dimensions.creative_format || 'Unknown Format') === format).length
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const bestFormat = formatMetrics[0]
+      const content = `Creative format performance:\n${formatMetrics.map(item => 
+        `• ${item.format}: ${item.roas.toFixed(2)}x ROAS, ${(item.ctr * 100).toFixed(2)}% CTR, $${item.spend.toLocaleString()} spend (${item.count} campaigns)`
+      ).join('\n')}\n\n💡 OPTIMIZATION: ${bestFormat.format} performs best with ${bestFormat.roas.toFixed(2)}x ROAS. Increase ${bestFormat.format} creative production.`
+      
+      return {
+        content,
+        data: {
+          type: 'creative_format_optimization',
+          formats: formatMetrics,
+          bestFormat: bestFormat,
+          query: query
+        }
+      }
+    }
+    
+    // AUDIENCE/AD GROUP OPTIMIZATION HANDLERS
+    if (lowerQuery.includes('audience') || lowerQuery.includes('ad group') || lowerQuery.includes('ad groups') ||
+        (lowerQuery.includes('group') && (lowerQuery.includes('performing best') || lowerQuery.includes('best performing')))) {
+      const adGroupGroups: Record<string, { totalSpend: number, totalRevenue: number, totalImpressions: number, totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const adGroup = item.dimensions.ad_group_name || 'Unknown Ad Group'
+        if (!adGroupGroups[adGroup]) {
+          adGroupGroups[adGroup] = { totalSpend: 0, totalRevenue: 0, totalImpressions: 0, totalClicks: 0 }
+        }
+        adGroupGroups[adGroup].totalSpend += item.metrics.spend
+        adGroupGroups[adGroup].totalRevenue += (item.metrics.revenue || 0)
+        adGroupGroups[adGroup].totalImpressions += item.metrics.impressions
+        adGroupGroups[adGroup].totalClicks += item.metrics.clicks
+      })
+      
+      const adGroupMetrics = Object.entries(adGroupGroups)
+        .filter(([_, metrics]) => metrics.totalSpend > 500) // Filter for meaningful spend
+        .map(([adGroup, metrics]) => ({
+          adGroup,
+          roas: metrics.totalSpend > 0 ? metrics.totalRevenue / metrics.totalSpend : 0,
+          ctr: metrics.totalImpressions > 0 ? metrics.totalClicks / metrics.totalImpressions : 0,
+          spend: metrics.totalSpend
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topAdGroups = adGroupMetrics.slice(0, 5)
+      const worstAdGroups = adGroupMetrics.slice(-3).reverse()
+      
+      const content = `Audience/Ad Group performance:\n\n🏆 TOP PERFORMERS:\n${topAdGroups.map((item, index) => 
+        `${index + 1}. ${item.adGroup}: ${item.roas.toFixed(2)}x ROAS (${(item.ctr * 100).toFixed(2)}% CTR, $${item.spend.toLocaleString()} spend)`
+      ).join('\n')}\n\n⚠️ OPTIMIZATION NEEDED:\n${worstAdGroups.map((item, index) => 
+        `${index + 1}. ${item.adGroup}: ${item.roas.toFixed(2)}x ROAS (${(item.ctr * 100).toFixed(2)}% CTR, $${item.spend.toLocaleString()} spend)`
+      ).join('\n')}\n\n💡 RECOMMENDATION: Scale budget on top performers, optimize or pause underperformers.`
+      
+      return {
+        content,
+        data: {
+          type: 'audience_optimization',
+          adGroups: adGroupMetrics,
+          topAdGroups: topAdGroups,
+          worstAdGroups: worstAdGroups,
+          query: query
+        }
+      }
+    }
+    
+    // INDIVIDUAL CREATIVE OPTIMIZATION HANDLERS
+    if (lowerQuery.includes('creative') && (lowerQuery.includes('performing') || lowerQuery.includes('performance') || lowerQuery.includes('best creative'))) {
+      const creativeGroups: Record<string, { totalSpend: number, totalRevenue: number, totalImpressions: number, totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const creative = item.dimensions.creative_name || 'Unknown Creative'
+        if (!creativeGroups[creative]) {
+          creativeGroups[creative] = { totalSpend: 0, totalRevenue: 0, totalImpressions: 0, totalClicks: 0 }
+        }
+        creativeGroups[creative].totalSpend += item.metrics.spend
+        creativeGroups[creative].totalRevenue += (item.metrics.revenue || 0)
+        creativeGroups[creative].totalImpressions += item.metrics.impressions
+        creativeGroups[creative].totalClicks += item.metrics.clicks
+      })
+      
+      const creativeMetrics = Object.entries(creativeGroups)
+        .filter(([_, metrics]) => metrics.totalSpend > 100) // Filter for meaningful spend
+        .map(([creative, metrics]) => ({
+          creative,
+          roas: metrics.totalSpend > 0 ? metrics.totalRevenue / metrics.totalSpend : 0,
+          ctr: metrics.totalImpressions > 0 ? metrics.totalClicks / metrics.totalImpressions : 0,
+          spend: metrics.totalSpend
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topCreatives = creativeMetrics.slice(0, 5)
+      const worstCreatives = creativeMetrics.slice(-3).reverse()
+      
+      const content = `Individual creative performance:\n\n🏆 TOP CREATIVES:\n${topCreatives.map((item, index) => 
+        `${index + 1}. ${item.creative}: ${item.roas.toFixed(2)}x ROAS (${(item.ctr * 100).toFixed(2)}% CTR, $${item.spend.toLocaleString()} spend)`
+      ).join('\n')}\n\n⚠️ NEEDS OPTIMIZATION:\n${worstCreatives.map((item, index) => 
+        `${index + 1}. ${item.creative}: ${item.roas.toFixed(2)}x ROAS (${(item.ctr * 100).toFixed(2)}% CTR, $${item.spend.toLocaleString()} spend)`
+      ).join('\n')}\n\n💡 RECOMMENDATION: Replicate winning creative elements, replace or optimize underperformers.`
+      
+      return {
+        content,
+        data: {
+          type: 'creative_optimization',
+          creatives: creativeMetrics,
+          topCreatives: topCreatives,
+          worstCreatives: worstCreatives,
+          query: query
+        }
+      }
+    }
+    
+    // ADVANCED OPTIMIZATION RECOMMENDATION HANDLERS
+    if (lowerQuery.includes('optimize') || lowerQuery.includes('optimization') || lowerQuery.includes('improve') || 
+        lowerQuery.includes('reallocate') || lowerQuery.includes('budget optimization') || lowerQuery.includes('how can i improve')) {
+      
+      // Calculate comprehensive optimization insights
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      const placementGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      const formatGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        // Platform analysis
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+        
+        // Placement analysis
+        const placement = item.dimensions.placement_name || 'Unknown'
+        if (!placementGroups[placement]) {
+          placementGroups[placement] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        placementGroups[placement].totalSpend += item.metrics.spend
+        placementGroups[placement].totalRevenue += (item.metrics.revenue || 0)
+        
+        // Format analysis
+        const format = item.dimensions.creative_format || 'Unknown'
+        if (!formatGroups[format]) {
+          formatGroups[format] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        formatGroups[format].totalSpend += item.metrics.spend
+        formatGroups[format].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      // Find best performers
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+          spend: data.totalSpend
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const placementROAS = Object.entries(placementGroups)
+        .filter(([_, data]) => data.totalSpend > 1000)
+        .map(([placement, data]) => ({
+          placement,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+          spend: data.totalSpend
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const formatROAS = Object.entries(formatGroups)
+        .map(([format, data]) => ({
+          format,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+          spend: data.totalSpend
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const bestPlatform = platformROAS[0]
+      const bestPlacement = placementROAS[0]
+      const bestFormat = formatROAS[0]
+      
+      // Calculate potential revenue impact
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const currentRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+      const potentialRevenue = totalSpend * bestPlacement.roas
+      const revenueIncrease = potentialRevenue - currentRevenue
+      
+      const content = `🎯 COMPREHENSIVE OPTIMIZATION RECOMMENDATIONS:\n\n` +
+        `📊 CURRENT PERFORMANCE:\n` +
+        `• Total spend: $${totalSpend.toLocaleString()}\n` +
+        `• Current revenue: $${currentRevenue.toLocaleString()}\n` +
+        `• Average ROAS: ${(currentRevenue / totalSpend).toFixed(2)}x\n\n` +
+        `🚀 OPTIMIZATION OPPORTUNITIES:\n` +
+        `1. PLATFORM: Scale ${bestPlatform.platform} (${bestPlatform.roas.toFixed(2)}x ROAS)\n` +
+        `2. PLACEMENT: Focus on ${bestPlacement.placement} (${bestPlacement.roas.toFixed(2)}x ROAS)\n` +
+        `3. FORMAT: Increase ${bestFormat.format} production (${bestFormat.roas.toFixed(2)}x ROAS)\n\n` +
+        `💰 REVENUE POTENTIAL:\n` +
+        `• Moving all spend to best placement: +$${revenueIncrease.toLocaleString()} (+${((revenueIncrease/currentRevenue)*100).toFixed(1)}%)\n` +
+        `• Conservative 20% budget reallocation: +$${(revenueIncrease * 0.2).toLocaleString()}\n\n` +
+        `💡 ACTION PLAN:\n` +
+        `1. Increase spend on ${bestPlatform.platform} by 25%\n` +
+        `2. Pause underperforming placements (ROAS < 2.0x)\n` +
+        `3. Scale ${bestFormat.format} creative production\n` +
+        `4. Test new creatives based on ${bestFormat.format} performance patterns`
+      
+      return {
+        content,
+        data: {
+          type: 'comprehensive_optimization',
+          platformROAS: platformROAS,
+          placementROAS: placementROAS,
+          formatROAS: formatROAS,
+          bestPlatform: bestPlatform,
+          bestPlacement: bestPlacement,
+          bestFormat: bestFormat,
+          potentialRevenueIncrease: revenueIncrease,
+          query: query
+        }
+      }
+    }
     
     // CRITICAL COMPARATIVE HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     

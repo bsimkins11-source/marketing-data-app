@@ -25,12 +25,16 @@ export interface MarketingDimensions {
   campaignId: string
   adGroup: string
   adGroupId: string
+  ad_group_name?: string
+  placement_name?: string
   keyword?: string
   platform: string
   location: string
   audience: string
   creativeId: string
   creativeName: string
+  creative_name?: string
+  creative_format?: string
 }
 
 export type DataSource = 'google_analytics' | 'facebook_ads' | 'twitter_ads' | 'linkedin_ads' | 'tiktok_ads' | 'csv_backend' | 'firebase' | 'sample'
