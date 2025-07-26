@@ -270,68 +270,63 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     
     // CRITICAL FIXES - HIGHEST PRIORITY HANDLERS (MOVED TO VERY TOP)
     
-    // Handle platform-specific revenue queries (HIGHEST PRIORITY)
+    // Handle platform-specific queries (HIGHEST PRIORITY)
     const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => lowerQuery.includes(platform))
     
-    if (detectedPlatform && (lowerQuery.includes('revenue') || lowerQuery.includes('earnings'))) {
-      const actualPlatform = PLATFORM_MAP[detectedPlatform]
-      const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
-      const totalRevenue = filteredData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
-      
-      return {
-        content: `Total revenue from ${actualPlatform}: $${totalRevenue.toLocaleString()}`,
-        data: {
-          type: 'platform_revenue',
-          platform: actualPlatform,
-          value: totalRevenue,
-          count: filteredData.length,
-          query: query
-        }
-      }
-    }
-
-    // Handle "return on ad spend for [platform]" queries (HIGHEST PRIORITY)
-    if (detectedPlatform && (lowerQuery.includes('return on ad spend') || lowerQuery.includes('roas'))) {
+    if (detectedPlatform) {
       const actualPlatform = PLATFORM_MAP[detectedPlatform]
       const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
       
       if (filteredData.length > 0) {
-        const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
-        const totalRevenue = filteredData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
-        const platformROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
-        
-        return {
-          content: `Average ROAS for ${actualPlatform}: ${platformROAS.toFixed(2)}x`,
-          data: {
-            type: 'platform_roas',
-            platform: actualPlatform,
-            value: platformROAS,
-            totalSpend,
-            totalRevenue,
-            count: filteredData.length,
-            query: query
+        // Handle platform-specific revenue queries
+        if (lowerQuery.includes('revenue') || lowerQuery.includes('earnings')) {
+          const totalRevenue = filteredData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+          return {
+            content: `Total revenue from ${actualPlatform}: $${totalRevenue.toLocaleString()}`,
+            data: {
+              type: 'platform_revenue',
+              platform: actualPlatform,
+              value: totalRevenue,
+              count: filteredData.length,
+              query: query
+            }
           }
         }
-      }
-    }
-
-    // Handle platform-specific CTR queries (HIGHEST PRIORITY)
-    if (detectedPlatform && (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate'))) {
-      const actualPlatform = PLATFORM_MAP[detectedPlatform]
-      const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
-      
-      if (filteredData.length > 0) {
-        const totalCTR = filteredData.reduce((sum, item) => sum + item.metrics.ctr, 0)
-        const averageCTR = totalCTR / filteredData.length
         
-        return {
-          content: `Average CTR for ${actualPlatform}: ${(averageCTR * 100).toFixed(2)}%`,
-          data: {
-            type: 'platform_ctr',
-            platform: actualPlatform,
-            value: averageCTR,
-            count: filteredData.length,
-            query: query
+        // Handle platform-specific ROAS queries
+        if (lowerQuery.includes('return on ad spend') || lowerQuery.includes('roas')) {
+          const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
+          const totalRevenue = filteredData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+          const platformROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+          
+          return {
+            content: `Average ROAS for ${actualPlatform}: ${platformROAS.toFixed(2)}x`,
+            data: {
+              type: 'platform_roas',
+              platform: actualPlatform,
+              value: platformROAS,
+              totalSpend,
+              totalRevenue,
+              count: filteredData.length,
+              query: query
+            }
+          }
+        }
+        
+        // Handle platform-specific CTR queries
+        if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate')) {
+          const totalCTR = filteredData.reduce((sum, item) => sum + item.metrics.ctr, 0)
+          const averageCTR = totalCTR / filteredData.length
+          
+          return {
+            content: `Average CTR for ${actualPlatform}: ${(averageCTR * 100).toFixed(2)}%`,
+            data: {
+              type: 'platform_ctr',
+              platform: actualPlatform,
+              value: averageCTR,
+              count: filteredData.length,
+              query: query
+            }
           }
         }
       }
