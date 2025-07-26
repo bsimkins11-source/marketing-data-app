@@ -107,7 +107,127 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
-    // CRITICAL PATTERN HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
+    // CRITICAL COMPARATIVE HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
+    
+    // "Which platform performed best" - based on ROAS
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('performed best') || lowerQuery.includes('was the best') || lowerQuery.includes('had the best performance'))) {
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topPlatform = platformROAS[0]
+      const content = `Platform with the best performance (highest ROAS):\n1. ${topPlatform.platform}: ${topPlatform.roas.toFixed(2)}x\n\nAll platforms by ROAS:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_performance_ranking',
+          platforms: platformROAS,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // Strategic insights handlers
+    if (lowerQuery.includes('learn') && (lowerQuery.includes('campaign') || lowerQuery.includes('this'))) {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      
+      const content = `Based on your campaign data, here are the key learnings:\n\n` +
+        `💰 Financial Performance:\n` +
+        `• Total Revenue: $${totalRevenue.toLocaleString()}\n` +
+        `• Total Spend: $${totalSpend.toLocaleString()}\n` +
+        `• Overall ROAS: ${overallROAS.toFixed(2)}x\n\n` +
+        `📊 Engagement Metrics:\n` +
+        `• Total Impressions: ${totalImpressions.toLocaleString()}\n` +
+        `• Total Clicks: ${totalClicks.toLocaleString()}\n` +
+        `• Overall CTR: ${(overallCTR * 100).toFixed(2)}%\n\n` +
+        `🎯 Key Insights:\n` +
+        `• Your campaigns generated ${overallROAS.toFixed(1)}x return on ad spend\n` +
+        `• Average click-through rate was ${(overallCTR * 100).toFixed(2)}%\n` +
+        `• Total campaign reach was ${totalImpressions.toLocaleString()} impressions`
+      
+      return {
+        content,
+        data: {
+          type: 'strategic_insights',
+          totalSpend,
+          totalRevenue,
+          overallROAS,
+          overallCTR,
+          query: query
+        }
+      }
+    }
+    
+    // "Which platform should I put more money into" - strategic recommendations
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('should i put more money') || lowerQuery.includes('invest more') || lowerQuery.includes('allocate more budget'))) {
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, totalImpressions: number, totalClicks: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, totalImpressions: 0, totalClicks: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+        platformGroups[platform].totalImpressions += item.metrics.impressions
+        platformGroups[platform].totalClicks += item.metrics.clicks
+      })
+      
+      const platformAnalysis = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+          ctr: data.totalImpressions > 0 ? data.totalClicks / data.totalImpressions : 0,
+          totalSpend: data.totalSpend,
+          totalRevenue: data.totalRevenue
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topPlatform = platformAnalysis[0]
+      const content = `Based on performance analysis, here's my recommendation:\n\n` +
+        `🎯 **${topPlatform.platform}** should receive more budget allocation:\n` +
+        `• ROAS: ${topPlatform.roas.toFixed(2)}x (highest)\n` +
+        `• Revenue: $${topPlatform.totalRevenue.toLocaleString()}\n` +
+        `• CTR: ${(topPlatform.ctr * 100).toFixed(2)}%\n\n` +
+        `All platforms ranked by ROAS:\n${platformAnalysis.map((item, index) => 
+          `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x ROAS, $${item.totalRevenue.toLocaleString()} revenue`
+        ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_recommendation',
+          platforms: platformAnalysis,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // CRITICAL PATTERN HANDLERS - HIGH PRIORITY (AFTER COMPARATIVE HANDLERS)
     
     // Check for "how much revenue did we generate" pattern
     if (lowerQuery.includes('how much revenue') && lowerQuery.includes('generate')) {
