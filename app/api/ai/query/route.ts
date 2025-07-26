@@ -732,6 +732,136 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         }
       }
     }
+    
+    // Handle strategic insights and recommendations (HIGHEST PRIORITY)
+    
+    // "What did we learn from this campaign" - provide actionable insights
+    if (lowerQuery.includes('learn') && (lowerQuery.includes('campaign') || lowerQuery.includes('this'))) {
+      // Calculate key insights
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, totalClicks: number, totalImpressions: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, totalClicks: 0, totalImpressions: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+        platformGroups[platform].totalClicks += item.metrics.clicks
+        platformGroups[platform].totalImpressions += item.metrics.impressions
+      })
+      
+      const platformInsights = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+          ctr: data.totalImpressions > 0 ? data.totalClicks / data.totalImpressions : 0,
+          spend: data.totalSpend,
+          revenue: data.totalRevenue
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const bestPlatform = platformInsights[0]
+      const worstPlatform = platformInsights[platformInsights.length - 1]
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+      const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      
+      const content = `**Key Learnings from Your Campaign Data:**
+
+**🏆 Best Performing Platform:** ${bestPlatform.platform}
+- ROAS: ${bestPlatform.roas.toFixed(2)}x
+- Revenue: $${bestPlatform.revenue.toLocaleString()}
+- Spend: $${bestPlatform.spend.toLocaleString()}
+
+**📉 Platform Needing Improvement:** ${worstPlatform.platform}
+- ROAS: ${worstPlatform.roas.toFixed(2)}x
+- Opportunity: Focus on optimization or consider reallocating budget
+
+**📊 Overall Performance:**
+- Total ROAS: ${overallROAS.toFixed(2)}x
+- Total Revenue: $${totalRevenue.toLocaleString()}
+- Total Spend: $${totalSpend.toLocaleString()}
+
+**💡 Strategic Recommendations:**
+1. **Increase investment in ${bestPlatform.platform}** - it's delivering the best returns
+2. **Optimize ${worstPlatform.platform}** - focus on improving performance or consider budget reallocation
+3. **Scale successful campaigns** - replicate what's working on ${bestPlatform.platform}
+4. **Monitor CTR trends** - best CTR: ${(Math.max(...platformInsights.map(p => p.ctr)) * 100).toFixed(2)}% (${platformInsights.find(p => p.ctr === Math.max(...platformInsights.map(p => p.ctr)))?.platform})`
+      
+      return {
+        content,
+        data: {
+          type: 'strategic_insights',
+          bestPlatform: bestPlatform,
+          worstPlatform: worstPlatform,
+          overallROAS: overallROAS,
+          platformInsights: platformInsights,
+          query: query
+        }
+      }
+    }
+    
+    // "What should I do next" or "recommendations" - provide actionable advice
+    if (lowerQuery.includes('should i do') || lowerQuery.includes('recommendations') || lowerQuery.includes('what next') || lowerQuery.includes('apply to next')) {
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number, totalClicks: number, totalImpressions: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0, totalClicks: 0, totalImpressions: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+        platformGroups[platform].totalClicks += item.metrics.clicks
+        platformGroups[platform].totalImpressions += item.metrics.impressions
+      })
+      
+      const platformPerformance = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0,
+          ctr: data.totalImpressions > 0 ? data.totalClicks / data.totalImpressions : 0,
+          spend: data.totalSpend,
+          revenue: data.totalRevenue
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const bestPlatform = platformPerformance[0]
+      const worstPlatform = platformPerformance[platformPerformance.length - 1]
+      
+      const content = `**🎯 Actionable Recommendations for Your Next Campaign:**
+
+**💰 Budget Allocation Strategy:**
+- **INCREASE** budget for ${bestPlatform.platform} by 20-30% (ROAS: ${bestPlatform.roas.toFixed(2)}x)
+- **OPTIMIZE** ${worstPlatform.platform} before increasing spend (ROAS: ${worstPlatform.roas.toFixed(2)}x)
+
+**📈 Performance Optimization:**
+- Best CTR: ${(Math.max(...platformPerformance.map(p => p.ctr)) * 100).toFixed(2)}% on ${platformPerformance.find(p => p.ctr === Math.max(...platformPerformance.map(p => p.ctr)))?.platform}
+- Focus on improving creative performance on lower-performing platforms
+
+**🚀 Growth Opportunities:**
+- Scale successful campaigns from ${bestPlatform.platform}
+- Test new creative formats on ${worstPlatform.platform}
+- Consider expanding to similar audiences across platforms
+
+**📊 Key Metrics to Monitor:**
+- ROAS trends by platform
+- CTR improvements
+- Cost per acquisition optimization
+- Revenue growth vs. spend increase`
+      
+      return {
+        content,
+        data: {
+          type: 'actionable_recommendations',
+          bestPlatform: bestPlatform,
+          worstPlatform: worstPlatform,
+          platformPerformance: platformPerformance,
+          query: query
+        }
+      }
+    }
 
 
     
