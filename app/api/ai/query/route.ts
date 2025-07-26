@@ -2509,7 +2509,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     // BUT ONLY if they haven't been caught by our critical handlers above
     const hasPlatform = KEYWORDS.PLATFORMS.some(platform => lowerQuery.includes(platform))
     
-    if (hasPlatform && !lowerQuery.includes('revenue') && !lowerQuery.includes('roas') && !lowerQuery.includes('return on ad spend')) {
+    if (hasPlatform && !lowerQuery.includes('revenue') && !lowerQuery.includes('roas') && !lowerQuery.includes('return on ad spend') && !lowerQuery.includes('performance') && !lowerQuery.includes('performing') && !lowerQuery.includes('results') && !lowerQuery.includes('conversions')) {
       return processWithKeywords(query, data)
     }
     
