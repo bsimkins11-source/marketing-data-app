@@ -268,7 +268,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
 
-    // Check for "which platform spent the most" pattern
+    // Check for "which platform spent the most" pattern (HIGHEST PRIORITY)
     if (lowerQuery.includes('platform') && (lowerQuery.includes('spent the most') || lowerQuery.includes('spend the most') || lowerQuery.includes('highest spend') || lowerQuery.includes('cost the most') || lowerQuery.includes('spend most'))) {
       const platformGroups: Record<string, { totalSpend: number }> = {}
       
@@ -302,6 +302,8 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         }
       }
     }
+
+
     
     // CRITICAL FIXES - HIGHEST PRIORITY HANDLERS (MOVED TO VERY TOP)
     
