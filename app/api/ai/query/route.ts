@@ -107,58 +107,58 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
-    // TEMPORARILY DISABLED: CRITICAL COMPARATIVE HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
+    // CRITICAL COMPARATIVE HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
     console.log('DEBUG: Checking comparative handlers for query:', query)
     
     // "Which platform performed best" - based on ROAS
-    // if (lowerQuery.includes('platform') && (lowerQuery.includes('performed best') || lowerQuery.includes('was the best') || lowerQuery.includes('had the best performance'))) {
-    //   console.log('DEBUG: Platform performed best handler triggered!')
-    //   const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
-    //   
-    //   data.forEach(item => {
-    //     const platform = item.dimensions.platform
-    //     if (!platformGroups[platform]) {
-    //       platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
-    //     }
-    //     platformGroups[platform].totalSpend += item.metrics.spend
-    //     platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
-    //   })
-    //   
-    //   const platformROAS = Object.entries(platformGroups)
-    //     .map(([platform, data]) => ({
-    //       platform,
-    //       roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
-    //     }))
-    //     .sort((a, b) => b.roas - a.roas)
-    //   
-    //   const topPlatform = platformROAS[0]
-    //   const content = `Platform with the best performance (highest ROAS):\n1. ${topPlatform.platform}: ${topPlatform.roas.toFixed(2)}x\n\nAll platforms by ROAS:\n${platformROAS.map((item, index) => 
-    //     `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
-    //   ).join('\n')}`
-    //   
-    //   return {
-    //     content,
-    //     data: {
-    //       type: 'platform_performance_ranking',
-    //       platforms: platformROAS,
-    //       topPlatform: topPlatform,
-    //       query: query
-    //     }
-    //   }
-    // }
-    // 
-    // // Simple test handler to see if the issue is with complex handlers
-    // if (lowerQuery.includes('learn') && lowerQuery.includes('campaign')) {
-    //   console.log('DEBUG: Learn campaign handler triggered!')
-    //   return {
-    //     content: "Test: Strategic insights handler is working!",
-    //     data: {
-    //       type: 'test_strategic_insights',
-    //       query: query
-    //     }
-    //   }
-    // }
+    if (lowerQuery.includes('platform') && (lowerQuery.includes('performed best') || lowerQuery.includes('was the best') || lowerQuery.includes('had the best performance'))) {
+      console.log('DEBUG: Platform performed best handler triggered!')
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const topPlatform = platformROAS[0]
+      const content = `Platform with the best performance (highest ROAS):\n1. ${topPlatform.platform}: ${topPlatform.roas.toFixed(2)}x\n\nAll platforms by ROAS:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_performance_ranking',
+          platforms: platformROAS,
+          topPlatform: topPlatform,
+          query: query
+        }
+      }
+    }
+    
+    // Simple test handler to see if the issue is with complex handlers
+    if (lowerQuery.includes('learn') && lowerQuery.includes('campaign')) {
+      console.log('DEBUG: Learn campaign handler triggered!')
+      return {
+        content: "Test: Strategic insights handler is working!",
+        data: {
+          type: 'test_strategic_insights',
+          query: query
+        }
+      }
+    }
     
     // CRITICAL PATTERN HANDLERS - HIGH PRIORITY (AFTER COMPARATIVE HANDLERS)
     
