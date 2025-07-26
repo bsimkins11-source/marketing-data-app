@@ -105,15 +105,12 @@ export async function POST(request: NextRequest) {
 
 async function processAIQuery(query: string, data: MarketingData[]) {
   try {
-    console.log('DEBUG: processAIQuery called with query:', query)
     const lowerQuery = query.toLowerCase()
-    console.log('DEBUG: lowerQuery created:', lowerQuery)
     
     // CRITICAL PATTERN HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
     // Check for "how much revenue did we generate" pattern
     if (lowerQuery.includes('how much revenue') && lowerQuery.includes('generate')) {
-      console.log('DEBUG: Pattern handler triggered for "how much revenue did we generate"')
       const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
       return {
         content: `Total revenue across all campaigns: $${totalRevenue.toLocaleString()}`,
@@ -318,6 +315,28 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
 
+    // Handle platform-specific CTR queries (HIGHEST PRIORITY)
+    if (detectedPlatform && (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate'))) {
+      const actualPlatform = PLATFORM_MAP[detectedPlatform]
+      const filteredData = data.filter(item => item.dimensions.platform === actualPlatform)
+      
+      if (filteredData.length > 0) {
+        const totalCTR = filteredData.reduce((sum, item) => sum + item.metrics.ctr, 0)
+        const averageCTR = totalCTR / filteredData.length
+        
+        return {
+          content: `Average CTR for ${actualPlatform}: ${(averageCTR * 100).toFixed(2)}%`,
+          data: {
+            type: 'platform_ctr',
+            platform: actualPlatform,
+            value: averageCTR,
+            count: filteredData.length,
+            query: query
+          }
+        }
+      }
+    }
+
     // Now add keyword detection for the rest of the function
     const isCTRQuery = KEYWORDS.CTR.some(keyword => lowerQuery.includes(keyword))
     const isROASQuery = KEYWORDS.ROAS.some(keyword => lowerQuery.includes(keyword))
@@ -415,6 +434,24 @@ async function processAIQuery(query: string, data: MarketingData[]) {
           value: averageROAS,
           totalSpend,
           totalRevenue,
+          query: query
+        }
+      }
+    }
+
+    // Handle "average CTR" queries (HIGHEST PRIORITY) - use overall CTR calculation
+    if (lowerQuery.includes('average ctr') || lowerQuery.includes('avg ctr') || lowerQuery.includes('average click-through rate')) {
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      
+      return {
+        content: `Average CTR across all campaigns: ${(overallCTR * 100).toFixed(2)}%`,
+        data: {
+          type: 'average_ctr',
+          value: overallCTR,
+          totalClicks,
+          totalImpressions,
           query: query
         }
       }
