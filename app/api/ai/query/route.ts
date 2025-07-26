@@ -286,6 +286,255 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
     
+    // CAMPAIGN MANAGEMENT QUALITY HANDLERS
+    if (lowerQuery.includes('campaign managed well') || lowerQuery.includes('management quality') || lowerQuery.includes('campaign health') ||
+        lowerQuery.includes('pacing') || lowerQuery.includes('anomalies') || lowerQuery.includes('optimization patterns')) {
+      
+      // Analyze campaign management quality
+      const campaignGroups: Record<string, any[]> = {}
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!campaignGroups[campaign]) {
+          campaignGroups[campaign] = []
+        }
+        campaignGroups[campaign].push(item)
+      })
+      
+      // Calculate management metrics
+      const managementInsights = []
+      let totalPacingScore = 0
+      let totalOptimizationScore = 0
+      let campaignCount = 0
+      
+      for (const [campaign, items] of Object.entries(campaignGroups)) {
+        if (items.length < 2) continue
+        
+        // Pacing analysis
+        const totalSpend = items.reduce((sum, item) => sum + item.metrics.spend, 0)
+        const avgDailySpend = totalSpend / items.length
+        const spendVariance = items.reduce((sum, item) => sum + Math.pow(item.metrics.spend - avgDailySpend, 2), 0) / items.length
+        const spendVolatility = Math.sqrt(spendVariance) / avgDailySpend
+        
+        // Optimization analysis (creative and placement diversity)
+        const uniqueCreatives = new Set(items.map(item => item.dimensions.creativeName)).size
+        const uniquePlacements = new Set(items.map(item => item.dimensions.placement_name)).size
+        const creativeDiversity = Math.min(100, uniqueCreatives * 10)
+        const placementDiversity = Math.min(100, uniquePlacements * 10)
+        
+        // Performance improvement analysis
+        const earlyItems = items.slice(0, Math.floor(items.length / 3))
+        const lateItems = items.slice(-Math.floor(items.length / 3))
+        
+        const earlyAvgROAS = earlyItems.reduce((sum, item) => sum + item.metrics.roas, 0) / earlyItems.length
+        const lateAvgROAS = lateItems.reduce((sum, item) => sum + item.metrics.roas, 0) / lateItems.length
+        const roasImprovement = earlyAvgROAS > 0 ? ((lateAvgROAS - earlyAvgROAS) / earlyAvgROAS) * 100 : 0
+        
+        const pacingScore = Math.max(0, 100 - (spendVolatility * 50))
+        const optimizationScore = Math.min(100, 50 + creativeDiversity + placementDiversity + Math.max(0, roasImprovement))
+        
+        totalPacingScore += pacingScore
+        totalOptimizationScore += optimizationScore
+        campaignCount++
+        
+        managementInsights.push({
+          campaign,
+          pacingScore: Math.round(pacingScore),
+          optimizationScore: Math.round(optimizationScore),
+          spendVolatility: spendVolatility.toFixed(2),
+          uniqueCreatives,
+          uniquePlacements,
+          roasImprovement: roasImprovement.toFixed(1)
+        })
+      }
+      
+      const avgPacingScore = campaignCount > 0 ? totalPacingScore / campaignCount : 0
+      const avgOptimizationScore = campaignCount > 0 ? totalOptimizationScore / campaignCount : 0
+      const overallScore = (avgPacingScore + avgOptimizationScore) / 2
+      
+      // Anomaly detection and data realism check
+      const allROAS = data.map(item => item.metrics.roas)
+      const avgROAS = allROAS.reduce((sum, roas) => sum + roas, 0) / allROAS.length
+      const roasStd = Math.sqrt(allROAS.reduce((sum, roas) => sum + Math.pow(roas - avgROAS, 2), 0) / allROAS.length)
+      
+      const anomalies = data.filter(item => 
+        item.metrics.roas > avgROAS + 2 * roasStd || 
+        item.metrics.roas < avgROAS - 2 * roasStd
+      )
+      
+      // Check for artificial consistency patterns
+      const anomalyRate = anomalies.length / data.length
+      const isArtificialData = anomalyRate < 0.05 // Less than 5% anomalies suggests artificial data
+      
+      const content = `📋 CAMPAIGN MANAGEMENT QUALITY ASSESSMENT:\n\n` +
+        `📊 OVERALL MANAGEMENT SCORES:\n` +
+        `• Pacing Quality: ${Math.round(avgPacingScore)}/100\n` +
+        `• Optimization Quality: ${Math.round(avgOptimizationScore)}/100\n` +
+        `• Overall Management Score: ${Math.round(overallScore)}/100\n\n` +
+        `📈 CAMPAIGN-SPECIFIC INSIGHTS:\n${managementInsights.map(insight => 
+          `• ${insight.campaign}:\n` +
+          `  - Pacing: ${insight.pacingScore}/100 (volatility: ${insight.spendVolatility})\n` +
+          `  - Optimization: ${insight.optimizationScore}/100 (${insight.uniqueCreatives} creatives, ${insight.uniquePlacements} placements)\n` +
+          `  - ROAS Improvement: ${insight.roasImprovement}%`
+        ).join('\n')}\n\n` +
+        `🚨 ANOMALIES DETECTED: ${anomalies.length} (${(anomalyRate * 100).toFixed(1)}% of data)\n` +
+        `${anomalies.length > 0 ? anomalies.map(item => 
+          `• ${item.dimensions.campaign}: ${item.metrics.roas.toFixed(2)}x ROAS (${item.metrics.roas > avgROAS ? 'EXCEPTIONAL' : 'POOR'})`
+        ).join('\n') : '• No significant anomalies detected'}\n\n` +
+        `${isArtificialData ? 
+          `⚠️ DATA REALISM WARNING:\n` +
+          `• Management scores may be inflated due to artificial data consistency\n` +
+          `• Real campaigns typically show 5-15% statistical anomalies\n` +
+          `• This sample data shows only ${(anomalyRate * 100).toFixed(1)}% anomalies\n` +
+          `• Consider these scores as optimistic estimates\n\n` : ''}` +
+        `💡 MANAGEMENT ASSESSMENT:\n` +
+        `${overallScore >= 90 ? 
+          (isArtificialData ? 
+            '🏆 EXCEPTIONAL (with caveat): Scores reflect artificial data consistency. Real campaigns would face more challenges.' : 
+            '🏆 EXCEPTIONAL: Campaigns show excellent pacing and active optimization patterns') : 
+          overallScore >= 70 ? 
+          (isArtificialData ? 
+            '✅ GOOD (with caveat): Scores may be inflated due to artificial consistency' : 
+            '✅ GOOD: Campaigns are well-managed with room for improvement') :
+          '⚠️ NEEDS ATTENTION: Campaigns show inconsistent pacing or limited optimization'}`
+      
+      return {
+        content,
+        data: {
+          type: 'campaign_management_quality',
+          overallScore: Math.round(overallScore),
+          avgPacingScore: Math.round(avgPacingScore),
+          avgOptimizationScore: Math.round(avgOptimizationScore),
+          managementInsights: managementInsights,
+          anomalies: anomalies.length,
+          query: query
+        }
+      }
+    }
+    
+    // PACING ANALYSIS HANDLERS
+    if (lowerQuery.includes('pacing') || lowerQuery.includes('spend consistency') || lowerQuery.includes('budget pacing')) {
+      const campaignGroups: Record<string, any[]> = {}
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!campaignGroups[campaign]) {
+          campaignGroups[campaign] = []
+        }
+        campaignGroups[campaign].push(item)
+      })
+      
+      const pacingAnalysis = []
+      for (const [campaign, items] of Object.entries(campaignGroups)) {
+        const totalSpend = items.reduce((sum, item) => sum + item.metrics.spend, 0)
+        const avgDailySpend = totalSpend / items.length
+        const spendVariance = items.reduce((sum, item) => sum + Math.pow(item.metrics.spend - avgDailySpend, 2), 0) / items.length
+        const spendVolatility = Math.sqrt(spendVariance) / avgDailySpend
+        
+        const zeroSpendDays = items.filter(item => item.metrics.spend === 0).length
+        const highSpendDays = items.filter(item => item.metrics.spend > avgDailySpend * 2).length
+        
+        const pacingScore = Math.max(0, 100 - (spendVolatility * 50) - (zeroSpendDays * 10) - (highSpendDays * 5))
+        
+        pacingAnalysis.push({
+          campaign,
+          pacingScore: Math.round(pacingScore),
+          avgDailySpend: avgDailySpend.toFixed(2),
+          spendVolatility: spendVolatility.toFixed(2),
+          zeroSpendDays,
+          highSpendDays
+        })
+      }
+      
+      const avgPacingScore = pacingAnalysis.reduce((sum, item) => sum + item.pacingScore, 0) / pacingAnalysis.length
+      
+      const content = `📅 CAMPAIGN PACING ANALYSIS:\n\n` +
+        `📊 OVERALL PACING SCORE: ${Math.round(avgPacingScore)}/100\n\n` +
+        `📈 CAMPAIGN-SPECIFIC PACING:\n${pacingAnalysis.map(item => 
+          `• ${item.campaign}:\n` +
+          `  - Pacing Score: ${item.pacingScore}/100\n` +
+          `  - Avg Daily Spend: $${item.avgDailySpend}\n` +
+          `  - Spend Volatility: ${item.spendVolatility}\n` +
+          `  - Zero Spend Days: ${item.zeroSpendDays}\n` +
+          `  - High Spend Days: ${item.highSpendDays}`
+        ).join('\n')}\n\n` +
+        `💡 PACING ASSESSMENT:\n` +
+        `${avgPacingScore >= 90 ? '🏆 EXCELLENT: Very consistent daily spend patterns' :
+          avgPacingScore >= 70 ? '✅ GOOD: Generally consistent pacing with minor variations' :
+          '⚠️ NEEDS ATTENTION: Inconsistent spend patterns detected'}`
+      
+      return {
+        content,
+        data: {
+          type: 'pacing_analysis',
+          avgPacingScore: Math.round(avgPacingScore),
+          pacingAnalysis: pacingAnalysis,
+          query: query
+        }
+      }
+    }
+    
+    // ANOMALY DETECTION HANDLERS
+    if (lowerQuery.includes('anomalies') || lowerQuery.includes('anomaly') || lowerQuery.includes('unusual') || 
+        lowerQuery.includes('outliers') || lowerQuery.includes('exceptional performance')) {
+      
+      // Detect performance anomalies
+      const allROAS = data.map(item => item.metrics.roas)
+      const avgROAS = allROAS.reduce((sum, roas) => sum + roas, 0) / allROAS.length
+      const roasStd = Math.sqrt(allROAS.reduce((sum, roas) => sum + Math.pow(roas - avgROAS, 2), 0) / allROAS.length)
+      
+      const allCTR = data.map(item => item.metrics.ctr)
+      const avgCTR = allCTR.reduce((sum, ctr) => sum + ctr, 0) / allCTR.length
+      const ctrStd = Math.sqrt(allCTR.reduce((sum, ctr) => sum + Math.pow(ctr - avgCTR, 2), 0) / allCTR.length)
+      
+      const roasAnomalies = data.filter(item => 
+        item.metrics.roas > avgROAS + 2 * roasStd || 
+        (item.metrics.roas < avgROAS - 2 * roasStd && item.metrics.roas > 0)
+      )
+      
+      const ctrAnomalies = data.filter(item => 
+        item.metrics.ctr > avgCTR + 2 * ctrStd || 
+        (item.metrics.ctr < avgCTR - 2 * ctrStd && item.metrics.ctr > 0)
+      )
+      
+      const spendAnomalies = data.filter(item => {
+        const campaignItems = data.filter(d => d.dimensions.campaign === item.dimensions.campaign)
+        const campaignAvgSpend = campaignItems.reduce((sum, d) => sum + d.metrics.spend, 0) / campaignItems.length
+        return item.metrics.spend > campaignAvgSpend * 3 || item.metrics.spend < campaignAvgSpend * 0.1
+      })
+      
+      const content = `🚨 ANOMALY DETECTION REPORT:\n\n` +
+        `📊 PERFORMANCE ANOMALIES:\n` +
+        `• ROAS Anomalies: ${roasAnomalies.length}\n` +
+        `• CTR Anomalies: ${ctrAnomalies.length}\n` +
+        `• Spend Anomalies: ${spendAnomalies.length}\n\n` +
+        `🚀 EXCEPTIONAL PERFORMANCE:\n` +
+        `${roasAnomalies.filter(item => item.metrics.roas > avgROAS).slice(0, 3).map(item => 
+          `• ${item.dimensions.campaign}: ${item.metrics.roas.toFixed(2)}x ROAS (${item.dimensions.platform})`
+        ).join('\n')}\n\n` +
+        `⚠️ POOR PERFORMANCE:\n` +
+        `${roasAnomalies.filter(item => item.metrics.roas < avgROAS).slice(0, 3).map(item => 
+          `• ${item.dimensions.campaign}: ${item.metrics.roas.toFixed(2)}x ROAS (${item.dimensions.platform})`
+        ).join('\n')}\n\n` +
+        `💡 ANOMALY ASSESSMENT:\n` +
+        `${roasAnomalies.length + ctrAnomalies.length + spendAnomalies.length > 10 ? 
+          '⚠️ MULTIPLE ANOMALIES: Consider implementing automated monitoring and alerting' :
+          roasAnomalies.length + ctrAnomalies.length + spendAnomalies.length > 5 ?
+          '📊 MODERATE ANOMALIES: Some unusual patterns detected, review campaign settings' :
+          '✅ NORMAL PATTERNS: Performance is within expected ranges'}`
+      
+      return {
+        content,
+        data: {
+          type: 'anomaly_detection',
+          roasAnomalies: roasAnomalies.length,
+          ctrAnomalies: ctrAnomalies.length,
+          spendAnomalies: spendAnomalies.length,
+          exceptionalPerformance: roasAnomalies.filter(item => item.metrics.roas > avgROAS).length,
+          poorPerformance: roasAnomalies.filter(item => item.metrics.roas < avgROAS).length,
+          query: query
+        }
+      }
+    }
+    
     // ADVANCED OPTIMIZATION RECOMMENDATION HANDLERS
     if (lowerQuery.includes('optimize') || lowerQuery.includes('optimization') || lowerQuery.includes('improve') || 
         lowerQuery.includes('reallocate') || lowerQuery.includes('budget optimization') || lowerQuery.includes('how can i improve')) {
