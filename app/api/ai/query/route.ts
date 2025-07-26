@@ -199,6 +199,19 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
     
+    // Check for "how much money did we spend" pattern
+    if (lowerQuery.includes('how much money') && lowerQuery.includes('spend')) {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      return {
+        content: `Total spend across all campaigns: $${totalSpend.toLocaleString()}`,
+        data: {
+          type: 'total_spend',
+          value: totalSpend,
+          query: query
+        }
+      }
+    }
+    
     // Check for "overall CTR" pattern
     if (lowerQuery.includes('overall ctr') || lowerQuery.includes('overall click-through rate') || lowerQuery.includes('overall click through rate')) {
       const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
@@ -997,7 +1010,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         if (lowerQuery.includes('impressions') || lowerQuery.includes('views')) {
           const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
           return {
-            content: `Total impressions from ${actualPlatform}: ${totalImpressions.toLocaleString()}`,
+            content: `Total impressions for ${actualPlatform}: ${totalImpressions.toLocaleString()}`,
             data: {
               type: 'platform_impressions',
               platform: actualPlatform,
@@ -1012,7 +1025,36 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         if (lowerQuery.includes('clicks') || lowerQuery.includes('interactions')) {
           const totalClicks = filteredData.reduce((sum, item) => sum + item.metrics.clicks, 0)
           return {
-            content: `Total clicks from ${actualPlatform}: ${totalClicks.toLocaleString()}`,
+            content: `Total clicks for ${actualPlatform}: ${totalClicks.toLocaleString()}`,
+            data: {
+              type: 'platform_clicks',
+              platform: actualPlatform,
+              value: totalClicks,
+              count: filteredData.length,
+              query: query
+            }
+          }
+        }
+        
+        // Handle specific patterns that are failing in UAT
+        if (lowerQuery.includes('impressions') && lowerQuery.includes('get')) {
+          const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+          return {
+            content: `Total impressions for ${actualPlatform}: ${totalImpressions.toLocaleString()}`,
+            data: {
+              type: 'platform_impressions',
+              platform: actualPlatform,
+              value: totalImpressions,
+              count: filteredData.length,
+              query: query
+            }
+          }
+        }
+        
+        if (lowerQuery.includes('clicks') && lowerQuery.includes('get')) {
+          const totalClicks = filteredData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+          return {
+            content: `Total clicks for ${actualPlatform}: ${totalClicks.toLocaleString()}`,
             data: {
               type: 'platform_clicks',
               platform: actualPlatform,
