@@ -107,9 +107,170 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
-    // CRITICAL FIXES - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
+    // CRITICAL PATTERN HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
-    // Handle platform-specific revenue queries (ABSOLUTE HIGHEST PRIORITY)
+    // Check for "how much revenue did we generate" pattern
+    if (lowerQuery.includes('how much revenue') && lowerQuery.includes('generate')) {
+      const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+      return {
+        content: `Total revenue across all campaigns: $${totalRevenue.toLocaleString()}`,
+        data: {
+          type: 'total_revenue',
+          value: totalRevenue,
+          query: query
+        }
+      }
+    }
+    
+    // Check for "how many impressions did we get" pattern
+    if (lowerQuery.includes('how many impressions') && lowerQuery.includes('get')) {
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      return {
+        content: `Total impressions across all campaigns: ${totalImpressions.toLocaleString()}`,
+        data: {
+          type: 'total_impressions',
+          value: totalImpressions,
+          query: query
+        }
+      }
+    }
+    
+    // Check for "how many clicks did we get" pattern
+    if (lowerQuery.includes('how many clicks') && lowerQuery.includes('get')) {
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      return {
+        content: `Total clicks across all campaigns: ${totalClicks.toLocaleString()}`,
+        data: {
+          type: 'total_clicks',
+          value: totalClicks,
+          query: query
+        }
+      }
+    }
+    
+    // Check for "overall CTR" pattern
+    if (lowerQuery.includes('overall ctr') || lowerQuery.includes('overall click-through rate') || lowerQuery.includes('overall click through rate')) {
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      
+      return {
+        content: `Overall CTR across all campaigns: ${(overallCTR * 100).toFixed(2)}%`,
+        data: {
+          type: 'overall_ctr',
+          value: overallCTR,
+          totalClicks,
+          totalImpressions,
+          query: query
+        }
+      }
+    }
+    
+    // Check for "average ROAS" pattern
+    if (lowerQuery.includes('average roas') || lowerQuery.includes('avg roas') || lowerQuery.includes('average return on ad spend')) {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+      const averageROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      
+      return {
+        content: `Average ROAS across all campaigns: ${averageROAS.toFixed(2)}x`,
+        data: {
+          type: 'average_roas',
+          value: averageROAS,
+          totalSpend,
+          totalRevenue,
+          query: query
+        }
+      }
+    }
+    
+    // Check for "CTR for each platform" pattern
+    if (lowerQuery.includes('ctr for each platform') || lowerQuery.includes('click-through rate for each platform')) {
+      const platformGroups: Record<string, { totalCTR: number, count: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalCTR: 0, count: 0 }
+        }
+        platformGroups[platform].totalCTR += item.metrics.ctr
+        platformGroups[platform].count++
+      })
+      
+      const platformCTRs = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          avgCTR: data.count > 0 ? data.totalCTR / data.count : 0
+        }))
+        .sort((a, b) => b.avgCTR - a.avgCTR)
+      
+      const content = `CTR for each platform:\n${platformCTRs.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${(item.avgCTR * 100).toFixed(2)}%`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_ctr_breakdown',
+          platforms: platformCTRs,
+          query: query
+        }
+      }
+    }
+    
+    // Check for "ROAS for each platform" pattern
+    if (lowerQuery.includes('roas for each platform') || lowerQuery.includes('return on ad spend for each platform')) {
+      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
+      
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!platformGroups[platform]) {
+          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
+        }
+        platformGroups[platform].totalSpend += item.metrics.spend
+        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
+      })
+      
+      const platformROAS = Object.entries(platformGroups)
+        .map(([platform, data]) => ({
+          platform,
+          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
+        }))
+        .sort((a, b) => b.roas - a.roas)
+      
+      const content = `ROAS for each platform:\n${platformROAS.map((item, index) => 
+        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
+      ).join('\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'platform_roas_breakdown',
+          platforms: platformROAS,
+          query: query
+        }
+      }
+    }
+    
+    // Check for platform count pattern
+    if (lowerQuery.includes('how many platforms') || lowerQuery.includes('number of platforms') || lowerQuery.includes('count of platforms')) {
+      const uniquePlatforms = Array.from(new Set(data.map(item => item.dimensions.platform)))
+      const platformCount = uniquePlatforms.length
+      
+      return {
+        content: `Found ${platformCount} platforms: ${uniquePlatforms.join(', ')}`,
+        data: {
+          type: 'platform_count',
+          platforms: uniquePlatforms,
+          count: platformCount,
+          query: query
+        }
+      }
+    }
+    
+    // CRITICAL FIXES - HIGHEST PRIORITY HANDLERS (MOVED TO VERY TOP)
+    
+    // Handle platform-specific revenue queries (HIGHEST PRIORITY)
     const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => lowerQuery.includes(platform))
     
     if (detectedPlatform && (lowerQuery.includes('revenue') || lowerQuery.includes('earnings'))) {
@@ -507,167 +668,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
     
-    // CRITICAL: Check for specific patterns that should NOT go to OpenAI first
-    // These patterns need to be handled by our specific handlers
-    
-    // Check for "how much revenue did we generate" pattern
-    if (lowerQuery.includes('how much revenue') && lowerQuery.includes('generate')) {
-      const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
-      return {
-        content: `Total revenue across all campaigns: $${totalRevenue.toLocaleString()}`,
-        data: {
-          type: 'total_revenue',
-          value: totalRevenue,
-          query: query
-        }
-      }
-    }
-    
-    // Check for "how many impressions did we get" pattern
-    if (lowerQuery.includes('how many impressions') && lowerQuery.includes('get')) {
-      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
-      return {
-        content: `Total impressions across all campaigns: ${totalImpressions.toLocaleString()}`,
-        data: {
-          type: 'total_impressions',
-          value: totalImpressions,
-          query: query
-        }
-      }
-    }
-    
-    // Check for "how many clicks did we get" pattern
-    if (lowerQuery.includes('how many clicks') && lowerQuery.includes('get')) {
-      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
-      return {
-        content: `Total clicks across all campaigns: ${totalClicks.toLocaleString()}`,
-        data: {
-          type: 'total_clicks',
-          value: totalClicks,
-          query: query
-        }
-      }
-    }
-    
-    // Check for "overall CTR" pattern
-    if (lowerQuery.includes('overall ctr') || lowerQuery.includes('overall click-through rate') || lowerQuery.includes('overall click through rate')) {
-      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
-      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
-      const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-      
-      return {
-        content: `Overall CTR across all campaigns: ${(overallCTR * 100).toFixed(2)}%`,
-        data: {
-          type: 'overall_ctr',
-          value: overallCTR,
-          totalClicks,
-          totalImpressions,
-          query: query
-        }
-      }
-    }
-    
-    // Check for "average ROAS" pattern
-    if (lowerQuery.includes('average roas') || lowerQuery.includes('avg roas') || lowerQuery.includes('average return on ad spend')) {
-      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
-      const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
-      const averageROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
-      
-      return {
-        content: `Average ROAS across all campaigns: ${averageROAS.toFixed(2)}x`,
-        data: {
-          type: 'average_roas',
-          value: averageROAS,
-          totalSpend,
-          totalRevenue,
-          query: query
-        }
-      }
-    }
-    
-    // Check for "CTR for each platform" pattern
-    if (lowerQuery.includes('ctr for each platform') || lowerQuery.includes('click-through rate for each platform')) {
-      const platformGroups: Record<string, { totalCTR: number, count: number }> = {}
-      
-      data.forEach(item => {
-        const platform = item.dimensions.platform
-        if (!platformGroups[platform]) {
-          platformGroups[platform] = { totalCTR: 0, count: 0 }
-        }
-        platformGroups[platform].totalCTR += item.metrics.ctr
-        platformGroups[platform].count++
-      })
-      
-      const platformCTRs = Object.entries(platformGroups)
-        .map(([platform, data]) => ({
-          platform,
-          avgCTR: data.count > 0 ? data.totalCTR / data.count : 0
-        }))
-        .sort((a, b) => b.avgCTR - a.avgCTR)
-      
-      const content = `CTR for each platform:\n${platformCTRs.map((item, index) => 
-        `${index + 1}. ${item.platform}: ${(item.avgCTR * 100).toFixed(2)}%`
-      ).join('\n')}`
-      
-      return {
-        content,
-        data: {
-          type: 'platform_ctr_breakdown',
-          platforms: platformCTRs,
-          query: query
-        }
-      }
-    }
-    
-    // Check for "ROAS for each platform" pattern
-    if (lowerQuery.includes('roas for each platform') || lowerQuery.includes('return on ad spend for each platform')) {
-      const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
-      
-      data.forEach(item => {
-        const platform = item.dimensions.platform
-        if (!platformGroups[platform]) {
-          platformGroups[platform] = { totalSpend: 0, totalRevenue: 0 }
-        }
-        platformGroups[platform].totalSpend += item.metrics.spend
-        platformGroups[platform].totalRevenue += (item.metrics.revenue || 0)
-      })
-      
-      const platformROAS = Object.entries(platformGroups)
-        .map(([platform, data]) => ({
-          platform,
-          roas: data.totalSpend > 0 ? data.totalRevenue / data.totalSpend : 0
-        }))
-        .sort((a, b) => b.roas - a.roas)
-      
-      const content = `ROAS for each platform:\n${platformROAS.map((item, index) => 
-        `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
-      ).join('\n')}`
-      
-      return {
-        content,
-        data: {
-          type: 'platform_roas_breakdown',
-          platforms: platformROAS,
-          query: query
-        }
-      }
-    }
-    
-    // Check for platform count pattern
-    if (lowerQuery.includes('how many platforms') || lowerQuery.includes('number of platforms') || lowerQuery.includes('count of platforms')) {
-      const uniquePlatforms = Array.from(new Set(data.map(item => item.dimensions.platform)))
-      const platformCount = uniquePlatforms.length
-      
-      return {
-        content: `Found ${platformCount} platforms: ${uniquePlatforms.join(', ')}`,
-        data: {
-          type: 'platform_count',
-          platforms: uniquePlatforms,
-          count: platformCount,
-          query: query
-        }
-      }
-    }
+
     
     // If OpenAI is configured, use it for natural language processing
     if (config.openai.apiKey) {
