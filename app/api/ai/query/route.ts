@@ -106,8 +106,6 @@ export async function POST(request: NextRequest) {
 async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
-    let handlerTriggered = false
-    let handlerResult: any = null
     
     console.log('DEBUG: Starting processAIQuery for query:', query)
     
@@ -116,7 +114,6 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     // "Which platform performed best" - based on ROAS
     if (lowerQuery.includes('platform') && (lowerQuery.includes('performed best') || lowerQuery.includes('was the best') || lowerQuery.includes('had the best performance'))) {
       console.log('DEBUG: Platform performed best handler triggered!')
-      handlerTriggered = true
       
       const platformGroups: Record<string, { totalSpend: number, totalRevenue: number }> = {}
       
@@ -141,7 +138,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         `${index + 1}. ${item.platform}: ${item.roas.toFixed(2)}x`
       ).join('\n')}`
       
-      handlerResult = {
+      return {
         content,
         data: {
           type: 'platform_performance_ranking',
@@ -153,10 +150,9 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
     
     // Simple test handler to see if the issue is with complex handlers
-    if (!handlerTriggered && lowerQuery.includes('learn') && lowerQuery.includes('campaign')) {
+    if (lowerQuery.includes('learn') && lowerQuery.includes('campaign')) {
       console.log('DEBUG: Learn campaign handler triggered!')
-      handlerTriggered = true
-      handlerResult = {
+      return {
         content: "Test: Strategic insights handler is working!",
         data: {
           type: 'test_strategic_insights',
@@ -1571,17 +1567,10 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
     
     // Check for visualization requests for platform data
-    if (!handlerTriggered && (lowerQuery.includes('visual') || lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('plot'))) {
+    if (lowerQuery.includes('visual') || lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('plot')) {
       if (lowerQuery.includes('platform') || lowerQuery.includes('roas')) {
-        handlerTriggered = true
-        handlerResult = processWithKeywords(query, data)
+        return processWithKeywords(query, data)
       }
-    }
-    
-    // If a handler was triggered, return the result
-    if (handlerTriggered && handlerResult) {
-      console.log('DEBUG: Returning handler result')
-      return handlerResult
     }
     
     // If no handler was triggered, use OpenAI or fallback
