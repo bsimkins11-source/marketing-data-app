@@ -1016,8 +1016,9 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         
         // Handle platform-specific CTR queries
         if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate')) {
-          const totalCTR = filteredData.reduce((sum, item) => sum + item.metrics.ctr, 0)
-          const averageCTR = totalCTR / filteredData.length
+          const totalClicks = filteredData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+          const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+          const averageCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
           
           return {
             content: `Average CTR for ${actualPlatform}: ${(averageCTR * 100).toFixed(2)}%`,
@@ -1330,8 +1331,9 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         )
         
         if (campaignData.length > 0) {
-          const totalCTR = campaignData.reduce((sum, item) => sum + item.metrics.ctr, 0)
-          const averageCTR = totalCTR / campaignData.length
+          const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+          const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+          const averageCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
           
           return {
             content: `Average CTR for ${normalizedCampaignName}: ${(averageCTR * 100).toFixed(2)}%`,
@@ -1364,8 +1366,9 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         )
         
         if (campaignData.length > 0) {
-          const totalROAS = campaignData.reduce((sum, item) => sum + item.metrics.roas, 0)
-          const averageROAS = totalROAS / campaignData.length
+          const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
+          const totalRevenue = campaignData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+          const averageROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
           
           return {
             content: `Average ROAS for ${normalizedCampaignName}: ${averageROAS.toFixed(2)}x`,
