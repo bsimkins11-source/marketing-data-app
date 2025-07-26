@@ -108,6 +108,8 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     const lowerQuery = query.toLowerCase()
     
     console.log('DEBUG: Starting processAIQuery for query:', query)
+    console.log('DEBUG: Lower query:', lowerQuery)
+    console.log('DEBUG: Data length:', data.length)
     
     // CRITICAL COMPARATIVE HANDLERS - ABSOLUTE HIGHEST PRIORITY (BEFORE ANY OTHER LOGIC)
     
