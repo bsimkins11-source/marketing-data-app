@@ -2114,6 +2114,18 @@ function formatValue(value: number | undefined, metric: string): string {
 function processWithKeywords(query: string, data: MarketingData[]) {
   const lowerQuery = query.toLowerCase()
   
+  // SIMPLE TEST - SHOULD ALWAYS WORK
+  if (lowerQuery.includes('test debug')) {
+    return {
+      content: "DEBUG: processWithKeywords test handler is working!",
+      data: {
+        type: 'test_debug_keywords',
+        query: query,
+        lowerQuery: lowerQuery
+      }
+    }
+  }
+  
   // Keyword detection using shared constants
   const isCTRQuery = KEYWORDS.CTR.some(keyword => lowerQuery.includes(keyword))
   const isROASQuery = KEYWORDS.ROAS.some(keyword => lowerQuery.includes(keyword))
