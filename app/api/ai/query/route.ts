@@ -4484,7 +4484,9 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   }
 
   // ADVANCED ANALYTICS HANDLERS (HIGH PRIORITY)
-  if (lowerQuery.includes('trends') || lowerQuery.includes('patterns') || lowerQuery.includes('insights') || lowerQuery.includes('analytics')) {
+  if (lowerQuery.includes('trends') || lowerQuery.includes('patterns') || lowerQuery.includes('insights') || lowerQuery.includes('analytics') || 
+      lowerQuery.includes('key metrics') || lowerQuery.includes('should i focus') || lowerQuery.includes('key findings') || 
+      lowerQuery.includes('should i pay attention') || lowerQuery.includes('what should i focus') || lowerQuery.includes('what are the key')) {
     // Calculate comprehensive insights
     const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
     const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
@@ -4554,7 +4556,9 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   }
 
   // CAMPAIGN EXECUTIVE SUMMARY HANDLERS (IMPROVED)
-  if (lowerQuery.includes('summary') || lowerQuery.includes('overview') || lowerQuery.includes('executive') || lowerQuery.includes('big picture')) {
+  if (lowerQuery.includes('summary') || lowerQuery.includes('overview') || lowerQuery.includes('executive') || lowerQuery.includes('big picture') ||
+      lowerQuery.includes('summarize') || lowerQuery.includes('campaign performance') || lowerQuery.includes('marketing performance') ||
+      lowerQuery.includes('summarize the') || lowerQuery.includes('summarize our')) {
     // Calculate comprehensive campaign summary
     const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
     const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
