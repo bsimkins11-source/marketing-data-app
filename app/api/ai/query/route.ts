@@ -740,6 +740,191 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
+  // PHASE 3 IMPROVEMENT 4: Advanced Analytics Handler (Priority: HIGH)
+  // Handle advanced analytics and deep dive queries
+  if ((lowerQuery.includes('analytics') || lowerQuery.includes('analysis') || lowerQuery.includes('deep dive') ||
+       lowerQuery.includes('breakdown') || lowerQuery.includes('trend') || lowerQuery.includes('pattern') ||
+       lowerQuery.includes('correlation') || lowerQuery.includes('insight')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Group by platform and campaign for advanced analysis
+    const platformGroups: Record<string, { spend: number, revenue: number, roas: number, ctr: number, cpa: number, conversions: number }> = {}
+    const campaignGroups: Record<string, { spend: number, revenue: number, roas: number, ctr: number, cpa: number, conversions: number }> = {}
+    
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      const campaign = item.dimensions.campaign
+      
+      // Platform analysis
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, roas: 0, ctr: 0, cpa: 0, conversions: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += item.metrics.revenue
+      platformGroups[platform].conversions += item.metrics.conversions
+      
+      // Campaign analysis
+      if (!campaignGroups[campaign]) {
+        campaignGroups[campaign] = { spend: 0, revenue: 0, roas: 0, ctr: 0, cpa: 0, conversions: 0 }
+      }
+      campaignGroups[campaign].spend += item.metrics.spend
+      campaignGroups[campaign].revenue += item.metrics.revenue
+      campaignGroups[campaign].conversions += item.metrics.conversions
+    })
+    
+    // Calculate metrics for each group
+    Object.keys(platformGroups).forEach(platform => {
+      const group = platformGroups[platform]
+      const platformData = data.filter(item => item.dimensions.platform === platform)
+      const totalImpressions = platformData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const totalClicks = platformData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      
+      group.roas = group.spend > 0 ? group.revenue / group.spend : 0
+      group.ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      group.cpa = group.conversions > 0 ? group.spend / group.conversions : 0
+    })
+    
+    Object.keys(campaignGroups).forEach(campaign => {
+      const group = campaignGroups[campaign]
+      const campaignData = data.filter(item => item.dimensions.campaign === campaign)
+      const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      
+      group.roas = group.spend > 0 ? group.revenue / group.spend : 0
+      group.ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      group.cpa = group.conversions > 0 ? group.spend / group.conversions : 0
+    })
+    
+    // Find top performers
+    const topPlatforms = Object.entries(platformGroups).sort((a, b) => b[1].roas - a[1].roas).slice(0, 3)
+    const topCampaigns = Object.entries(campaignGroups).sort((a, b) => b[1].roas - a[1].roas).slice(0, 3)
+    
+    const content = `📊 ADVANCED ANALYTICS\n\n🏆 Top Performing Platforms:\n${topPlatforms.map(([platform, metrics], index) => 
+      `${index + 1}. ${platform}: ${metrics.roas.toFixed(2)}x ROAS, ${(metrics.ctr * 100).toFixed(2)}% CTR, $${metrics.cpa.toFixed(2)} CPA`
+    ).join('\n')}\n\n🎯 Top Performing Campaigns:\n${topCampaigns.map(([campaign, metrics], index) => 
+      `${index + 1}. ${campaign}: ${metrics.roas.toFixed(2)}x ROAS, ${(metrics.ctr * 100).toFixed(2)}% CTR, $${metrics.cpa.toFixed(2)} CPA`
+    ).join('\n')}\n\n💡 Key Insights:\n• Platform performance varies significantly\n• Campaign effectiveness shows clear winners\n• Conversion rates impact overall ROI`
+    
+    return {
+      content,
+      data: {
+        type: 'advanced_analytics',
+        topPlatforms: topPlatforms,
+        topCampaigns: topCampaigns,
+        platformAnalysis: platformGroups,
+        campaignAnalysis: campaignGroups,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 5: Enhanced Platform Conversions Handler (Priority: HIGH)
+  // Improve platform conversion queries that are currently low performing
+  if (detectedPlatform && (lowerQuery.includes('conversion') || lowerQuery.includes('conversions')) && 
+      !lowerQuery.includes('performance') && !lowerQuery.includes('analysis')) {
+    
+    const platform = PLATFORM_MAP[detectedPlatform] || detectedPlatform
+    
+    // Filter data for the specific platform
+    const platformData = data.filter(item => 
+      item.dimensions.platform.toLowerCase() === detectedPlatform
+    )
+    
+    if (platformData.length === 0) {
+      return {
+        content: `No data found for ${platform}`,
+        data: {
+          type: 'platform_conversions',
+          platform: platform,
+          conversions: 'no_data',
+          query: query
+        }
+      }
+    }
+    
+    // Calculate conversion metrics
+    const totalConversions = platformData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    const totalImpressions = platformData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = platformData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalSpend = platformData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    
+    const conversionRate = totalImpressions > 0 ? (totalConversions / totalImpressions) * 100 : 0
+    const clickToConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0
+    const costPerConversion = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    const content = `${platform} Conversion Metrics:\n\n🎯 Total Conversions: ${totalConversions.toLocaleString()}\n📊 Conversion Rate: ${conversionRate.toFixed(2)}%\n🖱️ Click-to-Conversion Rate: ${clickToConversionRate.toFixed(2)}%\n💸 Cost Per Conversion: $${costPerConversion.toFixed(2)}\n👁️ Total Impressions: ${totalImpressions.toLocaleString()}\n🖱️ Total Clicks: ${totalClicks.toLocaleString()}`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_conversions',
+        platform: platform,
+        totalConversions: totalConversions,
+        conversionRate: conversionRate,
+        clickToConversionRate: clickToConversionRate,
+        costPerConversion: costPerConversion,
+        totalImpressions: totalImpressions,
+        totalClicks: totalClicks,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 6: Enhanced Specific Metrics Handler (Priority: HIGH)
+  // Improve specific metrics queries that are currently low performing
+  if ((lowerQuery.includes('what is') || lowerQuery.includes('what are') || lowerQuery.includes('how much') || lowerQuery.includes('how many')) && 
+      (lowerQuery.includes('spend') || lowerQuery.includes('revenue') || lowerQuery.includes('impressions') || 
+       lowerQuery.includes('clicks') || lowerQuery.includes('conversions')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Calculate overall metrics
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    // Determine which metric is being asked for
+    let metric = 'spend'
+    let metricName = 'Total Spend'
+    let formatFunction = (value: number) => `$${value.toLocaleString()}`
+    
+    if (lowerQuery.includes('revenue')) {
+      metric = 'revenue'
+      metricName = 'Total Revenue'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('impressions')) {
+      metric = 'impressions'
+      metricName = 'Total Impressions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('clicks')) {
+      metric = 'clicks'
+      metricName = 'Total Clicks'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('conversions')) {
+      metric = 'conversions'
+      metricName = 'Total Conversions'
+      formatFunction = (value: number) => value.toLocaleString()
+    }
+    
+    let value = 0
+    if (metric === 'spend') value = totalSpend
+    else if (metric === 'revenue') value = totalRevenue
+    else if (metric === 'impressions') value = totalImpressions
+    else if (metric === 'clicks') value = totalClicks
+    else if (metric === 'conversions') value = totalConversions
+    
+    return {
+      content: `${metricName}: ${formatFunction(value)}`,
+      data: {
+        type: 'specific_metrics',
+        metric: metric,
+        value: value,
+        query: query
+      }
+    }
+  }
+
   // Simple fallback response for now
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
