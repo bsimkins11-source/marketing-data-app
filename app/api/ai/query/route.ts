@@ -3429,6 +3429,252 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
   
+  // PHASE 1 IMPROVEMENT: Enhanced Comparison Analysis (Priority: HIGH)
+  // Handle "which platform performed best" type queries
+  if ((lowerQuery.includes('which') || lowerQuery.includes('what')) && 
+      (lowerQuery.includes('platform') || lowerQuery.includes('channel')) && 
+      (lowerQuery.includes('best') || lowerQuery.includes('highest') || lowerQuery.includes('most') || lowerQuery.includes('performed'))) {
+    
+    // Determine the metric to compare
+    let metric = 'roas'
+    let metricName = 'ROAS'
+    let formatFunction = (value: number) => `${value.toFixed(2)}x`
+    
+    if (isCTRQuery || lowerQuery.includes('ctr') || lowerQuery.includes('click')) {
+      metric = 'ctr'
+      metricName = 'CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    } else if (isROASQuery || lowerQuery.includes('roas') || lowerQuery.includes('return')) {
+      metric = 'roas'
+      metricName = 'ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+    } else if (lowerQuery.includes('spend') || lowerQuery.includes('cost') || lowerQuery.includes('budget')) {
+      metric = 'spend'
+      metricName = 'Spend'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('revenue') || lowerQuery.includes('earnings') || lowerQuery.includes('income')) {
+      metric = 'revenue'
+      metricName = 'Revenue'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('conversion') || lowerQuery.includes('conversions')) {
+      metric = 'conversions'
+      metricName = 'Conversions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('impression') || lowerQuery.includes('impressions')) {
+      metric = 'impressions'
+      metricName = 'Impressions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('click') || lowerQuery.includes('clicks')) {
+      metric = 'clicks'
+      metricName = 'Clicks'
+      formatFunction = (value: number) => value.toLocaleString()
+    }
+    
+    // Group data by platform and calculate totals
+    const platformGroups: Record<string, { total: number, count: number, spend: number, revenue: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { total: 0, count: 0, spend: 0, revenue: 0 }
+      }
+      
+      if (metric === 'roas') {
+        // Calculate ROAS for each platform
+        platformGroups[platform].spend += item.metrics.spend
+        platformGroups[platform].revenue += item.metrics.revenue
+        platformGroups[platform].count++
+      } else {
+        // For other metrics, sum directly
+        const value = item.metrics[metric as keyof typeof item.metrics] as number
+        platformGroups[platform].total += value || 0
+        platformGroups[platform].count++
+      }
+    })
+    
+    // Calculate final metric values and sort
+    const platformMetrics = Object.entries(platformGroups)
+      .map(([platform, data]) => {
+        let finalValue = data.total
+        if (metric === 'roas') {
+          finalValue = data.spend > 0 ? data.revenue / data.spend : 0
+        }
+        return {
+          platform,
+          value: finalValue,
+          spend: data.spend,
+          revenue: data.revenue
+        }
+      })
+      .sort((a, b) => b.value - a.value) // Sort descending
+    
+    const winner = platformMetrics[0]
+    const runnerUp = platformMetrics[1]
+    
+    const content = `${winner.platform} performed best with ${formatFunction(winner.value)} ${metricName}${runnerUp ? `, followed by ${runnerUp.platform} with ${formatFunction(runnerUp.value)}` : ''}`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_comparison',
+        metric: metric,
+        winner: winner,
+        runnerUp: runnerUp,
+        allPlatforms: platformMetrics,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 1 IMPROVEMENT: Enhanced Platform Conversion Queries (Priority: HIGH)
+  // Handle platform-specific conversion queries
+  if (detectedPlatform && (lowerQuery.includes('conversion') || lowerQuery.includes('conversions'))) {
+    const platform = PLATFORM_MAP[detectedPlatform] || detectedPlatform
+    
+    // Filter data for the specific platform
+    const platformData = data.filter(item => 
+      item.dimensions.platform.toLowerCase() === detectedPlatform
+    )
+    
+    if (platformData.length === 0) {
+      return {
+        content: `No data found for ${platform}`,
+        data: {
+          type: 'platform_conversions',
+          platform: platform,
+          conversions: 0,
+          conversionRate: 0,
+          query: query
+        }
+      }
+    }
+    
+    // Calculate conversion metrics
+    const totalConversions = platformData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    const totalImpressions = platformData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = platformData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalSpend = platformData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    
+    // Calculate conversion rates
+    const conversionRate = totalImpressions > 0 ? (totalConversions / totalImpressions) * 100 : 0
+    const clickToConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0
+    const costPerConversion = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    const content = `${platform} generated ${totalConversions.toLocaleString()} conversions with a ${conversionRate.toFixed(2)}% conversion rate. Cost per conversion: $${costPerConversion.toFixed(2)}`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_conversions',
+        platform: platform,
+        conversions: totalConversions,
+        conversionRate: conversionRate,
+        clickToConversionRate: clickToConversionRate,
+        costPerConversion: costPerConversion,
+        spend: totalSpend,
+        impressions: totalImpressions,
+        clicks: totalClicks,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 1 IMPROVEMENT: Enhanced Campaign Comparison (Priority: HIGH)
+  // Handle "which campaign performed best" type queries
+  if ((lowerQuery.includes('which') || lowerQuery.includes('what')) && 
+      (lowerQuery.includes('campaign') || lowerQuery.includes('campaigns')) && 
+      (lowerQuery.includes('best') || lowerQuery.includes('highest') || lowerQuery.includes('most') || lowerQuery.includes('performed'))) {
+    
+    // Determine the metric to compare
+    let metric = 'roas'
+    let metricName = 'ROAS'
+    let formatFunction = (value: number) => `${value.toFixed(2)}x`
+    
+    if (isCTRQuery || lowerQuery.includes('ctr') || lowerQuery.includes('click')) {
+      metric = 'ctr'
+      metricName = 'CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    } else if (isROASQuery || lowerQuery.includes('roas') || lowerQuery.includes('return')) {
+      metric = 'roas'
+      metricName = 'ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+    } else if (lowerQuery.includes('spend') || lowerQuery.includes('cost') || lowerQuery.includes('budget')) {
+      metric = 'spend'
+      metricName = 'Spend'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('revenue') || lowerQuery.includes('earnings') || lowerQuery.includes('income')) {
+      metric = 'revenue'
+      metricName = 'Revenue'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('conversion') || lowerQuery.includes('conversions')) {
+      metric = 'conversions'
+      metricName = 'Conversions'
+      formatFunction = (value: number) => value.toLocaleString()
+    }
+    
+    // Normalize campaign names
+    const normalizedData = data.map(item => ({
+      ...item,
+      dimensions: {
+        ...item.dimensions,
+        campaign: item.dimensions.campaign.trim()
+      }
+    }))
+    
+    // Group data by campaign and calculate totals
+    const campaignGroups: Record<string, { total: number, count: number, spend: number, revenue: number }> = {}
+    normalizedData.forEach(item => {
+      const campaign = item.dimensions.campaign
+      if (!campaignGroups[campaign]) {
+        campaignGroups[campaign] = { total: 0, count: 0, spend: 0, revenue: 0 }
+      }
+      
+      if (metric === 'roas') {
+        // Calculate ROAS for each campaign
+        campaignGroups[campaign].spend += item.metrics.spend
+        campaignGroups[campaign].revenue += item.metrics.revenue
+        campaignGroups[campaign].count++
+      } else {
+        // For other metrics, sum directly
+        const value = item.metrics[metric as keyof typeof item.metrics] as number
+        campaignGroups[campaign].total += value || 0
+        campaignGroups[campaign].count++
+      }
+    })
+    
+    // Calculate final metric values and sort
+    const campaignMetrics = Object.entries(campaignGroups)
+      .map(([campaign, data]) => {
+        let finalValue = data.total
+        if (metric === 'roas') {
+          finalValue = data.spend > 0 ? data.revenue / data.spend : 0
+        }
+        return {
+          campaign,
+          value: finalValue,
+          spend: data.spend,
+          revenue: data.revenue
+        }
+      })
+      .sort((a, b) => b.value - a.value) // Sort descending
+    
+    const winner = campaignMetrics[0]
+    const runnerUp = campaignMetrics[1]
+    
+    const content = `${winner.campaign} performed best with ${formatFunction(winner.value)} ${metricName}${runnerUp ? `, followed by ${runnerUp.campaign} with ${formatFunction(runnerUp.value)}` : ''}`
+    
+    return {
+      content,
+      data: {
+        type: 'campaign_comparison',
+        metric: metric,
+        winner: winner,
+        runnerUp: runnerUp,
+        allCampaigns: campaignMetrics,
+        query: query
+      }
+    }
+  }
+
   // Handle "how many campaigns" queries with proper grouping (IMPROVED)
   if (isCountQuery && isCampaignQuery) {
     // Normalize campaign names to handle trailing spaces and duplicates
