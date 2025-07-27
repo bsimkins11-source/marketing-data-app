@@ -440,9 +440,18 @@ async function processAIQuery(query: string, data: any[]) {
   }
 
   // PHASE 2 IMPROVEMENT 4: Enhanced Comparative Analysis (Priority: HIGH)
-  // Handle efficiency and performance comparison queries
+  // Handle all comparative analysis queries that are currently low performing
   if ((lowerQuery.includes('which') || lowerQuery.includes('what')) && 
-      (lowerQuery.includes('efficient') || lowerQuery.includes('efficiency') || lowerQuery.includes('worst') || lowerQuery.includes('lowest') || lowerQuery.includes('best value'))) {
+      (lowerQuery.includes('best') || lowerQuery.includes('highest') || lowerQuery.includes('most') || 
+       lowerQuery.includes('efficient') || lowerQuery.includes('efficiency') || lowerQuery.includes('worst') || 
+       lowerQuery.includes('lowest') || lowerQuery.includes('best value') || lowerQuery.includes('performed'))) {
+    
+    // Determine if this is a platform or campaign comparison
+    const isPlatformComparison = lowerQuery.includes('platform') || 
+                                (lowerQuery.includes('which') && !lowerQuery.includes('campaign')) ||
+                                (lowerQuery.includes('what') && !lowerQuery.includes('campaign'))
+    
+    const isCampaignComparison = lowerQuery.includes('campaign')
     
     // Determine the metric to compare
     let metric = 'roas'
@@ -450,42 +459,111 @@ async function processAIQuery(query: string, data: any[]) {
     let formatFunction = (value: number) => `${value.toFixed(2)}x`
     let sortDescending = true
     
-    if (lowerQuery.includes('efficient') || lowerQuery.includes('efficiency')) {
-      // Efficiency = ROAS / CTR (higher is better)
+    if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate')) {
+      metric = 'ctr'
+      metricName = 'CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    } else if (lowerQuery.includes('spend') || lowerQuery.includes('cost') || lowerQuery.includes('budget')) {
+      metric = 'spend'
+      metricName = 'Spend'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('revenue')) {
+      metric = 'revenue'
+      metricName = 'Revenue'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('impressions')) {
+      metric = 'impressions'
+      metricName = 'Impressions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('clicks')) {
+      metric = 'clicks'
+      metricName = 'Clicks'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('conversions')) {
+      metric = 'conversions'
+      metricName = 'Conversions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+      metric = 'cpa'
+      metricName = 'CPA'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      sortDescending = false // Lower CPA is better
+    } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+      metric = 'cpc'
+      metricName = 'CPC'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      sortDescending = false // Lower CPC is better
+    } else if (lowerQuery.includes('cpm') || lowerQuery.includes('cost per thousand')) {
+      metric = 'cpm'
+      metricName = 'CPM'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      sortDescending = false // Lower CPM is better
+    } else if (lowerQuery.includes('efficient') || lowerQuery.includes('efficiency')) {
       metric = 'efficiency'
       metricName = 'Efficiency'
       formatFunction = (value: number) => `${value.toFixed(2)}`
     } else if (lowerQuery.includes('worst') || lowerQuery.includes('lowest')) {
-      // For "worst" queries, we'll find the lowest ROAS
-      metric = 'roas'
-      metricName = 'ROAS'
-      sortDescending = false
+      sortDescending = false // For "worst" queries, we want the lowest value
     } else if (lowerQuery.includes('best value')) {
-      // Best value = highest ROAS with reasonable spend
       metric = 'value'
       metricName = 'Value'
       formatFunction = (value: number) => `${value.toFixed(2)}`
     }
     
-    // Group data by platform and calculate metrics
-    const platformGroups: Record<string, { spend: number, revenue: number, impressions: number, clicks: number, conversions: number }> = {}
-    data.forEach(item => {
-      const platform = item.dimensions.platform
-      if (!platformGroups[platform]) {
-        platformGroups[platform] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
-      }
-      platformGroups[platform].spend += item.metrics.spend
-      platformGroups[platform].revenue += item.metrics.revenue
-      platformGroups[platform].impressions += item.metrics.impressions
-      platformGroups[platform].clicks += item.metrics.clicks
-      platformGroups[platform].conversions += item.metrics.conversions
-    })
+    // Group data by platform or campaign and calculate metrics
+    const groups: Record<string, { spend: number, revenue: number, impressions: number, clicks: number, conversions: number }> = {}
+    
+    if (isPlatformComparison) {
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!groups[platform]) {
+          groups[platform] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+        }
+        groups[platform].spend += item.metrics.spend
+        groups[platform].revenue += item.metrics.revenue
+        groups[platform].impressions += item.metrics.impressions
+        groups[platform].clicks += item.metrics.clicks
+        groups[platform].conversions += item.metrics.conversions
+      })
+    } else if (isCampaignComparison) {
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!groups[campaign]) {
+          groups[campaign] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+        }
+        groups[campaign].spend += item.metrics.spend
+        groups[campaign].revenue += item.metrics.revenue
+        groups[campaign].impressions += item.metrics.impressions
+        groups[campaign].clicks += item.metrics.clicks
+        groups[campaign].conversions += item.metrics.conversions
+      })
+    }
     
     // Calculate final metric values and sort
-    const platformMetrics = Object.entries(platformGroups)
-      .map(([platform, data]) => {
+    const metrics = Object.entries(groups)
+      .map(([name, data]) => {
         let finalValue = 0
-        if (metric === 'efficiency') {
+        if (metric === 'roas') {
+          finalValue = data.spend > 0 ? data.revenue / data.spend : 0
+        } else if (metric === 'ctr') {
+          finalValue = data.impressions > 0 ? data.clicks / data.impressions : 0
+        } else if (metric === 'spend') {
+          finalValue = data.spend
+        } else if (metric === 'revenue') {
+          finalValue = data.revenue
+        } else if (metric === 'impressions') {
+          finalValue = data.impressions
+        } else if (metric === 'clicks') {
+          finalValue = data.clicks
+        } else if (metric === 'conversions') {
+          finalValue = data.conversions
+        } else if (metric === 'cpa') {
+          finalValue = data.conversions > 0 ? data.spend / data.conversions : 0
+        } else if (metric === 'cpc') {
+          finalValue = data.clicks > 0 ? data.spend / data.clicks : 0
+        } else if (metric === 'cpm') {
+          finalValue = data.impressions > 0 ? (data.spend / data.impressions) * 1000 : 0
+        } else if (metric === 'efficiency') {
           const roas = data.spend > 0 ? data.revenue / data.spend : 0
           const ctr = data.impressions > 0 ? data.clicks / data.impressions : 0
           finalValue = ctr > 0 ? roas / ctr : 0
@@ -493,11 +571,9 @@ async function processAIQuery(query: string, data: any[]) {
           const roas = data.spend > 0 ? data.revenue / data.spend : 0
           const spendEfficiency = data.spend > 0 ? 1 / data.spend : 0
           finalValue = roas * spendEfficiency
-        } else {
-          finalValue = data.spend > 0 ? data.revenue / data.spend : 0
         }
         return {
-          platform,
+          name,
           value: finalValue,
           spend: data.spend,
           revenue: data.revenue
@@ -505,19 +581,23 @@ async function processAIQuery(query: string, data: any[]) {
       })
       .sort((a, b) => sortDescending ? b.value - a.value : a.value - b.value)
     
-    const winner = platformMetrics[0]
-    const runnerUp = platformMetrics[1]
+    const winner = metrics[0]
+    const runnerUp = metrics[1]
     
-    const content = `${winner.platform} is ${lowerQuery.includes('worst') || lowerQuery.includes('lowest') ? 'performing worst' : 'most efficient'} with ${formatFunction(winner.value)} ${metricName}${runnerUp ? `, followed by ${runnerUp.platform} with ${formatFunction(runnerUp.value)}` : ''}`
+    const comparisonType = isPlatformComparison ? 'platform' : 'campaign'
+    const bestWorst = lowerQuery.includes('worst') || lowerQuery.includes('lowest') ? 'worst' : 'best'
+    
+    const content = `${winner.name} ${bestWorst === 'worst' ? 'performed worst' : 'performed best'} with ${formatFunction(winner.value)} ${metricName}${runnerUp ? `, followed by ${runnerUp.name} with ${formatFunction(runnerUp.value)}` : ''}`
     
     return {
       content,
       data: {
-        type: 'platform_efficiency_comparison',
+        type: 'comparative_analysis',
+        comparisonType: comparisonType,
         metric: metric,
         winner: winner,
         runnerUp: runnerUp,
-        allPlatforms: platformMetrics,
+        allMetrics: metrics,
         query: query
       }
     }
@@ -820,7 +900,8 @@ async function processAIQuery(query: string, data: any[]) {
 
   // PHASE 3 IMPROVEMENT 5: Enhanced Platform Conversions Handler (Priority: HIGH)
   // Improve platform conversion queries that are currently low performing
-  if (detectedPlatform && (lowerQuery.includes('conversion') || lowerQuery.includes('conversions')) && 
+  if (detectedPlatform && (lowerQuery.includes('conversion') || lowerQuery.includes('conversions') || 
+      lowerQuery.includes('converted') || lowerQuery.includes('converting')) && 
       !lowerQuery.includes('performance') && !lowerQuery.includes('analysis')) {
     
     const platform = PLATFORM_MAP[detectedPlatform] || detectedPlatform
@@ -872,9 +953,11 @@ async function processAIQuery(query: string, data: any[]) {
 
   // PHASE 3 IMPROVEMENT 6: Enhanced Specific Metrics Handler (Priority: HIGH)
   // Improve specific metrics queries that are currently low performing
-  if ((lowerQuery.includes('what is') || lowerQuery.includes('what are') || lowerQuery.includes('how much') || lowerQuery.includes('how many')) && 
+  if ((lowerQuery.includes('what is') || lowerQuery.includes('what are') || lowerQuery.includes('how much') || lowerQuery.includes('how many') || 
+       lowerQuery.includes('total') || lowerQuery.includes('overall') || lowerQuery.includes('sum')) && 
       (lowerQuery.includes('spend') || lowerQuery.includes('revenue') || lowerQuery.includes('impressions') || 
-       lowerQuery.includes('clicks') || lowerQuery.includes('conversions')) &&
+       lowerQuery.includes('clicks') || lowerQuery.includes('conversions') || lowerQuery.includes('cost') || 
+       lowerQuery.includes('budget') || lowerQuery.includes('money')) &&
       !detectedPlatform && !detectedCampaign) {
     
     // Calculate overall metrics
@@ -920,6 +1003,69 @@ async function processAIQuery(query: string, data: any[]) {
         type: 'specific_metrics',
         metric: metric,
         value: value,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 7: Catch-all Comparative Handler (Priority: HIGH)
+  // Handle any remaining comparative queries that might be falling through
+  if ((lowerQuery.includes('which') || lowerQuery.includes('what')) && 
+      (lowerQuery.includes('platform') || lowerQuery.includes('campaign')) &&
+      (lowerQuery.includes('best') || lowerQuery.includes('highest') || lowerQuery.includes('most') || 
+       lowerQuery.includes('worst') || lowerQuery.includes('lowest'))) {
+    
+    // Default to platform comparison with ROAS
+    const isPlatformComparison = lowerQuery.includes('platform') || !lowerQuery.includes('campaign')
+    const isCampaignComparison = lowerQuery.includes('campaign')
+    
+    // Group data by platform or campaign
+    const groups: Record<string, { spend: number, revenue: number, roas: number }> = {}
+    
+    if (isPlatformComparison) {
+      data.forEach(item => {
+        const platform = item.dimensions.platform
+        if (!groups[platform]) {
+          groups[platform] = { spend: 0, revenue: 0, roas: 0 }
+        }
+        groups[platform].spend += item.metrics.spend
+        groups[platform].revenue += item.metrics.revenue
+      })
+    } else {
+      data.forEach(item => {
+        const campaign = item.dimensions.campaign
+        if (!groups[campaign]) {
+          groups[campaign] = { spend: 0, revenue: 0, roas: 0 }
+        }
+        groups[campaign].spend += item.metrics.spend
+        groups[campaign].revenue += item.metrics.revenue
+      })
+    }
+    
+    // Calculate ROAS for each group
+    Object.keys(groups).forEach(name => {
+      const group = groups[name]
+      group.roas = group.spend > 0 ? group.revenue / group.spend : 0
+    })
+    
+    // Sort by ROAS
+    const sorted = Object.entries(groups).sort((a, b) => b[1].roas - a[1].roas)
+    const winner = sorted[0]
+    const runnerUp = sorted[1]
+    
+    const comparisonType = isPlatformComparison ? 'platform' : 'campaign'
+    const bestWorst = lowerQuery.includes('worst') || lowerQuery.includes('lowest') ? 'worst' : 'best'
+    
+    const content = `${winner[0]} ${bestWorst === 'worst' ? 'performed worst' : 'performed best'} with ${winner[1].roas.toFixed(2)}x ROAS${runnerUp ? `, followed by ${runnerUp[0]} with ${runnerUp[1].roas.toFixed(2)}x ROAS` : ''}`
+    
+    return {
+      content,
+      data: {
+        type: 'catch_all_comparison',
+        comparisonType: comparisonType,
+        winner: { name: winner[0], roas: winner[1].roas },
+        runnerUp: runnerUp ? { name: runnerUp[0], roas: runnerUp[1].roas } : null,
+        allMetrics: sorted,
         query: query
       }
     }
