@@ -299,12 +299,14 @@ ${topPlatforms.map((platform, index) =>
   // PHASE 4 IMPROVEMENT 11: Advanced Cross-Dimensional Analysis Handler (Priority: CRITICAL)
   // Handle complex queries combining creatives, audiences, and platforms
   if ((KEYWORDS.CREATIVE.some(keyword => lowerQuery.includes(keyword)) &&
-       KEYWORDS.AUDIENCE.some(keyword => lowerQuery.includes(keyword)) &&
-       KEYWORDS.PLATFORM.some(keyword => lowerQuery.includes(keyword))) ||
-      (lowerQuery.includes('performed best') && 
-       (lowerQuery.includes('against') || lowerQuery.includes('on'))) ||
+       KEYWORDS.AUDIENCE.some(keyword => lowerQuery.includes(keyword))) ||
+      (lowerQuery.includes('best performing creatives') && 
+       (lowerQuery.includes('against') || lowerQuery.includes('audiences'))) ||
       (lowerQuery.includes('creatives performed best') && 
-       (lowerQuery.includes('audiences') || lowerQuery.includes('platforms')))) {
+       (lowerQuery.includes('audiences') || lowerQuery.includes('platforms'))) ||
+      (lowerQuery.includes('creatives') && 
+       lowerQuery.includes('audiences') && 
+       (lowerQuery.includes('performed') || lowerQuery.includes('best')))) {
     
     // Group data by creative, audience, and platform combination
     const crossDimensionalMetrics = data.reduce((acc, item) => {
