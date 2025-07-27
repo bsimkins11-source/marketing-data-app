@@ -690,7 +690,14 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     // CAMPAIGN SUMMARY HANDLERS (WORLD-CLASS DIGITAL MARKETING ANALYSIS)
     if (lowerQuery.includes('campaign summary') || lowerQuery.includes('campaign overview') || lowerQuery.includes('summary of campaigns') ||
         lowerQuery.includes('campaign performance summary') || lowerQuery.includes('overall campaign') || lowerQuery.includes('campaigns summary') ||
-        lowerQuery.includes('high level overview') || lowerQuery.includes('executive summary') || lowerQuery.includes('campaign analysis')) {
+        lowerQuery.includes('high level overview') || lowerQuery.includes('executive summary') || lowerQuery.includes('campaign analysis') ||
+        lowerQuery.includes('summarize') || lowerQuery.includes('big picture') || lowerQuery.includes('high-level') || lowerQuery.includes('high level') ||
+        lowerQuery.includes('overview') || lowerQuery.includes('summary') || lowerQuery.includes('recap') || lowerQuery.includes('summarize the') ||
+        lowerQuery.includes('summarize our') || lowerQuery.includes('give me a summary') || lowerQuery.includes('what is the summary') ||
+        lowerQuery.includes('what is our summary') || lowerQuery.includes('marketing performance') || lowerQuery.includes('campaign performance') ||
+        lowerQuery.includes('performance summary') || lowerQuery.includes('results summary') || lowerQuery.includes('summarize results') ||
+        lowerQuery.includes('summarize performance') || lowerQuery.includes('give me an overview') || lowerQuery.includes('what is the overview') ||
+        lowerQuery.includes('what is our overview') || lowerQuery.includes('campaign overview') || lowerQuery.includes('marketing overview')) {
       
       // Calculate comprehensive campaign metrics
       const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
