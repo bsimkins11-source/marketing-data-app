@@ -217,6 +217,340 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // PHASE 4 IMPROVEMENT 14: Worst Performing Campaign Analysis Handler (Priority: CRITICAL)
+  // Handle worst performing campaign analysis with creative and audience optimizations
+  if ((lowerQuery.includes('worst performing campaign') && 
+       (lowerQuery.includes('creative') || lowerQuery.includes('audience'))) ||
+      (lowerQuery.includes('creative optimizations') && lowerQuery.includes('audience optimizations')) ||
+      (lowerQuery.includes('optimizations') && lowerQuery.includes('platform') && lowerQuery.includes('campaign'))) {
+    
+    try {
+      // Group data by campaign and calculate performance
+      const campaignMetrics = data.reduce((acc, item) => {
+        const campaign = item.dimensions.campaign
+        if (!acc[campaign]) {
+          acc[campaign] = {
+            platform: item.dimensions.platform,
+            spend: 0,
+            revenue: 0,
+            impressions: 0,
+            clicks: 0,
+            conversions: 0,
+            ctrValues: [],
+            creatives: new Map(),
+            audiences: new Map()
+          }
+        }
+        acc[campaign].spend += item.metrics.spend
+        acc[campaign].revenue += item.metrics.revenue
+        acc[campaign].impressions += item.metrics.impressions
+        acc[campaign].clicks += item.metrics.clicks
+        acc[campaign].conversions += item.metrics.conversions
+        acc[campaign].ctrValues.push(item.metrics.ctr || 0)
+        
+        // Track creative performance
+        const creativeKey = item.dimensions.creativeName || item.dimensions.creativeId
+        if (!acc[campaign].creatives.has(creativeKey)) {
+          acc[campaign].creatives.set(creativeKey, {
+            creativeName: item.dimensions.creativeName,
+            creativeFormat: item.dimensions.creative_format,
+            spend: 0,
+            revenue: 0,
+            impressions: 0,
+            ctrValues: []
+          })
+        }
+        const creative = acc[campaign].creatives.get(creativeKey)
+        creative.spend += item.metrics.spend
+        creative.revenue += item.metrics.revenue
+        creative.impressions += item.metrics.impressions
+        creative.ctrValues.push(item.metrics.ctr || 0)
+        
+        // Track audience performance
+        const audience = item.dimensions.audience
+        if (!acc[campaign].audiences.has(audience)) {
+          acc[campaign].audiences.set(audience, {
+            audience: audience,
+            spend: 0,
+            revenue: 0,
+            impressions: 0,
+            ctrValues: []
+          })
+        }
+        const audienceData = acc[campaign].audiences.get(audience)
+        audienceData.spend += item.metrics.spend
+        audienceData.revenue += item.metrics.revenue
+        audienceData.impressions += item.metrics.impressions
+        audienceData.ctrValues.push(item.metrics.ctr || 0)
+        
+        return acc
+      }, {} as Record<string, any>)
+      
+      // Calculate campaign performance and find worst performer
+      const campaignPerformance = Object.entries(campaignMetrics).map(([campaign, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const avgCtr = metrics.ctrValues.length > 0 ? 
+          metrics.ctrValues.reduce((sum: number, ctr: number) => sum + ctr, 0) / metrics.ctrValues.length : 0
+        
+        // Calculate creative performance for this campaign
+        const creativePerformance = Array.from(metrics.creatives.values()).map((creative: any) => {
+          const creativeRoas = creative.spend > 0 ? creative.revenue / creative.spend : 0
+          const creativeCtr = creative.ctrValues.length > 0 ? 
+            creative.ctrValues.reduce((sum: number, ctr: number) => sum + ctr, 0) / creative.ctrValues.length : 0
+          return {
+            creativeName: creative.creativeName,
+            creativeFormat: creative.creativeFormat,
+            roas: creativeRoas,
+            ctr: creativeCtr,
+            spend: creative.spend,
+            impressions: creative.impressions
+          }
+        }).sort((a, b) => b.roas - a.roas)
+        
+        // Calculate audience performance for this campaign
+        const audiencePerformance = Array.from(metrics.audiences.values()).map((audience: any) => {
+          const audienceRoas = audience.spend > 0 ? audience.revenue / audience.spend : 0
+          const audienceCtr = audience.ctrValues.length > 0 ? 
+            audience.ctrValues.reduce((sum: number, ctr: number) => sum + ctr, 0) / audience.ctrValues.length : 0
+          return {
+            audience: audience.audience,
+            roas: audienceRoas,
+            ctr: audienceCtr,
+            spend: audience.spend,
+            impressions: audience.impressions
+          }
+        }).sort((a, b) => b.roas - a.roas)
+        
+        return {
+          campaign,
+          platform: metrics.platform,
+          roas,
+          ctr: avgCtr,
+          spend: metrics.spend,
+          revenue: metrics.revenue,
+          impressions: metrics.impressions,
+          creativePerformance,
+          audiencePerformance
+        }
+      }).sort((a, b) => a.roas - b.roas) // Sort by ROAS ascending (worst first)
+      
+      // Get worst performing campaign
+      const worstCampaign = campaignPerformance[0]
+      
+      if (!worstCampaign) {
+        return {
+          content: "No campaign data found for analysis.",
+          data: {
+            type: 'worst_campaign_analysis',
+            query: query
+          }
+        }
+      }
+      
+      const content = `🎯 **WORST PERFORMING CAMPAIGN ANALYSIS**
+
+## **📊 Campaign Overview: ${worstCampaign.campaign}**
+- **Platform**: ${worstCampaign.platform}
+- **ROAS**: ${worstCampaign.roas.toFixed(2)}x
+- **CTR**: ${(worstCampaign.ctr * 100).toFixed(2)}%
+- **Spend**: $${worstCampaign.spend.toLocaleString()}
+- **Revenue**: $${worstCampaign.revenue.toLocaleString()}
+
+## **🎨 Creative Optimizations by Platform:**
+
+### **${worstCampaign.platform} Creative Performance:**
+${worstCampaign.creativePerformance.slice(0, 3).map((creative, index) => 
+  `${index + 1}. **${creative.creativeName}** (${creative.creativeFormat})
+   • ROAS: ${creative.roas.toFixed(2)}x
+   • CTR: ${(creative.ctr * 100).toFixed(2)}%
+   • Spend: $${creative.spend.toLocaleString()}`
+).join('\n\n')}
+
+### **🚀 Creative Optimization Recommendations:**
+1. **Scale**: Increase budget on ${worstCampaign.creativePerformance[0]?.creativeName} (ROAS: ${worstCampaign.creativePerformance[0]?.roas.toFixed(2)}x)
+2. **Test**: Create variations of ${worstCampaign.creativePerformance[0]?.creativeFormat} format
+3. **Optimize**: Improve CTR for underperforming creatives
+
+## **🎯 Audience Optimizations by Platform:**
+
+### **${worstCampaign.platform} Audience Performance:**
+${worstCampaign.audiencePerformance.slice(0, 3).map((audience, index) => 
+  `${index + 1}. **${audience.audience}**
+   • ROAS: ${audience.roas.toFixed(2)}x
+   • CTR: ${(audience.ctr * 100).toFixed(2)}%
+   • Spend: $${audience.spend.toLocaleString()}`
+).join('\n\n')}
+
+### **🎯 Audience Optimization Recommendations:**
+1. **Target**: Focus on ${worstCampaign.audiencePerformance[0]?.audience} (ROAS: ${worstCampaign.audiencePerformance[0]?.roas.toFixed(2)}x)
+2. **Exclude**: Consider excluding underperforming audiences with ROAS < 2.0x
+3. **Expand**: Create lookalike audiences based on top performers
+
+## **📈 Next Steps for ${worstCampaign.campaign}:**
+1. **Immediate**: Increase spend on top creative (${worstCampaign.creativePerformance[0]?.creativeName}) by 40%
+2. **Short-term**: Create audience-specific creative variations
+3. **Long-term**: Develop platform-specific optimization strategy`
+
+      return {
+        content,
+        data: {
+          type: 'worst_campaign_analysis',
+          worstCampaign,
+          query: query
+        }
+      }
+    } catch (error) {
+      return {
+        content: "Error generating worst campaign analysis. Please try a more specific query.",
+        data: {
+          type: 'error',
+          query: query
+        }
+      }
+    }
+  }
+
+  // PHASE 4 IMPROVEMENT 13: Amazon Creative Optimization Handler (Priority: CRITICAL)
+  // Handle Amazon-specific creative optimization queries
+  if ((lowerQuery.includes('amazon') && 
+       (lowerQuery.includes('creative') || lowerQuery.includes('creatives')) &&
+       (lowerQuery.includes('optimization') || lowerQuery.includes('optimize') || lowerQuery.includes('recommendations'))) ||
+      (lowerQuery.includes('creative optimizations') && lowerQuery.includes('amazon')) ||
+      (lowerQuery.includes('amazon creative') && lowerQuery.includes('performance'))) {
+    
+    try {
+      // Filter data for Amazon platform
+      const amazonData = data.filter(item => 
+        item.dimensions.platform.toLowerCase() === 'amazon'
+      )
+      
+      if (amazonData.length === 0) {
+        return {
+          content: "No Amazon campaign data found for creative optimization analysis.",
+          data: {
+            type: 'amazon_creative_optimization',
+            query: query
+          }
+        }
+      }
+      
+      // Analyze creative performance on Amazon
+      const creativeMetrics = amazonData.reduce((acc, item) => {
+        const creativeKey = item.dimensions.creativeName || item.dimensions.creativeId
+        if (!acc[creativeKey]) {
+          acc[creativeKey] = {
+            creativeName: item.dimensions.creativeName,
+            creativeFormat: item.dimensions.creative_format,
+            spend: 0,
+            revenue: 0,
+            impressions: 0,
+            clicks: 0,
+            conversions: 0,
+            ctrValues: [],
+            audiences: new Set()
+          }
+        }
+        acc[creativeKey].spend += item.metrics.spend
+        acc[creativeKey].revenue += item.metrics.revenue
+        acc[creativeKey].impressions += item.metrics.impressions
+        acc[creativeKey].clicks += item.metrics.clicks
+        acc[creativeKey].conversions += item.metrics.conversions
+        acc[creativeKey].ctrValues.push(item.metrics.ctr || 0)
+        acc[creativeKey].audiences.add(item.dimensions.audience)
+        return acc
+      }, {} as Record<string, any>)
+      
+      // Calculate creative performance
+      const creativePerformance = Object.entries(creativeMetrics).map(([creativeKey, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const avgCtr = metrics.ctrValues.length > 0 ? 
+          metrics.ctrValues.reduce((sum: number, ctr: number) => sum + ctr, 0) / metrics.ctrValues.length : 0
+        const audienceCount = metrics.audiences.size
+        
+        return { 
+          creativeName: metrics.creativeName, 
+          creativeFormat: metrics.creativeFormat,
+          roas, 
+          ctr: avgCtr, 
+          spend: metrics.spend, 
+          revenue: metrics.revenue,
+          impressions: metrics.impressions,
+          audienceCount
+        }
+      }).sort((a, b) => b.roas - a.roas)
+      
+      // Get top performers
+      const topCreatives = creativePerformance.slice(0, 5)
+      
+      // Calculate overall Amazon metrics
+      const totalSpend = amazonData.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalRevenue = amazonData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+      const overallRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      const avgCtr = amazonData.reduce((sum, item) => sum + (item.metrics.ctr || 0), 0) / amazonData.length
+      
+      const content = `🎯 **AMAZON CREATIVE OPTIMIZATION ANALYSIS**
+
+## **📊 Amazon Performance Overview**
+- **Total Spend**: $${totalSpend.toLocaleString()}
+- **Total Revenue**: $${totalRevenue.toLocaleString()}
+- **Overall ROAS**: ${overallRoas.toFixed(2)}x
+- **Average CTR**: ${(avgCtr * 100).toFixed(2)}%
+
+## **🏆 Top Performing Amazon Creatives:**
+
+${topCreatives.map((creative, index) => 
+  `${index + 1}. **${creative.creativeName}** (${creative.creativeFormat})
+   • ROAS: ${creative.roas.toFixed(2)}x
+   • CTR: ${(creative.ctr * 100).toFixed(2)}%
+   • Spend: $${creative.spend.toLocaleString()}
+   • Impressions: ${creative.impressions.toLocaleString()}
+   • Audiences: ${creative.audienceCount}`
+).join('\n\n')}
+
+## **🚀 Creative Optimization Recommendations:**
+
+### **1. Scale Top Performers**
+- **${topCreatives[0]?.creativeName}** shows the highest ROAS (${topCreatives[0]?.roas.toFixed(2)}x) - increase budget allocation
+- Create variations of ${topCreatives[0]?.creativeFormat} format based on this success
+
+### **2. Format Optimization**
+- **${topCreatives[1]?.creativeFormat}** format performs well - expand usage
+- Test new ${topCreatives[2]?.creativeFormat} variations across audiences
+
+### **3. Audience-Creative Pairing**
+- Focus on audience-specific creative variations
+- Leverage ${topCreatives[0]?.audienceCount} audience insights for targeting
+
+### **4. Next Steps**
+1. **Immediate**: Increase spend on ${topCreatives[0]?.creativeName} by 30%
+2. **Short-term**: Create ${topCreatives[0]?.creativeFormat} variations for different audiences
+3. **Long-term**: Develop Amazon-specific creative strategy based on top performers`
+
+      return {
+        content,
+        data: {
+          type: 'amazon_creative_optimization',
+          creatives: topCreatives,
+          overallMetrics: {
+            spend: totalSpend,
+            revenue: totalRevenue,
+            roas: overallRoas,
+            avgCtr: avgCtr
+          },
+          query: query
+        }
+      }
+    } catch (error) {
+      return {
+        content: "Error generating Amazon creative optimization analysis. Please try a more specific query.",
+        data: {
+          type: 'error',
+          query: query
+        }
+      }
+    }
+  }
+
   // PHASE 4 IMPROVEMENT 12: Optimization Strategy Handler (Priority: CRITICAL)
   // Handle optimization strategy queries
   if (lowerQuery.includes('optimization strategy') || 
