@@ -125,6 +125,42 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
+  // PHASE 2 IMPROVEMENT: Enhanced Metric Context Handling (Priority: HIGH)
+  // Handle ambiguous metric queries with better context detection
+  if ((lowerQuery.includes('what is') || lowerQuery.includes('what are')) && 
+      (lowerQuery.includes('metrics') || lowerQuery.includes('numbers') || lowerQuery.includes('stats') || lowerQuery.includes('performance')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Calculate key overall metrics
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const overallCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    const content = `Key Performance Metrics:\n\n💰 Total Spend: $${totalSpend.toLocaleString()}\n💵 Total Revenue: $${totalRevenue.toLocaleString()}\n📈 Overall ROAS: ${overallROAS.toFixed(2)}x\n👁️ Total Impressions: ${totalImpressions.toLocaleString()}\n🖱️ Total Clicks: ${totalClicks.toLocaleString()}\n🎯 Total Conversions: ${totalConversions.toLocaleString()}\n📊 Overall CTR: ${(overallCTR * 100).toFixed(2)}%\n💸 Overall CPA: $${overallCPA.toFixed(2)}`
+    
+    return {
+      content,
+      data: {
+        type: 'key_metrics_summary',
+        totalSpend: totalSpend,
+        totalRevenue: totalRevenue,
+        overallROAS: overallROAS,
+        overallCTR: overallCTR,
+        overallCPA: overallCPA,
+        totalImpressions: totalImpressions,
+        totalClicks: totalClicks,
+        totalConversions: totalConversions,
+        query: query
+      }
+    }
+  }
+
   // Simple fallback response for now
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
