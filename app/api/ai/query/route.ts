@@ -32,43 +32,43 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
       const campaigns = lastResult.data.campaigns || []
       if (campaigns.length > 0) {
         const topCampaign = campaigns[0]
-        const campaignData = data.filter(item => 
+    const campaignData = data.filter(item => 
           item.dimensions.campaign === topCampaign.campaign
         )
         
         if (campaignData.length > 0) {
-          const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
-          const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
-          const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
-          const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
-          
-          let metric = 'spend'
-          let metricName = 'Spend'
-          let formatFunction = (value: number) => `$${value.toLocaleString()}`
+    const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    
+    let metric = 'spend'
+    let metricName = 'Spend'
+    let formatFunction = (value: number) => `$${value.toLocaleString()}`
           let value = totalSpend
           
           if (lowerQuery.includes('ctr')) {
-            metric = 'ctr'
-            metricName = 'CTR'
-            formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      metric = 'ctr'
+      metricName = 'CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
             value = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-          } else if (lowerQuery.includes('roas')) {
-            metric = 'roas'
-            metricName = 'ROAS'
-            formatFunction = (value: number) => `${value.toFixed(2)}x`
+    } else if (lowerQuery.includes('roas')) {
+      metric = 'roas'
+      metricName = 'ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
             value = totalSpend > 0 ? totalRevenue / totalSpend : 0
           }
           
-          return {
+      return {
             content: `${topCampaign.campaign} ${metricName}: ${formatFunction(value)}`,
-            data: {
+        data: {
               type: 'drill_down',
               campaign: topCampaign.campaign,
-              metric: metric,
+          metric: metric,
               value: value,
-              query: query
-            }
-          }
+          query: query
+        }
+      }
         }
       }
     }
@@ -127,7 +127,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
         const campaigns = Array.from(new Set(brandData.map(item => item.dimensions.campaign)))
         const totalSpend = brandData.reduce((sum, item) => sum + item.metrics.spend, 0)
         const totalRevenue = brandData.reduce((sum, item) => sum + item.metrics.revenue, 0)
-        const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
         
         return {
           brand: brandName,
@@ -163,12 +163,12 @@ ${uniqueBrands.map((brand, index) => `${index + 1}. ${brand}`).join('\n')}
 Each brand has its own set of campaigns with different performance metrics and targeting strategies.`
 
       updateConversationContext(sessionId, query, { content, data: { type: 'brand_query', brands: brandCampaigns, query: query } })
-      return {
-        content,
-        data: {
+    return {
+      content,
+      data: {
           type: 'brand_query',
           brands: brandCampaigns,
-          query: query
+        query: query
         }
       }
     } catch (error) {
@@ -306,9 +306,9 @@ ${brandMetrics.map(brand =>
    - Establish cross-brand performance benchmarks`
 
       updateConversationContext(sessionId, query, { content, data: { type: 'brand_analytics', brands: brandMetrics, overallMetrics: { totalSpend, totalRevenue, overallRoas }, query: query } })
-      return {
+    return {
         content,
-        data: {
+      data: {
           type: 'brand_analytics',
           brands: brandMetrics,
           overallMetrics: {
@@ -316,7 +316,7 @@ ${brandMetrics.map(brand =>
             totalRevenue,
             overallRoas
           },
-          query: query
+        query: query
         }
       }
     } catch (error) {
@@ -339,12 +339,12 @@ ${brandMetrics.map(brand =>
       const uniqueCampaigns = Array.from(new Set(data.map(item => item.dimensions.campaign)))
       
       // Calculate overall metrics
-      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
-      const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
-      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
-      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
-      const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
-      
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
       const overallRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0
       const overallCtr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
       const overallCpa = totalConversions > 0 ? totalSpend / totalConversions : 0
@@ -364,8 +364,8 @@ ${brandMetrics.map(brand =>
         
         // Get platforms used in this campaign
         const platforms = Array.from(new Set(campaignData.map(item => item.dimensions.platform)))
-        
-                 return {
+    
+    return {
            campaign: campaignName,
            brand: campaignData[0]?.dimensions.brand || 'Unknown Brand',
            spend: campaignSpend,
@@ -536,19 +536,19 @@ ${platformPerformance.map((platform, index) =>
         )
         
         if (analysisData.length === 0) {
-          return {
+    return {
             content: `No data found for campaign "${campaignName}". Available campaigns: ${Array.from(new Set(data.map(item => item.dimensions.campaign))).join(', ')}`,
-            data: {
+      data: {
               type: 'campaign_not_found',
-              query: query
-            }
-          }
-        }
+        query: query
+      }
+    }
+  }
       }
       
       // Analyze platform performance
       const platformMetrics = analysisData.reduce((acc, item) => {
-        const platform = item.dimensions.platform
+      const platform = item.dimensions.platform
         if (!acc[platform]) {
           acc[platform] = {
             spend: 0,
@@ -619,7 +619,7 @@ ${platformPerformance.map((platform, index) =>
           const creativeRoas = creative.spend > 0 ? creative.revenue / creative.spend : 0
           const creativeCtr = creative.ctrValues.length > 0 ? 
             creative.ctrValues.reduce((sum: number, ctr: number) => sum + ctr, 0) / creative.ctrValues.length : 0
-          return {
+    return {
             creativeName: creative.creativeName,
             creativeFormat: creative.creativeFormat,
             roas: creativeRoas,
@@ -753,10 +753,10 @@ ${platformPerformance.map((platform, index) =>
       
       ${isCampaignSpecific ? `\n## **📋 CAMPAIGN-SPECIFIC NOTES:**
       This analysis is focused on "${campaignName}" campaign. Consider these insights in the context of your overall marketing strategy and cross-campaign performance.` : ''}`
-      
-      return {
-        content,
-        data: {
+    
+    return {
+      content,
+      data: {
           type: isCampaignSpecific ? 'campaign_specific_optimization' : 'universal_optimization',
           platformPerformance,
           topPlatforms,
@@ -768,7 +768,7 @@ ${platformPerformance.map((platform, index) =>
           },
           campaignName,
           isCampaignSpecific,
-          query: query
+        query: query
         }
       }
     } catch (error) {
@@ -827,22 +827,30 @@ ${platformPerformance.map((platform, index) =>
     // Calculate performance metrics and sort
     const creativePerformance = Object.values(creativeMetrics).map((creative: any) => {
       const roas = creative.spend > 0 ? creative.revenue / creative.spend : 0
-      const ctr = creative.impressions > 0 ? creative.clicks / creative.impressions : 0
-      const cpa = creative.conversions > 0 ? creative.spend / creative.conversions : 0
+      // Calculate conversions from revenue and ROAS, then calculate CPA
+      const calculatedConversions = roas > 0 ? creative.revenue / (roas * 100) : 0 // Assuming $100 average order value
+      const cpa = calculatedConversions > 0 ? creative.spend / calculatedConversions : 0
       
-      return {
-        creativeId: creative.creativeId,
-        creativeName: creative.creativeName,
-        creativeFormat: creative.creativeFormat,
-        campaign: creative.campaign,
-        platform: creative.platform,
-        roas,
-        ctr,
-        cpa,
-        spend: creative.spend,
-        revenue: creative.revenue,
-        conversions: creative.conversions
-      }
+      // Get the original CTR from the data (we need to find the first item with this creative)
+      const firstCreativeItem = filteredData.find(item => 
+        item.dimensions.creativeId === creative.creativeId && 
+        item.dimensions.creativeName === creative.creativeName
+      )
+      const ctr = firstCreativeItem?.metrics.ctr || 0
+      
+              return {
+          creativeId: creative.creativeId,
+          creativeName: creative.creativeName,
+          creativeFormat: creative.creativeFormat,
+          campaign: creative.campaign,
+          platform: creative.platform,
+          roas,
+          ctr,
+          cpa,
+          spend: creative.spend,
+          revenue: creative.revenue,
+          conversions: calculatedConversions
+        }
     }).sort((a, b) => b.roas - a.roas)
     
     // Get top 3 performing creatives
@@ -1125,13 +1133,13 @@ ${platformPerformance.map((platform, index) =>
         
         return `${item.dimensions.campaign} (${item.dimensions.platform}): ROAS ${roas.toFixed(2)}x, CTR ${(ctr * 100).toFixed(2)}%, CPA $${cpa.toFixed(2)}`
       }).join('\n')
-      
-      return {
+    
+    return {
         content: `Found ${anomalies.length} anomaly/anomalies:\n${anomalyList}`,
-        data: {
+      data: {
           type: 'anomaly_detection',
           anomalies: anomalies,
-          query: query
+        query: query
         }
       }
     } else {
