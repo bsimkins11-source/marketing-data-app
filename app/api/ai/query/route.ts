@@ -1595,6 +1595,33 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // PHASE 4 IMPROVEMENT 8: Campaign Names Handler (Priority: CRITICAL)
+  // Handle "campaign names", "list campaigns", "what campaigns" queries
+  if ((lowerQuery.includes('campaign names') || lowerQuery.includes('campaign name') || 
+       lowerQuery.includes('list campaigns') || lowerQuery.includes('what campaigns') ||
+       lowerQuery.includes('all campaigns') || lowerQuery.includes('show campaigns')) &&
+      !KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword))) {
+    
+    // Get unique campaign names
+    const campaignNames = data.map(item => item.dimensions.campaign)
+    const uniqueCampaigns = Array.from(new Set(campaignNames))
+    const sortedCampaigns = uniqueCampaigns.sort()
+    
+    const content = `📋 Campaign Names:\n\n${sortedCampaigns.map((campaign, index) => 
+      `${index + 1}. ${campaign}`
+    ).join('\n')}\n\nTotal: ${sortedCampaigns.length} campaigns`
+    
+    return {
+      content,
+      data: {
+        type: 'campaign_names',
+        campaigns: sortedCampaigns,
+        count: sortedCampaigns.length,
+        query: query
+      }
+    }
+  }
+
   // PHASE 4 IMPROVEMENT 7: Creative Performance Handler (Priority: CRITICAL)
   // Handle "top performing creatives", "best creatives" queries
   if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
