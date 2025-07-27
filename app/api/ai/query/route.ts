@@ -4484,7 +4484,10 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   }
 
   // SPECIFIC METRICS HANDLERS (HIGH PRIORITY - FIXING 100% FAILURE RATE)
-  if (lowerQuery.includes('what is our') || lowerQuery.includes('what are our') || lowerQuery.includes('how much') || lowerQuery.includes('how many') || lowerQuery.includes('what is the')) {
+  if ((lowerQuery.includes('what is our') || lowerQuery.includes('what are our') || lowerQuery.includes('how much') || lowerQuery.includes('how many') || lowerQuery.includes('what is the')) && 
+      !lowerQuery.includes('summary') && !lowerQuery.includes('overview') && !lowerQuery.includes('executive') && !lowerQuery.includes('big picture') &&
+      !lowerQuery.includes('trends') && !lowerQuery.includes('patterns') && !lowerQuery.includes('insights') && !lowerQuery.includes('analytics') &&
+      !lowerQuery.includes('key metrics') && !lowerQuery.includes('key findings') && !lowerQuery.includes('focus') && !lowerQuery.includes('attention')) {
     // Check for specific metrics
     if (lowerQuery.includes('spend') || lowerQuery.includes('cost') || lowerQuery.includes('budget')) {
       const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
