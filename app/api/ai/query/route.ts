@@ -372,6 +372,206 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
+  // PHASE 2 IMPROVEMENT 6: Campaign-Specific Handlers (Priority: HIGH)
+  // Handle campaign-specific queries that are currently falling through
+  if (detectedCampaign && (lowerQuery.includes('spend') || lowerQuery.includes('revenue') || 
+      lowerQuery.includes('impressions') || lowerQuery.includes('clicks') || lowerQuery.includes('conversions') ||
+      lowerQuery.includes('ctr') || lowerQuery.includes('roas') || lowerQuery.includes('cpa') || 
+      lowerQuery.includes('cpc') || lowerQuery.includes('cpm'))) {
+    
+    const campaign = detectedCampaign.replace('freshnest ', 'FreshNest ').replace('freshnest', 'FreshNest ')
+    
+    // Filter data for the specific campaign
+    const campaignData = data.filter(item => 
+      item.dimensions.campaign_name.toLowerCase().includes(detectedCampaign)
+    )
+    
+    if (campaignData.length === 0) {
+      return {
+        content: `No data found for ${campaign}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          performance: 'no_data',
+          query: query
+        }
+      }
+    }
+    
+    // Calculate campaign metrics
+    const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = campaignData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    // Determine which metric is being asked for
+    let metric = 'spend'
+    let metricName = 'Spend'
+    let formatFunction = (value: number) => `$${value.toLocaleString()}`
+    
+    if (lowerQuery.includes('revenue')) {
+      metric = 'revenue'
+      metricName = 'Revenue'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('impressions')) {
+      metric = 'impressions'
+      metricName = 'Impressions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('clicks')) {
+      metric = 'clicks'
+      metricName = 'Clicks'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('conversions')) {
+      metric = 'conversions'
+      metricName = 'Conversions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('ctr')) {
+      metric = 'ctr'
+      metricName = 'CTR'
+      const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(ctr)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: ctr,
+          query: query
+        }
+      }
+    } else if (lowerQuery.includes('roas')) {
+      metric = 'roas'
+      metricName = 'ROAS'
+      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(roas)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: roas,
+          query: query
+        }
+      }
+    } else if (lowerQuery.includes('cpa')) {
+      metric = 'cpa'
+      metricName = 'CPA'
+      const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(cpa)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: cpa,
+          query: query
+        }
+      }
+    } else if (lowerQuery.includes('cpc')) {
+      metric = 'cpc'
+      metricName = 'CPC'
+      const cpc = totalClicks > 0 ? totalSpend / totalClicks : 0
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(cpc)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: cpc,
+          query: query
+        }
+      }
+    } else if (lowerQuery.includes('cpm')) {
+      metric = 'cpm'
+      metricName = 'CPM'
+      const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(cpm)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: cpm,
+          query: query
+        }
+      }
+    }
+    
+    // Handle basic metrics (spend, revenue, impressions, clicks, conversions)
+    let value = 0
+    if (metric === 'spend') value = totalSpend
+    else if (metric === 'revenue') value = totalRevenue
+    else if (metric === 'impressions') value = totalImpressions
+    else if (metric === 'clicks') value = totalClicks
+    else if (metric === 'conversions') value = totalConversions
+    
+    return {
+      content: `${campaign} ${metricName}: ${formatFunction(value)}`,
+      data: {
+        type: 'campaign_specific',
+        campaign: campaign,
+        metric: metric,
+        value: value,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 2 IMPROVEMENT 7: Strategic Insights Handler (Priority: MEDIUM)
+  // Handle strategic and recommendation queries
+  if ((lowerQuery.includes('recommendations') || lowerQuery.includes('recommend') || 
+       lowerQuery.includes('learn') || lowerQuery.includes('insights') || lowerQuery.includes('takeaways') ||
+       lowerQuery.includes('optimize') || lowerQuery.includes('improve') || lowerQuery.includes('focus')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Calculate overall performance metrics
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    
+    // Group by platform for analysis
+    const platformGroups: Record<string, { spend: number, revenue: number, roas: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, roas: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += item.metrics.revenue
+    })
+    
+    // Calculate ROAS for each platform
+    Object.keys(platformGroups).forEach(platform => {
+      const group = platformGroups[platform]
+      group.roas = group.spend > 0 ? group.revenue / group.spend : 0
+    })
+    
+    // Find best and worst performing platforms
+    const platforms = Object.entries(platformGroups).sort((a, b) => b[1].roas - a[1].roas)
+    const bestPlatform = platforms[0]
+    const worstPlatform = platforms[platforms.length - 1]
+    
+    const content = `Strategic Insights & Recommendations:\n\n🎯 Overall ROAS: ${overallROAS.toFixed(2)}x\n\n📈 Best Performing Platform: ${bestPlatform[0]} (${bestPlatform[1].roas.toFixed(2)}x ROAS)\n📉 Needs Attention: ${worstPlatform[0]} (${worstPlatform[1].roas.toFixed(2)}x ROAS)\n\n💡 Recommendations:\n• Increase investment in ${bestPlatform[0]} for higher returns\n• Optimize ${worstPlatform[0]} performance or consider reallocating budget\n• Focus on improving conversion rates across all platforms`
+    
+    return {
+      content,
+      data: {
+        type: 'strategic_insights',
+        overallROAS: overallROAS,
+        bestPlatform: bestPlatform[0],
+        worstPlatform: worstPlatform[0],
+        platformAnalysis: platformGroups,
+        query: query
+      }
+    }
+  }
+
   // Simple fallback response for now
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
