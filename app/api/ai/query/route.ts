@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { config } from '@/lib/config'
 import { loadCampaignData } from '@/lib/server-data-service'
 
+// In-memory conversation context store (in production, use Redis or database)
+const conversationContexts = new Map<string, {
+  messages: Array<{ role: 'user' | 'ai', content: string, data?: any }>,
+  lastContext: {
+    platform?: string,
+    campaign?: string,
+    metric?: string,
+    data?: any
+  },
+  sessionStart: number
+}>()
+
 // Shared constants for keyword detection
 const KEYWORDS = {
   CTR: ['ctr', 'click-through rate', 'click through rate', 'click rate', 'click-through', 'clickthrough'],
@@ -13,7 +25,8 @@ const KEYWORDS = {
   VIZ: ['visual', 'visualize', 'chart', 'graph', 'plot', 'show me', 'display', 'visualization'],
   TOP: ['top', 'best', 'highest', 'leading', 'top performing', 'best performing'],
   PLATFORMS: ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk'],
-  CAMPAIGN_NAMES: ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples', 'freshnest', 'summer grilling', 'back to school', 'holiday recipes', 'pantry staples']
+  CAMPAIGN_NAMES: ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples', 'freshnest', 'summer grilling', 'back to school', 'holiday recipes', 'pantry staples'],
+  DRILL_DOWN: ['drill down', 'drilldown', 'break down', 'breakdown', 'detail', 'details', 'more', 'deeper', 'deeper dive', 'deep dive', 'specific', 'specifically', 'in detail', 'show me more', 'tell me more', 'expand', 'elaborate', 'further', 'furthermore', 'additionally', 'also', 'what about', 'how about', 'what else', 'what other', 'which other', 'show me the', 'tell me about the', 'give me the', 'provide the', 'show the', 'tell the', 'give the', 'provide the', 'show me', 'tell me', 'give me', 'provide me', 'show', 'tell', 'give', 'provide', 'what is the', 'what are the', 'how is the', 'how are the', 'which is the', 'which are the', 'where is the', 'where are the', 'when is the', 'when are the', 'why is the', 'why are the', 'who is the', 'who are the']
 }
 
 const PLATFORM_MAP: Record<string, string> = {
@@ -25,6 +38,158 @@ const PLATFORM_MAP: Record<string, string> = {
   'tradedesk': 'Tradedesk'
 }
 
+// Conversation context management functions
+function getConversationContext(sessionId?: string) {
+  if (!sessionId) {
+    return {
+      messages: [],
+      lastContext: {},
+      sessionStart: Date.now()
+    }
+  }
+  
+  if (!conversationContexts.has(sessionId)) {
+    conversationContexts.set(sessionId, {
+      messages: [],
+      lastContext: {},
+      sessionStart: Date.now()
+    })
+  }
+  
+  return conversationContexts.get(sessionId)!
+}
+
+function updateConversationContext(sessionId: string | undefined, query: string, result: any) {
+  if (!sessionId) return
+  
+  const context = getConversationContext(sessionId)
+  context.messages.push({ role: 'user', content: query })
+  context.messages.push({ role: 'ai', content: result.content, data: result.data })
+  
+  // Update last context based on the result
+  if (result.data) {
+    context.lastContext = {
+      platform: result.data.platform,
+      campaign: result.data.campaign,
+      metric: result.data.metric,
+      data: result.data
+    }
+  }
+  
+  // Keep only last 10 messages to prevent memory bloat
+  if (context.messages.length > 10) {
+    context.messages = context.messages.slice(-10)
+  }
+}
+
+function handleDrillDownQuery(query: string, data: any[], context: any) {
+  const lowerQuery = query.toLowerCase()
+  const lastContext = context.lastContext
+  
+  // If we have a platform context, drill down into campaigns
+  if (lastContext.platform && (lowerQuery.includes('campaign') || lowerQuery.includes('campaigns'))) {
+    const platformData = data.filter(item => 
+      item.dimensions.platform.toLowerCase() === lastContext.platform.toLowerCase()
+    )
+    
+    const campaignBreakdown = platformData.reduce((acc, item) => {
+      const campaign = item.dimensions.campaign
+      if (!acc[campaign]) {
+        acc[campaign] = {
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0
+        }
+      }
+      acc[campaign].spend += item.metrics.spend
+      acc[campaign].revenue += item.metrics.revenue
+      acc[campaign].impressions += item.metrics.impressions
+      acc[campaign].clicks += item.metrics.clicks
+      acc[campaign].conversions += item.metrics.conversions
+      return acc
+    }, {} as Record<string, any>)
+    
+    const breakdownText = Object.entries(campaignBreakdown)
+      .map(([campaign, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        return `${campaign}: $${metrics.spend.toLocaleString()} spend, $${metrics.revenue.toLocaleString()} revenue, ${roas.toFixed(2)}x ROAS, ${(ctr * 100).toFixed(2)}% CTR`
+      })
+      .join('\n')
+    
+    return {
+      content: `Campaign breakdown for ${lastContext.platform}:\n\n${breakdownText}`,
+      data: {
+        type: 'drill_down_campaigns',
+        platform: lastContext.platform,
+        campaigns: campaignBreakdown,
+        query: query
+      }
+    }
+  }
+  
+  // If we have a campaign context, drill down into platforms
+  if (lastContext.campaign && (lowerQuery.includes('platform') || lowerQuery.includes('platforms'))) {
+    const campaignData = data.filter(item => 
+      item.dimensions.campaign.toLowerCase().includes(lastContext.campaign.toLowerCase())
+    )
+    
+    const platformBreakdown = campaignData.reduce((acc, item) => {
+      const platform = item.dimensions.platform
+      if (!acc[platform]) {
+        acc[platform] = {
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0
+        }
+      }
+      acc[platform].spend += item.metrics.spend
+      acc[platform].revenue += item.metrics.revenue
+      acc[platform].impressions += item.metrics.impressions
+      acc[platform].clicks += item.metrics.clicks
+      acc[platform].conversions += item.metrics.conversions
+      return acc
+    }, {} as Record<string, any>)
+    
+    const breakdownText = Object.entries(platformBreakdown)
+      .map(([platform, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        return `${platform}: $${metrics.spend.toLocaleString()} spend, $${metrics.revenue.toLocaleString()} revenue, ${roas.toFixed(2)}x ROAS, ${(ctr * 100).toFixed(2)}% CTR`
+      })
+      .join('\n')
+    
+    return {
+      content: `Platform breakdown for ${lastContext.campaign}:\n\n${breakdownText}`,
+      data: {
+        type: 'drill_down_platforms',
+        campaign: lastContext.campaign,
+        platforms: platformBreakdown,
+        query: query
+      }
+    }
+  }
+  
+  // If we have a metric context, drill down into time periods or other dimensions
+  if (lastContext.metric && (lowerQuery.includes('trend') || lowerQuery.includes('over time') || lowerQuery.includes('timeline'))) {
+    // For now, return a simple trend analysis
+    return {
+      content: `Here's the trend analysis for ${lastContext.metric}:\n\nBased on the current data, I can show you performance trends. Would you like me to break this down by platform, campaign, or time period?`,
+      data: {
+        type: 'drill_down_trends',
+        metric: lastContext.metric,
+        query: query
+      }
+    }
+  }
+  
+  return null
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { query, sessionId } = await request.json()
@@ -34,7 +199,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await loadCampaignData()
-    const result = await processAIQuery(query, data)
+    const result = await processAIQuery(query, data, sessionId)
     
     return NextResponse.json(result)
   } catch (error) {
@@ -46,8 +211,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function processAIQuery(query: string, data: any[]) {
+async function processAIQuery(query: string, data: any[], sessionId?: string) {
   const lowerQuery = query.toLowerCase()
+  
+  // Get or create conversation context
+  const context = getConversationContext(sessionId)
   
   // Keyword detection
   const isCTRQuery = KEYWORDS.CTR.some(keyword => lowerQuery.includes(keyword))
@@ -56,6 +224,18 @@ async function processAIQuery(query: string, data: any[]) {
   // Platform detection
   const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => lowerQuery.includes(platform))
   const detectedCampaign = KEYWORDS.CAMPAIGN_NAMES.find(campaign => lowerQuery.includes(campaign))
+  
+  // Check for drill-down patterns
+  const isDrillDownQuery = KEYWORDS.DRILL_DOWN.some(keyword => lowerQuery.includes(keyword))
+  
+  // Handle drill-down queries with context
+  if (isDrillDownQuery && context.lastContext) {
+    const drillDownResult = handleDrillDownQuery(query, data, context)
+    if (drillDownResult) {
+      updateConversationContext(sessionId, query, drillDownResult)
+      return drillDownResult
+    }
+  }
 
   // PHASE 2 IMPROVEMENT 6: Campaign-Specific Handlers (Priority: HIGH)
   // Handle campaign-specific queries that are currently falling through
@@ -72,15 +252,17 @@ async function processAIQuery(query: string, data: any[]) {
     )
     
     if (campaignData.length === 0) {
-      return {
-        content: `No data found for ${campaign}`,
-        data: {
-          type: 'campaign_specific',
-          campaign: campaign,
-          performance: 'no_data',
-          query: query
-        }
+          const noDataResult = {
+      content: `No data found for ${campaign}`,
+      data: {
+        type: 'campaign_specific',
+        campaign: campaign,
+        performance: 'no_data',
+        query: query
       }
+    }
+    updateConversationContext(sessionId, query, noDataResult)
+    return noDataResult
     }
     
     // Calculate campaign metrics
@@ -225,15 +407,17 @@ async function processAIQuery(query: string, data: any[]) {
     )
     
     if (platformData.length === 0) {
-      return {
-        content: `No data found for ${platform}`,
-        data: {
-          type: 'platform_performance',
-          platform: platform,
-          performance: 'no_data',
-          query: query
-        }
+          const noDataResult = {
+      content: `No data found for ${platform}`,
+      data: {
+        type: 'platform_performance',
+        platform: platform,
+        performance: 'no_data',
+        query: query
       }
+    }
+    updateConversationContext(sessionId, query, noDataResult)
+    return noDataResult
     }
     
     // Calculate comprehensive platform performance metrics
@@ -1420,11 +1604,16 @@ async function processAIQuery(query: string, data: any[]) {
   }
 
   // Simple fallback response for now
-  return {
+  const fallbackResult = {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
     data: {
       type: 'fallback',
       query: query
     }
   }
+  
+  // Update conversation context
+  updateConversationContext(sessionId, query, fallbackResult)
+  
+  return fallbackResult
 }
