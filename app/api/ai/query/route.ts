@@ -113,6 +113,75 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // Brand Query Handler
+  if ((lowerQuery.includes('brand') || lowerQuery.includes('brands')) &&
+      (lowerQuery.includes('used') || lowerQuery.includes('in') || lowerQuery.includes('campaigns') || lowerQuery.includes('what'))) {
+    
+    try {
+      // Get unique brands
+      const uniqueBrands = Array.from(new Set(data.map(item => item.dimensions.brand)))
+      
+      // Get campaigns by brand
+      const brandCampaigns = uniqueBrands.map(brandName => {
+        const brandData = data.filter(item => item.dimensions.brand === brandName)
+        const campaigns = Array.from(new Set(brandData.map(item => item.dimensions.campaign)))
+        const totalSpend = brandData.reduce((sum, item) => sum + item.metrics.spend, 0)
+        const totalRevenue = brandData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+        const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+        
+        return {
+          brand: brandName,
+          campaigns: campaigns,
+          campaignCount: campaigns.length,
+          totalSpend,
+          totalRevenue,
+          roas
+        }
+      })
+      
+      const content = `🏷️ **BRANDS USED IN CAMPAIGNS**
+
+## **📋 BRAND OVERVIEW**
+- **Total Brands**: ${uniqueBrands.length}
+- **Total Campaigns**: ${brandCampaigns.reduce((sum, brand) => sum + brand.campaignCount, 0)}
+
+## **🏢 BRAND DETAILS**
+
+${brandCampaigns.map((brand, index) => 
+  `${index + 1}. **${brand.brand}**
+   • **Campaigns**: ${brand.campaignCount} campaigns
+   • **Campaign Names**: ${brand.campaigns.join(', ')}
+   • **Total Spend**: $${brand.totalSpend.toLocaleString()}
+   • **Total Revenue**: $${brand.totalRevenue.toLocaleString()}
+   • **ROAS**: ${brand.roas.toFixed(2)}x`
+).join('\n\n')}
+
+## **📊 SUMMARY**
+The campaigns use **${uniqueBrands.length} brands**:
+${uniqueBrands.map((brand, index) => `${index + 1}. ${brand}`).join('\n')}
+
+Each brand has its own set of campaigns with different performance metrics and targeting strategies.`
+
+      updateConversationContext(sessionId, query, { content, data: { type: 'brand_query', brands: brandCampaigns, query: query } })
+      return {
+        content,
+        data: {
+          type: 'brand_query',
+          brands: brandCampaigns,
+          query: query
+        }
+      }
+    } catch (error) {
+      return {
+        content: "Error retrieving brand information. Please try again.",
+        data: {
+          type: 'error',
+          query: query
+        }
+      }
+    }
+  }
+
   // Brand-Level Analytics Handler
   if ((lowerQuery.includes('brand') || lowerQuery.includes('brands')) &&
       (lowerQuery.includes('performance') || lowerQuery.includes('analytics') || lowerQuery.includes('summary') || lowerQuery.includes('overview'))) {
