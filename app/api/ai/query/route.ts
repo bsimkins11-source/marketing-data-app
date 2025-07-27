@@ -107,8 +107,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
-    // PLATFORM PERFORMANCE & CONVERSIONS HANDLERS (ABSOLUTE HIGHEST PRIORITY)
-    // Temporary inline platform detection for debugging
+    // Platform detection logic
     let platformPerf: string | undefined = undefined;
     for (const p of KEYWORDS.PLATFORMS) {
       if (lowerQuery.includes(p)) {
@@ -117,80 +116,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       }
     }
     
-    if (platformPerf && (lowerQuery.includes('performance') || lowerQuery.includes('performing') || lowerQuery.includes('results'))) {
-      const platformData = data.filter(row => row.dimensions.platform === platformPerf);
-      if (platformData.length > 0) {
-        const totalSpend = platformData.reduce((sum, row) => sum + row.metrics.spend, 0);
-        const totalRevenue = platformData.reduce((sum, row) => sum + (row.metrics.revenue || 0), 0);
-        const totalImpressions = platformData.reduce((sum, row) => sum + row.metrics.impressions, 0);
-        const totalClicks = platformData.reduce((sum, row) => sum + row.metrics.clicks, 0);
-        const totalConversions = platformData.reduce((sum, row) => sum + (row.metrics.conversions || 0), 0);
-        const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
-        const roas = totalSpend > 0 ? (totalRevenue / totalSpend) : 0;
-        const cpa = totalConversions > 0 ? (totalSpend / totalConversions) : 0;
-        const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions * 1000) : 0;
-        return {
-          content: `${platformPerf} Performance:\n\n` +
-                  `💰 Spend: $${totalSpend.toLocaleString()}\n` +
-                  `💵 Revenue: $${totalRevenue.toLocaleString()}\n` +
-                  `👁️ Impressions: ${totalImpressions.toLocaleString()}\n` +
-                  `🖱️ Clicks: ${totalClicks.toLocaleString()}\n` +
-                  `🎯 Conversions: ${totalConversions.toLocaleString()}\n` +
-                  `📊 CTR: ${ctr.toFixed(2)}%\n` +
-                  `💎 ROAS: ${roas.toFixed(2)}x\n` +
-                  `💸 CPA: $${cpa.toFixed(2)}\n` +
-                  `📈 CPM: $${cpm.toFixed(2)}`,
-          data: {
-            type: 'platform_performance',
-            platform: platformPerf,
-            metrics: {
-              spend: totalSpend,
-              revenue: totalRevenue,
-              impressions: totalImpressions,
-              clicks: totalClicks,
-              conversions: totalConversions,
-              ctr: ctr,
-              roas: roas,
-              cpa: cpa,
-              cpm: cpm
-            },
-            query: query
-          }
-        };
-      }
-    }
-    if (platformPerf && lowerQuery.includes('conversions')) {
-      const platformData = data.filter(row => row.dimensions.platform === platformPerf);
-      if (platformData.length > 0) {
-        const totalConversions = platformData.reduce((sum, row) => sum + (row.metrics.conversions || 0), 0);
-        const totalSpend = platformData.reduce((sum, row) => sum + row.metrics.spend, 0);
-        const totalClicks = platformData.reduce((sum, row) => sum + row.metrics.clicks, 0);
-        const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks * 100) : 0;
-        const cpa = totalConversions > 0 ? (totalSpend / totalConversions) : 0;
-        return {
-          content: `${platformPerf} Conversions:\n\n` +
-                  `🎯 Total Conversions: ${totalConversions.toLocaleString()}\n` +
-                  `📊 Conversion Rate: ${conversionRate.toFixed(2)}%\n` +
-                  `💸 Cost Per Acquisition: $${cpa.toFixed(2)}\n` +
-                  `💰 Total Spend: $${totalSpend.toLocaleString()}\n` +
-                  `🖱️ Total Clicks: ${totalClicks.toLocaleString()}`,
-          data: {
-            type: 'platform_conversions',
-            platform: platformPerf,
-            metrics: {
-              conversions: totalConversions,
-              conversionRate: conversionRate,
-              cpa: cpa,
-              spend: totalSpend,
-              clicks: totalClicks
-            },
-            query: query
-          }
-        };
-      }
-    }
-    
-    // COMPARATIVE HANDLERS - FIXING "DOING THE BEST", "TOP", "WINNING" PATTERNS (HIGH PRIORITY)
+    // COMPARATIVE HANDLERS - FIXING "DOING THE BEST", "TOP", "WINNING" PATTERNS (HIGHEST PRIORITY)
     if (lowerQuery.includes('doing the best') || lowerQuery.includes('top platform') || lowerQuery.includes('top campaign') || 
         lowerQuery.includes('winning') || lowerQuery.includes('is winning') || lowerQuery.includes('what is the top') ||
         lowerQuery.includes('what is top') || lowerQuery.includes('which is doing the best') || lowerQuery.includes('which is winning')) {
