@@ -1617,6 +1617,70 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // PHASE 4 IMPROVEMENT 9: Platform Performance Handler (Priority: CRITICAL)
+  // Handle "top performing platform", "best platform", "platform performance" queries
+  if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
+      (lowerQuery.includes('platform') || lowerQuery.includes('platforms'))) {
+    
+    // Group data by platform and calculate metrics
+    const platformMetrics = data.reduce((acc, item) => {
+      const platform = item.dimensions.platform
+      if (!acc[platform]) {
+        acc[platform] = {
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          campaigns: new Set()
+        }
+      }
+      acc[platform].spend += item.metrics.spend
+      acc[platform].revenue += item.metrics.revenue
+      acc[platform].impressions += item.metrics.impressions
+      acc[platform].clicks += item.metrics.clicks
+      acc[platform].conversions += item.metrics.conversions
+      acc[platform].campaigns.add(item.dimensions.campaign)
+      return acc
+    }, {} as Record<string, any>)
+    
+    // Calculate performance metrics and sort
+    const platformPerformance = Object.entries(platformMetrics).map(([platform, metrics]: [string, any]) => {
+      const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+      const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+      const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+      
+      return {
+        platform,
+        roas,
+        ctr,
+        cpa,
+        spend: metrics.spend,
+        revenue: metrics.revenue,
+        conversions: metrics.conversions,
+        impressions: metrics.impressions,
+        clicks: metrics.clicks,
+        campaignCount: metrics.campaigns.size
+      }
+    }).sort((a, b) => b.roas - a.roas) // Sort by ROAS descending
+    
+    // Get top 3 performing platforms
+    const topPlatforms = platformPerformance.slice(0, 3)
+    
+    const content = `🏆 Top Performing Platforms:\n\n${topPlatforms.map((platform, index) => 
+      `${index + 1}. ${platform.platform}\n   • ROAS: ${platform.roas.toFixed(2)}x\n   • CTR: ${(platform.ctr * 100).toFixed(2)}%\n   • CPA: $${platform.cpa.toFixed(2)}\n   • Spend: $${platform.spend.toLocaleString()}\n   • Revenue: $${platform.revenue.toLocaleString()}\n   • Conversions: ${platform.conversions.toLocaleString()}\n   • Campaigns: ${platform.campaignCount}`
+    ).join('\n\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'top_performing_platforms',
+        platforms: topPlatforms,
+        query: query
+      }
+    }
+  }
+
   // PHASE 4 IMPROVEMENT 6: Top/Best Performing Handler (Priority: CRITICAL)
   // Handle "top performing", "best performing", "highest" queries
   if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
@@ -1700,70 +1764,6 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
         type: 'campaign_names',
         campaigns: sortedCampaigns,
         count: sortedCampaigns.length,
-        query: query
-      }
-    }
-  }
-
-  // PHASE 4 IMPROVEMENT 9: Platform Performance Handler (Priority: CRITICAL)
-  // Handle "top performing platform", "best platform", "platform performance" queries
-  if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
-      (lowerQuery.includes('platform') || lowerQuery.includes('platforms'))) {
-    
-    // Group data by platform and calculate metrics
-    const platformMetrics = data.reduce((acc, item) => {
-      const platform = item.dimensions.platform
-      if (!acc[platform]) {
-        acc[platform] = {
-          spend: 0,
-          revenue: 0,
-          impressions: 0,
-          clicks: 0,
-          conversions: 0,
-          campaigns: new Set()
-        }
-      }
-      acc[platform].spend += item.metrics.spend
-      acc[platform].revenue += item.metrics.revenue
-      acc[platform].impressions += item.metrics.impressions
-      acc[platform].clicks += item.metrics.clicks
-      acc[platform].conversions += item.metrics.conversions
-      acc[platform].campaigns.add(item.dimensions.campaign)
-      return acc
-    }, {} as Record<string, any>)
-    
-    // Calculate performance metrics and sort
-    const platformPerformance = Object.entries(platformMetrics).map(([platform, metrics]: [string, any]) => {
-      const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
-      const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
-      const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
-      
-      return {
-        platform,
-        roas,
-        ctr,
-        cpa,
-        spend: metrics.spend,
-        revenue: metrics.revenue,
-        conversions: metrics.conversions,
-        impressions: metrics.impressions,
-        clicks: metrics.clicks,
-        campaignCount: metrics.campaigns.size
-      }
-    }).sort((a, b) => b.roas - a.roas) // Sort by ROAS descending
-    
-    // Get top 3 performing platforms
-    const topPlatforms = platformPerformance.slice(0, 3)
-    
-    const content = `🏆 Top Performing Platforms:\n\n${topPlatforms.map((platform, index) => 
-      `${index + 1}. ${platform.platform}\n   • ROAS: ${platform.roas.toFixed(2)}x\n   • CTR: ${(platform.ctr * 100).toFixed(2)}%\n   • CPA: $${platform.cpa.toFixed(2)}\n   • Spend: $${platform.spend.toLocaleString()}\n   • Revenue: $${platform.revenue.toLocaleString()}\n   • Conversions: ${platform.conversions.toLocaleString()}\n   • Campaigns: ${platform.campaignCount}`
-    ).join('\n\n')}`
-    
-    return {
-      content,
-      data: {
-        type: 'top_performing_platforms',
-        platforms: topPlatforms,
         query: query
       }
     }
