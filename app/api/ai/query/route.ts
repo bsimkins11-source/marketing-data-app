@@ -108,7 +108,15 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     const lowerQuery = query.toLowerCase()
     
     // PLATFORM PERFORMANCE & CONVERSIONS HANDLERS (ABSOLUTE HIGHEST PRIORITY)
-    const platformPerf = detectPlatform(query);
+    // Temporary inline platform detection for debugging
+    let platformPerf: string | undefined = undefined;
+    for (const p of KEYWORDS.PLATFORMS) {
+      if (lowerQuery.includes(p)) {
+        platformPerf = PLATFORM_MAP[p] || p;
+        break;
+      }
+    }
+    
     if (platformPerf && (lowerQuery.includes('performance') || lowerQuery.includes('performing') || lowerQuery.includes('results'))) {
       const platformData = data.filter(row => row.dimensions.platform === platformPerf);
       if (platformData.length > 0) {
