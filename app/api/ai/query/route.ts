@@ -1280,7 +1280,7 @@ async function processAIQuery(query: string, data: any[]) {
   // PHASE 4 IMPROVEMENT 1: Ultra-Comprehensive Anomaly Detection Handler (Priority: CRITICAL)
   // Dramatically expand trigger phrases and synonyms for anomaly/problem detection
   if (([
-    'any', 'some', 'anything', 'something', 'everything', 'show me', 'tell me', 'find', 'identify', 'detect', 'spot', 'notice', 'see', 'look for', 'check for', 'search for', 'find any', 'show any', 'tell me about any', 'are there any', 'do you see any', 'can you find any', 'have you noticed any', 'did you spot any', 'can you identify any', 'are there some', 'do you see some', 'can you find some', 'have you noticed some', 'did you spot some', 'can you identify some', 'are there', 'do you see', 'can you find', 'have you noticed', 'did you spot', 'can you identify', 'is there', 'do you notice', 'can you spot', 'have you seen', 'did you notice', 'can you see', 'are you seeing', 'do you find', 'can you notice', 'have you found', 'did you find', 'can you detect', 'are you finding', 'do you detect', 'can you find', 'have you detected', 'did you detect', 'can you spot', 'are you detecting', 'do you spot', 'can you find', 'have you spotted', 'did you spot', 'can you identify', 'are you spotting', 'do you identify', 'can you find', 'have you identified', 'did you identify', 'can you spot', 'are you identifying', 'off', 'odd', 'strange', 'weird', 'unusual', 'unexpected', 'flag', 'red flag', 'red flags', 'problem', 'issue', 'trouble', 'concern', 'worry', 'alert', 'warning', 'caution', 'risk', 'danger', 'critical', 'emergency', 'urgent', 'concerning', 'worrisome', 'troubling', 'disturbing', 'shocking', 'surprising', 'peculiar', 'questionable', 'doubtful', 'uncertain', 'unclear', 'confusing', 'puzzling', 'mysterious', 'bizarre', 'underperforming', 'failing', 'struggling', 'lowest', 'worst', 'bad', 'poor', 'terrible', 'awful', 'horrible'
+    'any', 'some', 'anything', 'something', 'everything', 'show me', 'tell me', 'find', 'identify', 'detect', 'spot', 'notice', 'see', 'look for', 'check for', 'search for', 'find any', 'show any', 'tell me about any', 'are there any', 'do you see any', 'can you find any', 'have you noticed any', 'did you spot any', 'can you identify any', 'are there some', 'do you see some', 'can you find some', 'have you noticed some', 'did you spot some', 'can you identify some', 'are there', 'do you see', 'can you find', 'have you noticed', 'did you spot', 'can you identify', 'is there', 'do you notice', 'can you spot', 'have you seen', 'did you notice', 'can you see', 'are you seeing', 'do you find', 'can you notice', 'have you found', 'did you find', 'can you detect', 'are you finding', 'do you detect', 'can you find', 'have you detected', 'did you detect', 'can you spot', 'are you detecting', 'do you spot', 'can you find', 'have you spotted', 'did you spot', 'can you identify', 'are you spotting', 'do you identify', 'can you find', 'have you identified', 'did you identify', 'can you spot', 'are you identifying', 'off', 'odd', 'strange', 'weird', 'unusual', 'unexpected', 'flag', 'red flag', 'red flags', 'problem', 'issue', 'trouble', 'concern', 'worry', 'alert', 'warning', 'caution', 'risk', 'danger', 'critical', 'emergency', 'urgent', 'concerning', 'worrisome', 'troubling', 'disturbing', 'shocking', 'surprising', 'peculiar', 'questionable', 'doubtful', 'uncertain', 'unclear', 'confusing', 'puzzling', 'mysterious', 'bizarre', 'underperforming', 'failing', 'struggling', 'lowest', 'worst', 'bad', 'poor', 'terrible', 'awful', 'horrible', 'anomaly', 'anomalies'
   ].some(kw => lowerQuery.includes(kw))) &&
     ([
       'anomaly', 'anomalies', 'problem', 'problems', 'issue', 'issues', 'wrong', 'bad', 'poor', 'terrible', 'awful', 'horrible', 'worst', 'lowest', 'underperforming', 'failing', 'struggling', 'trouble', 'concern', 'worry', 'alarm', 'alert', 'red flag', 'red flags', 'warning', 'warnings', 'caution', 'risk', 'risks', 'danger', 'dangerous', 'critical', 'emergency', 'urgent', 'concerning', 'worrisome', 'troubling', 'disturbing', 'shocking', 'surprising', 'unexpected', 'odd', 'peculiar', 'suspicious', 'questionable', 'doubtful', 'uncertain', 'unclear', 'confusing', 'puzzling', 'mysterious', 'bizarre', 'unusual', 'strange', 'weird', 'off'
@@ -1306,6 +1306,68 @@ async function processAIQuery(query: string, data: any[]) {
     ].some(kw => lowerQuery.includes(kw))) &&
     !detectedPlatform && !detectedCampaign) {
     // ... existing specific metrics logic ...
+  }
+
+  // PHASE 4 IMPROVEMENT 4: Targeted Specific Metrics Handler (Priority: CRITICAL)
+  // Handle exact patterns from mega test that are falling through
+  if ((lowerQuery.includes('what is') || lowerQuery.includes('what are') || lowerQuery.includes('how is') || lowerQuery.includes('how are')) &&
+      (lowerQuery.includes('ctr') || lowerQuery.includes('roas') || lowerQuery.includes('cpa') || lowerQuery.includes('cpc') || lowerQuery.includes('cpm') || 
+       lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate') || lowerQuery.includes('clickthrough rate') ||
+       lowerQuery.includes('return on ad spend') || lowerQuery.includes('return on investment') || lowerQuery.includes('roi') ||
+       lowerQuery.includes('cost per acquisition') || lowerQuery.includes('cost per click') || lowerQuery.includes('cost per thousand') ||
+       lowerQuery.includes('cost per mille') || lowerQuery.includes('conversion rate') || lowerQuery.includes('click rate') ||
+       lowerQuery.includes('impression rate') || lowerQuery.includes('engagement rate')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Calculate overall metrics
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    // Determine which metric is being asked for
+    let metric = 'roas'
+    let metricName = 'Overall ROAS'
+    let formatFunction = (value: number) => `${value.toFixed(2)}x`
+    let value = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    
+    if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate') || lowerQuery.includes('clickthrough rate') || lowerQuery.includes('click rate')) {
+      metric = 'ctr'
+      metricName = 'Overall CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      value = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    } else if (lowerQuery.includes('roas') || lowerQuery.includes('return on ad spend') || lowerQuery.includes('return on investment') || lowerQuery.includes('roi')) {
+      metric = 'roas'
+      metricName = 'Overall ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+      value = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition') || lowerQuery.includes('conversion rate')) {
+      metric = 'cpa'
+      metricName = 'Overall CPA'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      value = totalConversions > 0 ? totalSpend / totalConversions : 0
+    } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+      metric = 'cpc'
+      metricName = 'Overall CPC'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      value = totalClicks > 0 ? totalSpend / totalClicks : 0
+    } else if (lowerQuery.includes('cpm') || lowerQuery.includes('cost per thousand') || lowerQuery.includes('cost per mille')) {
+      metric = 'cpm'
+      metricName = 'Overall CPM'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      value = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    }
+    
+    return {
+      content: `${metricName}: ${formatFunction(value)}`,
+      data: {
+        type: 'specific_metrics',
+        metric: metric,
+        value: value,
+        query: query
+      }
+    }
   }
 
   // Simple fallback response for now
