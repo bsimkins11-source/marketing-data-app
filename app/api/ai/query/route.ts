@@ -874,7 +874,8 @@ ${platformPerformance.map((platform, index) =>
 
   // Top Performing Platforms Handler
   if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
-      (lowerQuery.includes('platform') || lowerQuery.includes('platforms'))) {
+      (lowerQuery.includes('platform') || lowerQuery.includes('platforms')) &&
+      !lowerQuery.includes('by platform')) {
     
     // Group data by platform and calculate metrics
     const platformMetrics = data.reduce((acc, item) => {
@@ -901,21 +902,26 @@ ${platformPerformance.map((platform, index) =>
     // Calculate performance metrics and sort
     const platformPerformance = Object.entries(platformMetrics).map(([platform, metrics]: [string, any]) => {
       const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
-      const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
-      const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+      // Calculate conversions from revenue and ROAS, then calculate CPA
+      const calculatedConversions = roas > 0 ? metrics.revenue / (roas * 100) : 0 // Assuming $100 average order value
+      const cpa = calculatedConversions > 0 ? metrics.spend / calculatedConversions : 0
       
-      return {
-        platform,
-        roas,
-        ctr,
-        cpa,
-        spend: metrics.spend,
-        revenue: metrics.revenue,
-        conversions: metrics.conversions,
-        impressions: metrics.impressions,
-        clicks: metrics.clicks,
-        campaignCount: Array.from(metrics.campaigns).length
-      }
+      // Get the original CTR from the data (we need to find the first item with this platform)
+      const firstPlatformItem = data.find(item => item.dimensions.platform === platform)
+      const ctr = firstPlatformItem?.metrics.ctr || 0
+      
+              return {
+          platform,
+          roas,
+          ctr,
+          cpa,
+          spend: metrics.spend,
+          revenue: metrics.revenue,
+          conversions: calculatedConversions,
+          impressions: metrics.impressions,
+          clicks: metrics.clicks,
+          campaignCount: Array.from(metrics.campaigns).length
+        }
     }).sort((a, b) => b.roas - a.roas)
     
     // Get top 3 performing platforms
@@ -963,26 +969,34 @@ ${platformPerformance.map((platform, index) =>
     // Calculate ROAS for each campaign and sort by performance
     const campaignPerformance = Object.entries(campaignMetrics).map(([campaign, metrics]: [string, any]) => {
       const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
-      const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
-      const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+      // Calculate conversions from revenue and ROAS, then calculate CPA
+      const calculatedConversions = roas > 0 ? metrics.revenue / (roas * 100) : 0 // Assuming $100 average order value
+      const cpa = calculatedConversions > 0 ? metrics.spend / calculatedConversions : 0
       
-      return {
-        campaign,
-        platform: metrics.platform,
-        roas,
-        ctr,
-        cpa,
-        spend: metrics.spend,
-        revenue: metrics.revenue,
-        conversions: metrics.conversions
-      }
+      // Get the original CTR from the data (we need to find the first item with this campaign)
+      const firstCampaignItem = data.find(item => item.dimensions.campaign === campaign)
+      const ctr = firstCampaignItem?.metrics.ctr || 0
+      
+              return {
+          campaign,
+          platform: metrics.platform,
+          roas,
+          ctr,
+          cpa,
+          spend: metrics.spend,
+          revenue: metrics.revenue,
+          conversions: calculatedConversions
+        }
     }).sort((a, b) => b.roas - a.roas)
     
     // Get top 3 performing campaigns
     const topCampaigns = campaignPerformance.slice(0, 3)
     
+    // Check if user specifically asked for platform information
+    const includePlatform = lowerQuery.includes('platform') || lowerQuery.includes('platforms')
+    
     const content = `🏆 Top Performing Campaigns:\n\n${topCampaigns.map((campaign, index) => 
-      `${index + 1}. ${campaign.campaign} (${campaign.platform})\n   • ROAS: ${campaign.roas.toFixed(2)}x\n   • CTR: ${(campaign.ctr * 100).toFixed(2)}%\n   • CPA: $${campaign.cpa.toFixed(2)}\n   • Spend: $${campaign.spend.toLocaleString()}\n   • Revenue: $${campaign.revenue.toLocaleString()}\n   • Conversions: ${campaign.conversions.toLocaleString()}`
+      `${index + 1}. ${campaign.campaign}${includePlatform ? ` (${campaign.platform})` : ''}\n   • ROAS: ${campaign.roas.toFixed(2)}x\n   • CTR: ${(campaign.ctr * 100).toFixed(2)}%\n   • CPA: $${campaign.cpa.toFixed(2)}\n   • Spend: $${campaign.spend.toLocaleString()}\n   • Revenue: $${campaign.revenue.toLocaleString()}\n   • Conversions: ${campaign.conversions.toLocaleString()}`
     ).join('\n\n')}`
     
     return {
