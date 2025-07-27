@@ -235,7 +235,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
             revenue: 0,
             impressions: 0,
             clicks: 0,
-            conversions: 0
+            conversions: 0,
+            ctrValues: [] // Track CTR values for averaging
           }
         }
         acc[platform].spend += item.metrics.spend
@@ -243,14 +244,17 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
         acc[platform].impressions += item.metrics.impressions
         acc[platform].clicks += item.metrics.clicks
         acc[platform].conversions += item.metrics.conversions
+        acc[platform].ctrValues.push(item.metrics.ctr || 0)
         return acc
       }, {} as Record<string, any>)
       
       // Calculate platform performance
       const platformPerformance = Object.entries(platformMetrics).map(([platform, metrics]: [string, any]) => {
         const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
-        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
-        return { platform, roas, ctr, spend: metrics.spend, revenue: metrics.revenue }
+        // Calculate average CTR from individual CTR values
+        const avgCtr = metrics.ctrValues.length > 0 ? 
+          metrics.ctrValues.reduce((sum: number, ctr: number) => sum + ctr, 0) / metrics.ctrValues.length : 0
+        return { platform, roas, ctr: avgCtr, spend: metrics.spend, revenue: metrics.revenue }
       }).sort((a, b) => b.roas - a.roas)
       
       // Get top platforms
