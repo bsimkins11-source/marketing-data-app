@@ -227,6 +227,90 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
+  // PHASE 2 IMPROVEMENT 4: Enhanced Comparative Analysis (Priority: HIGH)
+  // Handle efficiency and performance comparison queries
+  if ((lowerQuery.includes('which') || lowerQuery.includes('what')) && 
+      (lowerQuery.includes('efficient') || lowerQuery.includes('efficiency') || lowerQuery.includes('worst') || lowerQuery.includes('lowest') || lowerQuery.includes('best value'))) {
+    
+    // Determine the metric to compare
+    let metric = 'roas'
+    let metricName = 'ROAS'
+    let formatFunction = (value: number) => `${value.toFixed(2)}x`
+    let sortDescending = true
+    
+    if (lowerQuery.includes('efficient') || lowerQuery.includes('efficiency')) {
+      // Efficiency = ROAS / CTR (higher is better)
+      metric = 'efficiency'
+      metricName = 'Efficiency'
+      formatFunction = (value: number) => `${value.toFixed(2)}`
+    } else if (lowerQuery.includes('worst') || lowerQuery.includes('lowest')) {
+      // For "worst" queries, we'll find the lowest ROAS
+      metric = 'roas'
+      metricName = 'ROAS'
+      sortDescending = false
+    } else if (lowerQuery.includes('best value')) {
+      // Best value = highest ROAS with reasonable spend
+      metric = 'value'
+      metricName = 'Value'
+      formatFunction = (value: number) => `${value.toFixed(2)}`
+    }
+    
+    // Group data by platform and calculate metrics
+    const platformGroups: Record<string, { spend: number, revenue: number, impressions: number, clicks: number, conversions: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += item.metrics.revenue
+      platformGroups[platform].impressions += item.metrics.impressions
+      platformGroups[platform].clicks += item.metrics.clicks
+      platformGroups[platform].conversions += item.metrics.conversions
+    })
+    
+    // Calculate final metric values and sort
+    const platformMetrics = Object.entries(platformGroups)
+      .map(([platform, data]) => {
+        let finalValue = 0
+        if (metric === 'efficiency') {
+          const roas = data.spend > 0 ? data.revenue / data.spend : 0
+          const ctr = data.impressions > 0 ? data.clicks / data.impressions : 0
+          finalValue = ctr > 0 ? roas / ctr : 0
+        } else if (metric === 'value') {
+          const roas = data.spend > 0 ? data.revenue / data.spend : 0
+          const spendEfficiency = data.spend > 0 ? 1 / data.spend : 0
+          finalValue = roas * spendEfficiency
+        } else {
+          finalValue = data.spend > 0 ? data.revenue / data.spend : 0
+        }
+        return {
+          platform,
+          value: finalValue,
+          spend: data.spend,
+          revenue: data.revenue
+        }
+      })
+      .sort((a, b) => sortDescending ? b.value - a.value : a.value - b.value)
+    
+    const winner = platformMetrics[0]
+    const runnerUp = platformMetrics[1]
+    
+    const content = `${winner.platform} is ${lowerQuery.includes('worst') || lowerQuery.includes('lowest') ? 'performing worst' : 'most efficient'} with ${formatFunction(winner.value)} ${metricName}${runnerUp ? `, followed by ${runnerUp.platform} with ${formatFunction(runnerUp.value)}` : ''}`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_efficiency_comparison',
+        metric: metric,
+        winner: winner,
+        runnerUp: runnerUp,
+        allPlatforms: platformMetrics,
+        query: query
+      }
+    }
+  }
+
   // Simple fallback response for now
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
