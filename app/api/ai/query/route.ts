@@ -57,6 +57,67 @@ async function processAIQuery(query: string, data: any[]) {
   const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => lowerQuery.includes(platform))
   const detectedCampaign = KEYWORDS.CAMPAIGN_NAMES.find(campaign => lowerQuery.includes(campaign))
 
+  // PHASE 2 IMPROVEMENT 5: Comprehensive Platform Performance Handler (Priority: CRITICAL)
+  // Handle all platform-specific performance queries that are currently falling through
+  if (detectedPlatform && (lowerQuery.includes('performance') || lowerQuery.includes('performing') || 
+      lowerQuery.includes('results') || lowerQuery.includes('how is') || lowerQuery.includes('what is') || 
+      lowerQuery.includes('doing') || lowerQuery.includes('performed'))) {
+    
+    const platform = PLATFORM_MAP[detectedPlatform] || detectedPlatform
+    
+    // Filter data for the specific platform
+    const platformData = data.filter(item => 
+      item.dimensions.platform.toLowerCase() === detectedPlatform
+    )
+    
+    if (platformData.length === 0) {
+      return {
+        content: `No data found for ${platform}`,
+        data: {
+          type: 'platform_performance',
+          platform: platform,
+          performance: 'no_data',
+          query: query
+        }
+      }
+    }
+    
+    // Calculate comprehensive platform performance metrics
+    const totalSpend = platformData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = platformData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = platformData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = platformData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = platformData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    // Calculate performance metrics
+    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+    const cpc = totalClicks > 0 ? totalSpend / totalClicks : 0
+    const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    
+    const content = `${platform} Performance Summary:\n\n💰 Total Spend: $${totalSpend.toLocaleString()}\n💵 Total Revenue: $${totalRevenue.toLocaleString()}\n📈 ROAS: ${roas.toFixed(2)}x\n👁️ Total Impressions: ${totalImpressions.toLocaleString()}\n🖱️ Total Clicks: ${totalClicks.toLocaleString()}\n🎯 Total Conversions: ${totalConversions.toLocaleString()}\n📊 CTR: ${(ctr * 100).toFixed(2)}%\n💸 CPA: $${cpa.toFixed(2)}\n🖱️ CPC: $${cpc.toFixed(2)}\n📈 CPM: $${cpm.toFixed(2)}`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_performance',
+        platform: platform,
+        totalSpend: totalSpend,
+        totalRevenue: totalRevenue,
+        roas: roas,
+        ctr: ctr,
+        cpa: cpa,
+        cpc: cpc,
+        cpm: cpm,
+        totalImpressions: totalImpressions,
+        totalClicks: totalClicks,
+        totalConversions: totalConversions,
+        query: query
+      }
+    }
+  }
+
   // PHASE 2 IMPROVEMENT: Enhanced Specific Metrics Handling (Priority: HIGH)
   // Handle context-aware metric queries without platform/campaign context
   if ((lowerQuery.includes('what is the') || lowerQuery.includes('what is our') || lowerQuery.includes('what is')) && 
