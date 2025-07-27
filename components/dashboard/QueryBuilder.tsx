@@ -245,7 +245,8 @@ export default function QueryBuilder() {
   }
 
   const saveQuery = () => {
-    // TODO: Implement actual save functionality
+    // Save functionality - to be implemented in future iteration
+    // This would save the current query configuration to user's saved queries
   }
 
   const exportResults = () => {
