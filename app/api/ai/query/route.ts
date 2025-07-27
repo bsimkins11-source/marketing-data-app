@@ -14,6 +14,18 @@ const conversationContexts = new Map<string, {
   sessionStart: number
 }>()
 
+// Cleanup old sessions every hour (in production, use Redis TTL or database cleanup)
+const SESSION_TIMEOUT = 60 * 60 * 1000 // 1 hour
+setInterval(() => {
+  const now = Date.now()
+  const entries = Array.from(conversationContexts.entries())
+  for (const [sessionId, context] of entries) {
+    if (now - context.sessionStart > SESSION_TIMEOUT) {
+      conversationContexts.delete(sessionId)
+    }
+  }
+}, SESSION_TIMEOUT)
+
 // Shared constants for keyword detection
 const KEYWORDS = {
   CTR: ['ctr', 'click-through rate', 'click through rate', 'click rate', 'click-through', 'clickthrough'],
