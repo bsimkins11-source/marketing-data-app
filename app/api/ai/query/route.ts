@@ -107,8 +107,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
   try {
     const lowerQuery = query.toLowerCase()
     
-    // PLATFORM PERFORMANCE HANDLERS (ABSOLUTE HIGHEST PRIORITY)
-    // More explicit and robust platform performance detection
+    // PLATFORM PERFORMANCE & CONVERSIONS HANDLERS (ABSOLUTE HIGHEST PRIORITY)
     const platformPerf = detectPlatform(query);
     if (platformPerf && (lowerQuery.includes('performance') || lowerQuery.includes('performing') || lowerQuery.includes('results'))) {
       const platformData = data.filter(row => row.dimensions.platform === platformPerf);
@@ -152,10 +151,6 @@ async function processAIQuery(query: string, data: MarketingData[]) {
         };
       }
     }
-
-    // CONVERSIONS HANDLERS (ABSOLUTE HIGHEST PRIORITY)
-    // More explicit and robust platform conversions detection
-    const platformPerf = detectPlatform(query);
     if (platformPerf && lowerQuery.includes('conversions')) {
       const platformData = data.filter(row => row.dimensions.platform === platformPerf);
       if (platformData.length > 0) {
