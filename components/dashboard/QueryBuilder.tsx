@@ -25,7 +25,7 @@ interface QueryResult {
 export default function QueryBuilder() {
   const [queryName, setQueryName] = useState('')
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['impressions', 'clicks'])
-  const [selectedDimensions, setSelectedDimensions] = useState<string[]>(['campaign_name'])
+  const [selectedDimensions, setSelectedDimensions] = useState<string[]>(['brand', 'campaign_name'])
   const [filters, setFilters] = useState<QueryFilter[]>([])
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
   const [isLoading, setIsLoading] = useState(false)
@@ -45,8 +45,10 @@ export default function QueryBuilder() {
   ]
 
   const availableDimensions = [
+    { id: 'brand', name: 'Brand', category: 'Organization' },
     { id: 'campaign_name', name: 'Campaign Name', category: 'Campaign' },
     { id: 'platform', name: 'Platform', category: 'Campaign' },
+    { id: 'audience', name: 'Audience', category: 'Targeting' },
     { id: 'ad_group_name', name: 'Ad Group', category: 'Campaign' },
     { id: 'creative_name', name: 'Creative', category: 'Creative' },
     { id: 'date', name: 'Date', category: 'Time' }
@@ -198,7 +200,18 @@ export default function QueryBuilder() {
       const startTime = Date.now()
       
       // Fetch data from API
-      const response = await fetch('/api/data/campaigns')
+      const response = await fetch('/api/data/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          metrics: selectedMetrics,
+          dimensions: selectedDimensions,
+          filters: filters,
+          date_range: dateRange
+        })
+      })
       const result = await response.json()
       
       if (!result.success) {
@@ -335,6 +348,26 @@ export default function QueryBuilder() {
         </div>
       </div>
 
+      {/* Dimensions Selection */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Dimensions
+        </label>
+        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+          {availableDimensions.map((dimension) => (
+            <label key={dimension.id} className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedDimensions.includes(dimension.id)}
+                onChange={() => toggleDimension(dimension.id)}
+                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm text-gray-700">{dimension.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {/* Metrics Selection */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -350,26 +383,6 @@ export default function QueryBuilder() {
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
               <span className="text-sm text-gray-700">{metric.name}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Dimensions Selection */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Group By
-        </label>
-        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-          {availableDimensions.map((dimension) => (
-            <label key={dimension.id} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedDimensions.includes(dimension.id)}
-                onChange={() => toggleDimension(dimension.id)}
-                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-              />
-              <span className="text-sm text-gray-700">{dimension.name}</span>
             </label>
           ))}
         </div>
