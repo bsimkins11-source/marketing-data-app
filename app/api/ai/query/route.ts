@@ -109,95 +109,81 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     
     // PLATFORM PERFORMANCE HANDLERS (ABSOLUTE HIGHEST PRIORITY)
     // More explicit and robust platform performance detection
-    const hasPerformanceKeyword = lowerQuery.includes('performance') || lowerQuery.includes('performing') || lowerQuery.includes('results');
-    const hasPlatformKeyword = lowerQuery.includes('meta') || lowerQuery.includes('dv360') || lowerQuery.includes('cm360') || lowerQuery.includes('sa360') || lowerQuery.includes('amazon') || lowerQuery.includes('tradedesk');
-    
-    if (hasPerformanceKeyword && hasPlatformKeyword) {
-      const platform = KEYWORDS.PLATFORMS.find(p => lowerQuery.includes(p.toLowerCase()));
-      if (platform) {
-        const platformData = data.filter(row => row.dimensions.platform === platform);
-        if (platformData.length > 0) {
-          const totalSpend = platformData.reduce((sum, row) => sum + row.metrics.spend, 0);
-          const totalRevenue = platformData.reduce((sum, row) => sum + (row.metrics.revenue || 0), 0);
-          const totalImpressions = platformData.reduce((sum, row) => sum + row.metrics.impressions, 0);
-          const totalClicks = platformData.reduce((sum, row) => sum + row.metrics.clicks, 0);
-          const totalConversions = platformData.reduce((sum, row) => sum + (row.metrics.conversions || 0), 0);
-          
-          const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
-          const roas = totalSpend > 0 ? (totalRevenue / totalSpend) : 0;
-          const cpa = totalConversions > 0 ? (totalSpend / totalConversions) : 0;
-          const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions * 1000) : 0;
-          
-          return {
-            content: `${platform} Performance:\n\n` +
-                    `💰 Spend: $${totalSpend.toLocaleString()}\n` +
-                    `💵 Revenue: $${totalRevenue.toLocaleString()}\n` +
-                    `👁️ Impressions: ${totalImpressions.toLocaleString()}\n` +
-                    `🖱️ Clicks: ${totalClicks.toLocaleString()}\n` +
-                    `🎯 Conversions: ${totalConversions.toLocaleString()}\n` +
-                    `📊 CTR: ${ctr.toFixed(2)}%\n` +
-                    `💎 ROAS: ${roas.toFixed(2)}x\n` +
-                    `💸 CPA: $${cpa.toFixed(2)}\n` +
-                    `📈 CPM: $${cpm.toFixed(2)}`,
-            data: {
-              type: 'platform_performance',
-              platform: platform,
-              metrics: {
-                spend: totalSpend,
-                revenue: totalRevenue,
-                impressions: totalImpressions,
-                clicks: totalClicks,
-                conversions: totalConversions,
-                ctr: ctr,
-                roas: roas,
-                cpa: cpa,
-                cpm: cpm
-              },
-              query: query
-            }
-          };
-        }
+    const platformPerf = detectPlatform(query);
+    if (platformPerf && (lowerQuery.includes('performance') || lowerQuery.includes('performing') || lowerQuery.includes('results'))) {
+      const platformData = data.filter(row => row.dimensions.platform === platformPerf);
+      if (platformData.length > 0) {
+        const totalSpend = platformData.reduce((sum, row) => sum + row.metrics.spend, 0);
+        const totalRevenue = platformData.reduce((sum, row) => sum + (row.metrics.revenue || 0), 0);
+        const totalImpressions = platformData.reduce((sum, row) => sum + row.metrics.impressions, 0);
+        const totalClicks = platformData.reduce((sum, row) => sum + row.metrics.clicks, 0);
+        const totalConversions = platformData.reduce((sum, row) => sum + (row.metrics.conversions || 0), 0);
+        const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
+        const roas = totalSpend > 0 ? (totalRevenue / totalSpend) : 0;
+        const cpa = totalConversions > 0 ? (totalSpend / totalConversions) : 0;
+        const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions * 1000) : 0;
+        return {
+          content: `${platformPerf} Performance:\n\n` +
+                  `💰 Spend: $${totalSpend.toLocaleString()}\n` +
+                  `💵 Revenue: $${totalRevenue.toLocaleString()}\n` +
+                  `👁️ Impressions: ${totalImpressions.toLocaleString()}\n` +
+                  `🖱️ Clicks: ${totalClicks.toLocaleString()}\n` +
+                  `🎯 Conversions: ${totalConversions.toLocaleString()}\n` +
+                  `📊 CTR: ${ctr.toFixed(2)}%\n` +
+                  `💎 ROAS: ${roas.toFixed(2)}x\n` +
+                  `💸 CPA: $${cpa.toFixed(2)}\n` +
+                  `📈 CPM: $${cpm.toFixed(2)}`,
+          data: {
+            type: 'platform_performance',
+            platform: platformPerf,
+            metrics: {
+              spend: totalSpend,
+              revenue: totalRevenue,
+              impressions: totalImpressions,
+              clicks: totalClicks,
+              conversions: totalConversions,
+              ctr: ctr,
+              roas: roas,
+              cpa: cpa,
+              cpm: cpm
+            },
+            query: query
+          }
+        };
       }
     }
 
     // CONVERSIONS HANDLERS (ABSOLUTE HIGHEST PRIORITY)
     // More explicit and robust platform conversions detection
-    const hasConversionsKeyword = lowerQuery.includes('conversions');
-    const hasPlatformForConversions = lowerQuery.includes('meta') || lowerQuery.includes('dv360') || lowerQuery.includes('cm360') || lowerQuery.includes('sa360') || lowerQuery.includes('amazon') || lowerQuery.includes('tradedesk');
-    
-    if (hasConversionsKeyword && hasPlatformForConversions) {
-      const platform = KEYWORDS.PLATFORMS.find(p => lowerQuery.includes(p.toLowerCase()));
-      if (platform) {
-        const platformData = data.filter(row => row.dimensions.platform === platform);
-        if (platformData.length > 0) {
-          const totalConversions = platformData.reduce((sum, row) => sum + (row.metrics.conversions || 0), 0);
-          const totalSpend = platformData.reduce((sum, row) => sum + row.metrics.spend, 0);
-          const totalClicks = platformData.reduce((sum, row) => sum + row.metrics.clicks, 0);
-          
-          const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks * 100) : 0;
-          const cpa = totalConversions > 0 ? (totalSpend / totalConversions) : 0;
-          
-          return {
-            content: `${platform} Conversions:\n\n` +
-                    `🎯 Total Conversions: ${totalConversions.toLocaleString()}\n` +
-                    `📊 Conversion Rate: ${conversionRate.toFixed(2)}%\n` +
-                    `💸 Cost Per Acquisition: $${cpa.toFixed(2)}\n` +
-                    `💰 Total Spend: $${totalSpend.toLocaleString()}\n` +
-                    `🖱️ Total Clicks: ${totalClicks.toLocaleString()}`,
-            data: {
-              type: 'platform_conversions',
-              platform: platform,
-              metrics: {
-                conversions: totalConversions,
-                conversionRate: conversionRate,
-                cpa: cpa,
-                spend: totalSpend,
-                clicks: totalClicks
-              },
-              query: query
-            }
-          };
-        }
+    const platformPerf = detectPlatform(query);
+    if (platformPerf && lowerQuery.includes('conversions')) {
+      const platformData = data.filter(row => row.dimensions.platform === platformPerf);
+      if (platformData.length > 0) {
+        const totalConversions = platformData.reduce((sum, row) => sum + (row.metrics.conversions || 0), 0);
+        const totalSpend = platformData.reduce((sum, row) => sum + row.metrics.spend, 0);
+        const totalClicks = platformData.reduce((sum, row) => sum + row.metrics.clicks, 0);
+        const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks * 100) : 0;
+        const cpa = totalConversions > 0 ? (totalSpend / totalConversions) : 0;
+        return {
+          content: `${platformPerf} Conversions:\n\n` +
+                  `🎯 Total Conversions: ${totalConversions.toLocaleString()}\n` +
+                  `📊 Conversion Rate: ${conversionRate.toFixed(2)}%\n` +
+                  `💸 Cost Per Acquisition: $${cpa.toFixed(2)}\n` +
+                  `💰 Total Spend: $${totalSpend.toLocaleString()}\n` +
+                  `🖱️ Total Clicks: ${totalClicks.toLocaleString()}`,
+          data: {
+            type: 'platform_conversions',
+            platform: platformPerf,
+            metrics: {
+              conversions: totalConversions,
+              conversionRate: conversionRate,
+              cpa: cpa,
+              spend: totalSpend,
+              clicks: totalClicks
+            },
+            query: query
+          }
+        };
       }
     }
     
@@ -4511,3 +4497,13 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 } 
+
+// Helper: Robust platform detection (handles possessives, punctuation, spacing)
+function detectPlatform(query: string): string | undefined {
+  const normalized = query.toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
+  for (const p of KEYWORDS.PLATFORMS) {
+    const pattern = new RegExp(`\\b${p}(?:'s|s)?\\b`, 'i');
+    if (pattern.test(normalized)) return p;
+  }
+  return undefined;
+}
