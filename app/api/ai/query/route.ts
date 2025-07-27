@@ -13,7 +13,7 @@ const KEYWORDS = {
   VIZ: ['visual', 'visualize', 'chart', 'graph', 'plot', 'show me', 'display', 'visualization'],
   TOP: ['top', 'best', 'highest', 'leading', 'top performing', 'best performing'],
   PLATFORMS: ['meta', 'dv360', 'cm360', 'sa360', 'amazon', 'tradedesk'],
-  CAMPAIGN_NAMES: ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples']
+  CAMPAIGN_NAMES: ['freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 'freshnest pantry staples', 'freshnest', 'summer grilling', 'back to school', 'holiday recipes', 'pantry staples']
 }
 
 const PLATFORM_MAP: Record<string, string> = {
@@ -56,6 +56,157 @@ async function processAIQuery(query: string, data: any[]) {
   // Platform detection
   const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => lowerQuery.includes(platform))
   const detectedCampaign = KEYWORDS.CAMPAIGN_NAMES.find(campaign => lowerQuery.includes(campaign))
+
+  // PHASE 2 IMPROVEMENT 6: Campaign-Specific Handlers (Priority: HIGH)
+  // Handle campaign-specific queries that are currently falling through
+  if (detectedCampaign && (lowerQuery.includes('spend') || lowerQuery.includes('revenue') || 
+      lowerQuery.includes('impressions') || lowerQuery.includes('clicks') || lowerQuery.includes('conversions') ||
+      lowerQuery.includes('ctr') || lowerQuery.includes('roas') || lowerQuery.includes('cpa') || 
+      lowerQuery.includes('cpc') || lowerQuery.includes('cpm'))) {
+    
+    const campaign = detectedCampaign.replace('freshnest ', 'FreshNest ').replace('freshnest', 'FreshNest ')
+    
+    // Filter data for the specific campaign - use the correct field name
+    const campaignData = data.filter(item => 
+      item.dimensions.campaign.toLowerCase().includes(detectedCampaign)
+    )
+    
+    if (campaignData.length === 0) {
+      return {
+        content: `No data found for ${campaign}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          performance: 'no_data',
+          query: query
+        }
+      }
+    }
+    
+    // Calculate campaign metrics
+    const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = campaignData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    // Determine which metric is being asked for
+    let metric = 'spend'
+    let metricName = 'Spend'
+    let formatFunction = (value: number) => `$${value.toLocaleString()}`
+    
+    if (lowerQuery.includes('revenue')) {
+      metric = 'revenue'
+      metricName = 'Revenue'
+      formatFunction = (value: number) => `$${value.toLocaleString()}`
+    } else if (lowerQuery.includes('impressions')) {
+      metric = 'impressions'
+      metricName = 'Impressions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('clicks')) {
+      metric = 'clicks'
+      metricName = 'Clicks'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('conversions')) {
+      metric = 'conversions'
+      metricName = 'Conversions'
+      formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('ctr')) {
+      metric = 'ctr'
+      metricName = 'CTR'
+      const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(ctr)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: ctr,
+          query: query
+        }
+      }
+    } else if (lowerQuery.includes('roas')) {
+      metric = 'roas'
+      metricName = 'ROAS'
+      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(roas)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: roas,
+          query: query
+        }
+      }
+    } else if (lowerQuery.includes('cpa')) {
+      metric = 'cpa'
+      metricName = 'CPA'
+      const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(cpa)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: cpa,
+          query: query
+        }
+      }
+    } else if (lowerQuery.includes('cpc')) {
+      metric = 'cpc'
+      metricName = 'CPC'
+      const cpc = totalClicks > 0 ? totalSpend / totalClicks : 0
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(cpc)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: cpc,
+          query: query
+        }
+      }
+    } else if (lowerQuery.includes('cpm')) {
+      metric = 'cpm'
+      metricName = 'CPM'
+      const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      return {
+        content: `${campaign} ${metricName}: ${formatFunction(cpm)}`,
+        data: {
+          type: 'campaign_specific',
+          campaign: campaign,
+          metric: metric,
+          value: cpm,
+          query: query
+        }
+      }
+    }
+    
+    // Handle basic metrics (spend, revenue, impressions, clicks, conversions)
+    let value = 0
+    if (metric === 'spend') value = totalSpend
+    else if (metric === 'revenue') value = totalRevenue
+    else if (metric === 'impressions') value = totalImpressions
+    else if (metric === 'clicks') value = totalClicks
+    else if (metric === 'conversions') value = totalConversions
+    
+    return {
+      content: `${campaign} ${metricName}: ${formatFunction(value)}`,
+      data: {
+        type: 'campaign_specific',
+        campaign: campaign,
+        metric: metric,
+        value: value,
+        query: query
+      }
+    }
+  }
 
   // PHASE 2 IMPROVEMENT 5: Comprehensive Platform Performance Handler (Priority: CRITICAL)
   // Handle all platform-specific performance queries that are currently falling through
@@ -367,157 +518,6 @@ async function processAIQuery(query: string, data: any[]) {
         winner: winner,
         runnerUp: runnerUp,
         allPlatforms: platformMetrics,
-        query: query
-      }
-    }
-  }
-
-  // PHASE 2 IMPROVEMENT 6: Campaign-Specific Handlers (Priority: HIGH)
-  // Handle campaign-specific queries that are currently falling through
-  if (detectedCampaign && (lowerQuery.includes('spend') || lowerQuery.includes('revenue') || 
-      lowerQuery.includes('impressions') || lowerQuery.includes('clicks') || lowerQuery.includes('conversions') ||
-      lowerQuery.includes('ctr') || lowerQuery.includes('roas') || lowerQuery.includes('cpa') || 
-      lowerQuery.includes('cpc') || lowerQuery.includes('cpm'))) {
-    
-    const campaign = detectedCampaign.replace('freshnest ', 'FreshNest ').replace('freshnest', 'FreshNest ')
-    
-    // Filter data for the specific campaign
-    const campaignData = data.filter(item => 
-      item.dimensions.campaign_name.toLowerCase().includes(detectedCampaign)
-    )
-    
-    if (campaignData.length === 0) {
-      return {
-        content: `No data found for ${campaign}`,
-        data: {
-          type: 'campaign_specific',
-          campaign: campaign,
-          performance: 'no_data',
-          query: query
-        }
-      }
-    }
-    
-    // Calculate campaign metrics
-    const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
-    const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
-    const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
-    const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
-    const totalConversions = campaignData.reduce((sum, item) => sum + item.metrics.conversions, 0)
-    
-    // Determine which metric is being asked for
-    let metric = 'spend'
-    let metricName = 'Spend'
-    let formatFunction = (value: number) => `$${value.toLocaleString()}`
-    
-    if (lowerQuery.includes('revenue')) {
-      metric = 'revenue'
-      metricName = 'Revenue'
-      formatFunction = (value: number) => `$${value.toLocaleString()}`
-    } else if (lowerQuery.includes('impressions')) {
-      metric = 'impressions'
-      metricName = 'Impressions'
-      formatFunction = (value: number) => value.toLocaleString()
-    } else if (lowerQuery.includes('clicks')) {
-      metric = 'clicks'
-      metricName = 'Clicks'
-      formatFunction = (value: number) => value.toLocaleString()
-    } else if (lowerQuery.includes('conversions')) {
-      metric = 'conversions'
-      metricName = 'Conversions'
-      formatFunction = (value: number) => value.toLocaleString()
-    } else if (lowerQuery.includes('ctr')) {
-      metric = 'ctr'
-      metricName = 'CTR'
-      const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
-      return {
-        content: `${campaign} ${metricName}: ${formatFunction(ctr)}`,
-        data: {
-          type: 'campaign_specific',
-          campaign: campaign,
-          metric: metric,
-          value: ctr,
-          query: query
-        }
-      }
-    } else if (lowerQuery.includes('roas')) {
-      metric = 'roas'
-      metricName = 'ROAS'
-      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
-      formatFunction = (value: number) => `${value.toFixed(2)}x`
-      return {
-        content: `${campaign} ${metricName}: ${formatFunction(roas)}`,
-        data: {
-          type: 'campaign_specific',
-          campaign: campaign,
-          metric: metric,
-          value: roas,
-          query: query
-        }
-      }
-    } else if (lowerQuery.includes('cpa')) {
-      metric = 'cpa'
-      metricName = 'CPA'
-      const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
-      formatFunction = (value: number) => `$${value.toFixed(2)}`
-      return {
-        content: `${campaign} ${metricName}: ${formatFunction(cpa)}`,
-        data: {
-          type: 'campaign_specific',
-          campaign: campaign,
-          metric: metric,
-          value: cpa,
-          query: query
-        }
-      }
-    } else if (lowerQuery.includes('cpc')) {
-      metric = 'cpc'
-      metricName = 'CPC'
-      const cpc = totalClicks > 0 ? totalSpend / totalClicks : 0
-      formatFunction = (value: number) => `$${value.toFixed(2)}`
-      return {
-        content: `${campaign} ${metricName}: ${formatFunction(cpc)}`,
-        data: {
-          type: 'campaign_specific',
-          campaign: campaign,
-          metric: metric,
-          value: cpc,
-          query: query
-        }
-      }
-    } else if (lowerQuery.includes('cpm')) {
-      metric = 'cpm'
-      metricName = 'CPM'
-      const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
-      formatFunction = (value: number) => `$${value.toFixed(2)}`
-      return {
-        content: `${campaign} ${metricName}: ${formatFunction(cpm)}`,
-        data: {
-          type: 'campaign_specific',
-          campaign: campaign,
-          metric: metric,
-          value: cpm,
-          query: query
-        }
-      }
-    }
-    
-    // Handle basic metrics (spend, revenue, impressions, clicks, conversions)
-    let value = 0
-    if (metric === 'spend') value = totalSpend
-    else if (metric === 'revenue') value = totalRevenue
-    else if (metric === 'impressions') value = totalImpressions
-    else if (metric === 'clicks') value = totalClicks
-    else if (metric === 'conversions') value = totalConversions
-    
-    return {
-      content: `${campaign} ${metricName}: ${formatFunction(value)}`,
-      data: {
-        type: 'campaign_specific',
-        campaign: campaign,
-        metric: metric,
-        value: value,
         query: query
       }
     }
