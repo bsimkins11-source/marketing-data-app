@@ -4483,6 +4483,154 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
+  // ADVANCED ANALYTICS HANDLERS (HIGH PRIORITY)
+  if (lowerQuery.includes('trends') || lowerQuery.includes('patterns') || lowerQuery.includes('insights') || lowerQuery.includes('analytics')) {
+    // Calculate comprehensive insights
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0)
+    
+    // Platform analysis
+    const platformGroups: Record<string, { spend: number, revenue: number, impressions: number, clicks: number, conversions: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += (item.metrics.revenue || 0)
+      platformGroups[platform].impressions += item.metrics.impressions
+      platformGroups[platform].clicks += item.metrics.clicks
+      platformGroups[platform].conversions += (item.metrics.conversions || 0)
+    })
+    
+    const platformInsights = Object.entries(platformGroups)
+      .map(([platform, metrics]) => ({
+        platform,
+        roas: metrics.spend > 0 ? metrics.revenue / metrics.spend : 0,
+        ctr: metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0,
+        cpa: metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0,
+        spend: metrics.spend
+      }))
+      .sort((a, b) => b.roas - a.roas)
+    
+    const bestPlatform = platformInsights[0]
+    const worstPlatform = platformInsights[platformInsights.length - 1]
+    
+    const content = `📊 **ADVANCED ANALYTICS INSIGHTS:**
+
+🔍 **KEY TRENDS & PATTERNS:**
+• **Best Performing Platform**: ${bestPlatform.platform} (ROAS: ${bestPlatform.roas.toFixed(2)}x, CTR: ${(bestPlatform.ctr * 100).toFixed(2)}%)
+• **Highest Spender**: ${platformInsights.sort((a, b) => b.spend - a.spend)[0].platform} ($${platformInsights.sort((a, b) => b.spend - a.spend)[0].spend.toLocaleString()})
+• **Most Efficient**: ${bestPlatform.platform} (CPA: $${bestPlatform.cpa.toFixed(2)})
+
+📈 **PERFORMANCE PATTERNS:**
+• Overall ROAS: ${(totalRevenue / totalSpend).toFixed(2)}x
+• Overall CTR: ${((totalClicks / totalImpressions) * 100).toFixed(2)}%
+• Overall CPA: $${(totalSpend / totalConversions).toFixed(2)}
+
+💡 **STRATEGIC INSIGHTS:**
+• ${bestPlatform.platform} shows the strongest performance and should be prioritized
+• ${worstPlatform.platform} needs optimization focus
+• Total campaign efficiency: ${((totalRevenue / totalSpend) * 100).toFixed(1)}% return on ad spend`
+
+    return {
+      content,
+      data: {
+        type: 'advanced_analytics',
+        platformInsights,
+        totalMetrics: {
+          spend: totalSpend,
+          revenue: totalRevenue,
+          impressions: totalImpressions,
+          clicks: totalClicks,
+          conversions: totalConversions
+        },
+        query: query
+      }
+    }
+  }
+
+  // CAMPAIGN EXECUTIVE SUMMARY HANDLERS (IMPROVED)
+  if (lowerQuery.includes('summary') || lowerQuery.includes('overview') || lowerQuery.includes('executive') || lowerQuery.includes('big picture')) {
+    // Calculate comprehensive campaign summary
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0)
+    
+    // Platform performance
+    const platformGroups: Record<string, { spend: number, revenue: number, impressions: number, clicks: number, conversions: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += (item.metrics.revenue || 0)
+      platformGroups[platform].impressions += item.metrics.impressions
+      platformGroups[platform].clicks += item.metrics.clicks
+      platformGroups[platform].conversions += (item.metrics.conversions || 0)
+    })
+    
+    const platformPerformance = Object.entries(platformGroups)
+      .map(([platform, metrics]) => ({
+        platform,
+        roas: metrics.spend > 0 ? metrics.revenue / metrics.spend : 0,
+        ctr: metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0,
+        spend: metrics.spend
+      }))
+      .sort((a, b) => b.roas - a.roas)
+    
+    const bestPlatform = platformPerformance[0]
+    const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    
+    const content = `🎯 **CAMPAIGN EXECUTIVE SUMMARY**
+
+📊 **OVERALL PERFORMANCE:**
+• **Total Spend**: $${totalSpend.toLocaleString()}
+• **Total Revenue**: $${totalRevenue.toLocaleString()}
+• **ROAS**: ${overallROAS.toFixed(2)}x
+• **CTR**: ${(overallCTR * 100).toFixed(2)}%
+• **Conversions**: ${totalConversions.toLocaleString()}
+
+🏆 **TOP PERFORMING PLATFORM:**
+• **${bestPlatform.platform}**: ${bestPlatform.roas.toFixed(2)}x ROAS, ${(bestPlatform.ctr * 100).toFixed(2)}% CTR
+
+📈 **KEY INSIGHTS:**
+• Campaign efficiency: ${((overallROAS - 1) * 100).toFixed(1)}% profit margin
+• ${bestPlatform.platform} is driving the strongest returns
+• Total reach: ${totalImpressions.toLocaleString()} impressions
+• Engagement rate: ${((totalClicks / totalImpressions) * 100).toFixed(2)}%
+
+💡 **RECOMMENDATIONS:**
+• Scale investment in ${bestPlatform.platform}
+• Optimize underperforming platforms
+• Focus on conversion rate optimization`
+
+    return {
+      content,
+      data: {
+        type: 'executive_summary',
+        platformPerformance,
+        totalMetrics: {
+          spend: totalSpend,
+          revenue: totalRevenue,
+          impressions: totalImpressions,
+          clicks: totalClicks,
+          conversions: totalConversions,
+          roas: overallROAS,
+          ctr: overallCTR
+        },
+        query: query
+      }
+    }
+  }
+
   // Default response with more helpful suggestions
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:
