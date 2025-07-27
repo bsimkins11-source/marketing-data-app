@@ -68,6 +68,7 @@ export interface KeywordGroups {
   COUNT: string[]
   SPEND: string[]
   CAMPAIGN: string[]
+  CREATIVE: string[]
   PLATFORM: string[]
   VIZ: string[]
   TOP: string[]
