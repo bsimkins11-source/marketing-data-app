@@ -4495,10 +4495,14 @@ function processWithKeywords(query: string, data: MarketingData[]) {
 
 // Helper: Robust platform detection (handles possessives, punctuation, spacing)
 function detectPlatform(query: string): string | undefined {
-  const normalized = query.toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
+  const lowerQuery = query.toLowerCase();
+  
+  // Simple approach: just check if platform names are in the query
   for (const p of KEYWORDS.PLATFORMS) {
-    const pattern = new RegExp(`\\b${p}(?:'s|s)?\\b`, 'i');
-    if (pattern.test(normalized)) return p;
+    if (lowerQuery.includes(p)) {
+      // Return the proper case platform name that matches CSV data
+      return PLATFORM_MAP[p] || p;
+    }
   }
   return undefined;
 }
