@@ -262,7 +262,7 @@ async function processAIQuery(query: string, data: any[]) {
                                      lowerQuery.includes('doing') || lowerQuery.includes('performed')
     
     // If it's a specific metric query, provide targeted response
-    if (isSpecificMetricQuery && !isGeneralPerformanceQuery) {
+    if (isSpecificMetricQuery) {
       let metric = 'spend'
       let metricName = 'Spend'
       let formatFunction = (value: number) => `$${value.toLocaleString()}`
