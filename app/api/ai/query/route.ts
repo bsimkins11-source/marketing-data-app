@@ -1534,6 +1534,89 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // PHASE 4 IMPROVEMENT 7: Creative Performance Handler (Priority: CRITICAL)
+  // Handle "top performing creatives", "best creatives" queries
+  if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
+      KEYWORDS.CREATIVE.some(keyword => lowerQuery.includes(keyword))) {
+    
+    // Detect platform if specified
+    const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => 
+      lowerQuery.includes(platform.toLowerCase())
+    )
+    
+    // Filter data by platform if specified
+    let filteredData = data
+    if (detectedPlatform) {
+      filteredData = data.filter(item => 
+        item.dimensions.platform.toLowerCase() === detectedPlatform.toLowerCase()
+      )
+    }
+    
+    // Group data by creative (using creative_id and creative_name)
+    const creativeMetrics = filteredData.reduce((acc, item) => {
+      const creativeKey = `${item.dimensions.creativeId}-${item.dimensions.creativeName}`
+      if (!acc[creativeKey]) {
+        acc[creativeKey] = {
+          creativeId: item.dimensions.creativeId,
+          creativeName: item.dimensions.creativeName,
+          creativeFormat: item.dimensions.creative_format,
+          campaign: item.dimensions.campaign,
+          platform: item.dimensions.platform,
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0
+        }
+      }
+      acc[creativeKey].spend += item.metrics.spend
+      acc[creativeKey].revenue += item.metrics.revenue
+      acc[creativeKey].impressions += item.metrics.impressions
+      acc[creativeKey].clicks += item.metrics.clicks
+      acc[creativeKey].conversions += item.metrics.conversions
+      return acc
+    }, {} as Record<string, any>)
+    
+    // Calculate performance metrics and sort
+    const creativePerformance = Object.values(creativeMetrics).map((creative: any) => {
+      const roas = creative.spend > 0 ? creative.revenue / creative.spend : 0
+      const ctr = creative.impressions > 0 ? creative.clicks / creative.impressions : 0
+      const cpa = creative.conversions > 0 ? creative.spend / creative.conversions : 0
+      
+      return {
+        creativeId: creative.creativeId,
+        creativeName: creative.creativeName,
+        creativeFormat: creative.creativeFormat,
+        campaign: creative.campaign,
+        platform: creative.platform,
+        roas,
+        ctr,
+        cpa,
+        spend: creative.spend,
+        revenue: creative.revenue,
+        conversions: creative.conversions
+      }
+    }).sort((a, b) => b.roas - a.roas) // Sort by ROAS descending
+    
+    // Get top 3 performing creatives
+    const topCreatives = creativePerformance.slice(0, 3)
+    
+    const platformText = detectedPlatform ? ` on ${detectedPlatform}` : ''
+    const content = `🏆 Top Performing Creatives${platformText}:\n\n${topCreatives.map((creative, index) => 
+      `${index + 1}. ${creative.creativeName} (${creative.creativeFormat})\n   • Campaign: ${creative.campaign}\n   • Platform: ${creative.platform}\n   • ROAS: ${creative.roas.toFixed(2)}x\n   • CTR: ${(creative.ctr * 100).toFixed(2)}%\n   • CPA: $${creative.cpa.toFixed(2)}\n   • Spend: $${creative.spend.toLocaleString()}\n   • Revenue: $${creative.revenue.toLocaleString()}\n   • Conversions: ${creative.conversions.toLocaleString()}`
+    ).join('\n\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'top_performing_creatives',
+        creatives: topCreatives,
+        platform: detectedPlatform,
+        query: query
+      }
+    }
+  }
+
   // PHASE 4 IMPROVEMENT 6: Top/Best Performing Handler (Priority: CRITICAL)
   // Handle "top performing", "best performing", "highest" queries
   if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
@@ -1617,89 +1700,6 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
         type: 'campaign_names',
         campaigns: sortedCampaigns,
         count: sortedCampaigns.length,
-        query: query
-      }
-    }
-  }
-
-  // PHASE 4 IMPROVEMENT 7: Creative Performance Handler (Priority: CRITICAL)
-  // Handle "top performing creatives", "best creatives" queries
-  if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
-      KEYWORDS.CREATIVE.some(keyword => lowerQuery.includes(keyword))) {
-    
-    // Detect platform if specified
-    const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => 
-      lowerQuery.includes(platform.toLowerCase())
-    )
-    
-    // Filter data by platform if specified
-    let filteredData = data
-    if (detectedPlatform) {
-      filteredData = data.filter(item => 
-        item.dimensions.platform.toLowerCase() === detectedPlatform.toLowerCase()
-      )
-    }
-    
-    // Group data by creative (using creative_id and creative_name)
-    const creativeMetrics = filteredData.reduce((acc, item) => {
-      const creativeKey = `${item.dimensions.creativeId}-${item.dimensions.creativeName}`
-      if (!acc[creativeKey]) {
-        acc[creativeKey] = {
-          creativeId: item.dimensions.creativeId,
-          creativeName: item.dimensions.creativeName,
-          creativeFormat: item.dimensions.creative_format,
-          campaign: item.dimensions.campaign,
-          platform: item.dimensions.platform,
-          spend: 0,
-          revenue: 0,
-          impressions: 0,
-          clicks: 0,
-          conversions: 0
-        }
-      }
-      acc[creativeKey].spend += item.metrics.spend
-      acc[creativeKey].revenue += item.metrics.revenue
-      acc[creativeKey].impressions += item.metrics.impressions
-      acc[creativeKey].clicks += item.metrics.clicks
-      acc[creativeKey].conversions += item.metrics.conversions
-      return acc
-    }, {} as Record<string, any>)
-    
-    // Calculate performance metrics and sort
-    const creativePerformance = Object.values(creativeMetrics).map((creative: any) => {
-      const roas = creative.spend > 0 ? creative.revenue / creative.spend : 0
-      const ctr = creative.impressions > 0 ? creative.clicks / creative.impressions : 0
-      const cpa = creative.conversions > 0 ? creative.spend / creative.conversions : 0
-      
-      return {
-        creativeId: creative.creativeId,
-        creativeName: creative.creativeName,
-        creativeFormat: creative.creativeFormat,
-        campaign: creative.campaign,
-        platform: creative.platform,
-        roas,
-        ctr,
-        cpa,
-        spend: creative.spend,
-        revenue: creative.revenue,
-        conversions: creative.conversions
-      }
-    }).sort((a, b) => b.roas - a.roas) // Sort by ROAS descending
-    
-    // Get top 3 performing creatives
-    const topCreatives = creativePerformance.slice(0, 3)
-    
-    const platformText = detectedPlatform ? ` on ${detectedPlatform}` : ''
-    const content = `🏆 Top Performing Creatives${platformText}:\n\n${topCreatives.map((creative, index) => 
-      `${index + 1}. ${creative.creativeName} (${creative.creativeFormat})\n   • Campaign: ${creative.campaign}\n   • Platform: ${creative.platform}\n   • ROAS: ${creative.roas.toFixed(2)}x\n   • CTR: ${(creative.ctr * 100).toFixed(2)}%\n   • CPA: $${creative.cpa.toFixed(2)}\n   • Spend: $${creative.spend.toLocaleString()}\n   • Revenue: $${creative.revenue.toLocaleString()}\n   • Conversions: ${creative.conversions.toLocaleString()}`
-    ).join('\n\n')}`
-    
-    return {
-      content,
-      data: {
-        type: 'top_performing_creatives',
-        creatives: topCreatives,
-        platform: detectedPlatform,
         query: query
       }
     }
