@@ -4483,11 +4483,132 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
+  // ADVANCED ANALYTICS HANDLERS (HIGH PRIORITY - TRENDS, PATTERNS, INSIGHTS)
+  if (lowerQuery.includes('trends') || lowerQuery.includes('patterns') || lowerQuery.includes('insights') || 
+      lowerQuery.includes('analytics') || lowerQuery.includes('key metrics') || lowerQuery.includes('key findings') ||
+      lowerQuery.includes('focus') || lowerQuery.includes('attention') || lowerQuery.includes('learn') ||
+      (lowerQuery.includes('what are the') && (lowerQuery.includes('trends') || lowerQuery.includes('patterns') || lowerQuery.includes('insights') || lowerQuery.includes('analytics')))) {
+    
+    // Calculate overall metrics
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0)
+    
+    // Calculate weighted averages
+    const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const overallCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    // Platform performance analysis
+    const platformGroups: Record<string, { spend: number, revenue: number, impressions: number, clicks: number, conversions: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += (item.metrics.revenue || 0)
+      platformGroups[platform].impressions += item.metrics.impressions
+      platformGroups[platform].clicks += item.metrics.clicks
+      platformGroups[platform].conversions += (item.metrics.conversions || 0)
+    })
+    
+    const platformAnalysis = Object.entries(platformGroups)
+      .map(([platform, metrics]) => {
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        return { platform, ...metrics, ctr, roas, cpa }
+      })
+      .sort((a, b) => b.roas - a.roas)
+    
+    // Campaign performance analysis
+    const campaignGroups: Record<string, { spend: number, revenue: number, impressions: number, clicks: number, conversions: number }> = {}
+    data.forEach(item => {
+      const campaign = item.dimensions.campaign
+      if (!campaignGroups[campaign]) {
+        campaignGroups[campaign] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      campaignGroups[campaign].spend += item.metrics.spend
+      campaignGroups[campaign].revenue += (item.metrics.revenue || 0)
+      campaignGroups[campaign].impressions += item.metrics.impressions
+      campaignGroups[campaign].clicks += item.metrics.clicks
+      campaignGroups[campaign].conversions += (item.metrics.conversions || 0)
+    })
+    
+    const campaignAnalysis = Object.entries(campaignGroups)
+      .map(([campaign, metrics]) => {
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        return { campaign, ...metrics, ctr, roas, cpa }
+      })
+      .sort((a, b) => b.roas - a.roas)
+    
+    // Generate insights
+    const topPlatform = platformAnalysis[0]
+    const topCampaign = campaignAnalysis[0]
+    const bottomPlatform = platformAnalysis[platformAnalysis.length - 1]
+    const bottomCampaign = campaignAnalysis[campaignAnalysis.length - 1]
+    
+    const content = `📊 **ADVANCED ANALYTICS & INSIGHTS** 📊
+
+🎯 **KEY METRICS OVERVIEW:**
+• Overall CTR: ${totalImpressions > 0 ? (overallCTR * 100).toFixed(2) : '0.00'}%
+• Overall ROAS: ${overallROAS.toFixed(2)}x
+• Overall CPA: ${totalConversions > 0 ? `$${overallCPA.toFixed(2)}` : 'N/A'}
+
+🏆 **TOP PERFORMERS:**
+• Best Platform: ${topPlatform.platform} (ROAS: ${topPlatform.roas.toFixed(2)}x, CTR: ${(topPlatform.ctr * 100).toFixed(2)}%)
+• Best Campaign: ${topCampaign.campaign} (ROAS: ${topCampaign.roas.toFixed(2)}x, CTR: ${(topCampaign.ctr * 100).toFixed(2)}%)
+
+⚠️ **AREAS FOR ATTENTION:**
+• Lowest Platform: ${bottomPlatform.platform} (ROAS: ${bottomPlatform.roas.toFixed(2)}x)
+• Lowest Campaign: ${bottomCampaign.campaign} (ROAS: ${bottomCampaign.roas.toFixed(2)}x)
+
+💡 **KEY INSIGHTS:**
+• ${topPlatform.platform} is driving the highest ROAS at ${topPlatform.roas.toFixed(2)}x
+• ${topCampaign.campaign} shows the best campaign-level performance
+• Consider reallocating budget from ${bottomPlatform.platform} to ${topPlatform.platform}
+• Focus optimization efforts on ${bottomCampaign.campaign} to improve its performance
+
+📈 **RECOMMENDATIONS:**
+• Increase spend on ${topPlatform.platform} by 20-30%
+• Optimize ${bottomCampaign.campaign} creative and targeting
+• Monitor ${bottomPlatform.platform} performance closely
+• Consider testing new creative formats on underperforming campaigns`;
+    
+    return {
+      content,
+      data: {
+        type: 'advanced_analytics',
+        overallMetrics: {
+          ctr: overallCTR,
+          roas: overallROAS,
+          cpa: overallCPA
+        },
+        platformAnalysis,
+        campaignAnalysis,
+        insights: {
+          topPlatform: topPlatform.platform,
+          topCampaign: topCampaign.campaign,
+          bottomPlatform: bottomPlatform.platform,
+          bottomCampaign: bottomCampaign.campaign
+        },
+        query: query
+      }
+    }
+  }
+
   // SPECIFIC METRICS HANDLERS (HIGH PRIORITY - FIXING 100% FAILURE RATE)
   if ((lowerQuery.includes('what is our') || lowerQuery.includes('what are our') || lowerQuery.includes('how much') || lowerQuery.includes('how many') || lowerQuery.includes('what is the')) && 
       !lowerQuery.includes('summary') && !lowerQuery.includes('overview') && !lowerQuery.includes('executive') && !lowerQuery.includes('big picture') &&
       !lowerQuery.includes('trends') && !lowerQuery.includes('patterns') && !lowerQuery.includes('insights') && !lowerQuery.includes('analytics') &&
-      !lowerQuery.includes('key metrics') && !lowerQuery.includes('key findings') && !lowerQuery.includes('focus') && !lowerQuery.includes('attention')) {
+      !lowerQuery.includes('key metrics') && !lowerQuery.includes('key findings') && !lowerQuery.includes('focus') && !lowerQuery.includes('attention') &&
+      !lowerQuery.includes('learn') && !lowerQuery.includes('recap') && !lowerQuery.includes('findings') &&
+      !lowerQuery.includes('what should i') && !lowerQuery.includes('what can you') && !lowerQuery.includes('what do you')) {
     // Check for specific metrics
     if (lowerQuery.includes('spend') || lowerQuery.includes('cost') || lowerQuery.includes('budget')) {
       const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
@@ -4754,7 +4875,11 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   // Handle "What are the spend?" and "What are the revenue?" patterns
   if (lowerQuery.includes('what are the') && 
       !lowerQuery.includes('key metrics') && !lowerQuery.includes('key findings') && !lowerQuery.includes('trends') && 
-      !lowerQuery.includes('patterns') && !lowerQuery.includes('insights') && !lowerQuery.includes('analytics')) {
+      !lowerQuery.includes('patterns') && !lowerQuery.includes('insights') && !lowerQuery.includes('analytics') &&
+      !lowerQuery.includes('summary') && !lowerQuery.includes('overview') && !lowerQuery.includes('executive') && 
+      !lowerQuery.includes('big picture') && !lowerQuery.includes('focus') && !lowerQuery.includes('attention') &&
+      !lowerQuery.includes('learn') && !lowerQuery.includes('recap') && !lowerQuery.includes('findings') &&
+      !lowerQuery.includes('what should i') && !lowerQuery.includes('what can you') && !lowerQuery.includes('what do you')) {
     if (lowerQuery.includes('spend')) {
       const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
       return {
