@@ -1035,10 +1035,13 @@ async function processAIQuery(query: string, data: any[]) {
   // PHASE 3 IMPROVEMENT 6: Enhanced Specific Metrics Handler (Priority: HIGH)
   // Improve specific metrics queries that are currently low performing
   if ((lowerQuery.includes('what is') || lowerQuery.includes('what are') || lowerQuery.includes('how much') || lowerQuery.includes('how many') || 
-       lowerQuery.includes('total') || lowerQuery.includes('overall') || lowerQuery.includes('sum')) && 
+       lowerQuery.includes('total') || lowerQuery.includes('overall') || lowerQuery.includes('sum') || 
+       lowerQuery.includes('the') || lowerQuery.includes('our')) && 
       (lowerQuery.includes('spend') || lowerQuery.includes('revenue') || lowerQuery.includes('impressions') || 
        lowerQuery.includes('clicks') || lowerQuery.includes('conversions') || lowerQuery.includes('cost') || 
-       lowerQuery.includes('budget') || lowerQuery.includes('money')) &&
+       lowerQuery.includes('budget') || lowerQuery.includes('money') || lowerQuery.includes('ctr') || 
+       lowerQuery.includes('roas') || lowerQuery.includes('cpa') || lowerQuery.includes('cpc') || 
+       lowerQuery.includes('cpm') || lowerQuery.includes('click-through rate') || lowerQuery.includes('return on ad spend')) &&
       !detectedPlatform && !detectedCampaign) {
     
     // Calculate overall metrics
@@ -1069,6 +1072,26 @@ async function processAIQuery(query: string, data: any[]) {
       metric = 'conversions'
       metricName = 'Total Conversions'
       formatFunction = (value: number) => value.toLocaleString()
+    } else if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate')) {
+      metric = 'ctr'
+      metricName = 'Overall CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    } else if (lowerQuery.includes('roas') || lowerQuery.includes('return on ad spend')) {
+      metric = 'roas'
+      metricName = 'Overall ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+    } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+      metric = 'cpa'
+      metricName = 'Overall CPA'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+      metric = 'cpc'
+      metricName = 'Overall CPC'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    } else if (lowerQuery.includes('cpm') || lowerQuery.includes('cost per thousand')) {
+      metric = 'cpm'
+      metricName = 'Overall CPM'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
     }
     
     let value = 0
@@ -1077,6 +1100,17 @@ async function processAIQuery(query: string, data: any[]) {
     else if (metric === 'impressions') value = totalImpressions
     else if (metric === 'clicks') value = totalClicks
     else if (metric === 'conversions') value = totalConversions
+    else if (metric === 'ctr') {
+      value = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    } else if (metric === 'roas') {
+      value = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    } else if (metric === 'cpa') {
+      value = totalConversions > 0 ? totalSpend / totalConversions : 0
+    } else if (metric === 'cpc') {
+      value = totalClicks > 0 ? totalSpend / totalClicks : 0
+    } else if (metric === 'cpm') {
+      value = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    }
     
     return {
       content: `${metricName}: ${formatFunction(value)}`,
