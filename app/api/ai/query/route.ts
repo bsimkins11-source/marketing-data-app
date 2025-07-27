@@ -736,7 +736,18 @@ async function processAIQuery(query: string, data: any[]) {
   // PHASE 3 IMPROVEMENT 1: Executive Summary Handler (Priority: HIGH)
   // Handle executive summary and overview queries
   if ((lowerQuery.includes('summary') || lowerQuery.includes('overview') || lowerQuery.includes('executive') ||
-       lowerQuery.includes('dashboard') || lowerQuery.includes('report') || lowerQuery.includes('status')) &&
+       lowerQuery.includes('dashboard') || lowerQuery.includes('report') || lowerQuery.includes('status') ||
+       lowerQuery.includes('recap') || lowerQuery.includes('rundown') || lowerQuery.includes('brief') ||
+       lowerQuery.includes('briefing') || lowerQuery.includes('synopsis') || lowerQuery.includes('digest') ||
+       lowerQuery.includes('highlights') || lowerQuery.includes('key points') || lowerQuery.includes('main points') ||
+       lowerQuery.includes('top line') || lowerQuery.includes('headlines') || lowerQuery.includes('snapshot') ||
+       lowerQuery.includes('picture') || lowerQuery.includes('view') || lowerQuery.includes('perspective') ||
+       lowerQuery.includes('situation') || lowerQuery.includes('condition') || lowerQuery.includes('state') ||
+       lowerQuery.includes('position') || lowerQuery.includes('standing') || lowerQuery.includes('performance') ||
+       lowerQuery.includes('results') || lowerQuery.includes('outcomes') || lowerQuery.includes('achievements') ||
+       lowerQuery.includes('progress') || lowerQuery.includes('update') || lowerQuery.includes('current state') ||
+       lowerQuery.includes('where we are') || lowerQuery.includes('how we are doing') || lowerQuery.includes('how are we doing') ||
+       lowerQuery.includes('what is happening') || lowerQuery.includes('what is going on') || lowerQuery.includes('what is the situation')) &&
       !detectedPlatform && !detectedCampaign) {
     
     // Calculate comprehensive summary metrics
@@ -798,7 +809,17 @@ async function processAIQuery(query: string, data: any[]) {
        lowerQuery.includes('awful') || lowerQuery.includes('horrible') || lowerQuery.includes('worst') ||
        lowerQuery.includes('lowest') || lowerQuery.includes('underperforming') || lowerQuery.includes('failing') ||
        lowerQuery.includes('struggling') || lowerQuery.includes('trouble') || lowerQuery.includes('concern') ||
-       lowerQuery.includes('worry') || lowerQuery.includes('alarm') || lowerQuery.includes('alert')) &&
+       lowerQuery.includes('worry') || lowerQuery.includes('alarm') || lowerQuery.includes('alert') ||
+       lowerQuery.includes('red flag') || lowerQuery.includes('red flags') || lowerQuery.includes('warning') ||
+       lowerQuery.includes('warnings') || lowerQuery.includes('caution') || lowerQuery.includes('risk') ||
+       lowerQuery.includes('risks') || lowerQuery.includes('danger') || lowerQuery.includes('dangerous') ||
+       lowerQuery.includes('critical') || lowerQuery.includes('emergency') || lowerQuery.includes('urgent') ||
+       lowerQuery.includes('concerning') || lowerQuery.includes('worrisome') || lowerQuery.includes('troubling') ||
+       lowerQuery.includes('disturbing') || lowerQuery.includes('shocking') || lowerQuery.includes('surprising') ||
+       lowerQuery.includes('unexpected') || lowerQuery.includes('odd') || lowerQuery.includes('peculiar') ||
+       lowerQuery.includes('suspicious') || lowerQuery.includes('questionable') || lowerQuery.includes('doubtful') ||
+       lowerQuery.includes('uncertain') || lowerQuery.includes('unclear') || lowerQuery.includes('confusing') ||
+       lowerQuery.includes('puzzling') || lowerQuery.includes('mysterious') || lowerQuery.includes('bizarre')) &&
       !detectedPlatform && !detectedCampaign) {
     
     // Calculate overall metrics for comparison
@@ -910,7 +931,20 @@ async function processAIQuery(query: string, data: any[]) {
   // Handle advanced analytics and deep dive queries
   if ((lowerQuery.includes('analytics') || lowerQuery.includes('analysis') || lowerQuery.includes('deep dive') ||
        lowerQuery.includes('breakdown') || lowerQuery.includes('trend') || lowerQuery.includes('pattern') ||
-       lowerQuery.includes('correlation') || lowerQuery.includes('insight')) &&
+       lowerQuery.includes('correlation') || lowerQuery.includes('insight') || lowerQuery.includes('insights') ||
+       lowerQuery.includes('examination') || lowerQuery.includes('investigation') || lowerQuery.includes('study') ||
+       lowerQuery.includes('research') || lowerQuery.includes('exploration') || lowerQuery.includes('discovery') ||
+       lowerQuery.includes('finding') || lowerQuery.includes('findings') || lowerQuery.includes('observation') ||
+       lowerQuery.includes('observation') || lowerQuery.includes('data analysis') || lowerQuery.includes('data analytics') ||
+       lowerQuery.includes('statistical analysis') || lowerQuery.includes('performance analysis') || lowerQuery.includes('campaign analysis') ||
+       lowerQuery.includes('market analysis') || lowerQuery.includes('competitive analysis') || lowerQuery.includes('benchmark analysis') ||
+       lowerQuery.includes('comparative analysis') || lowerQuery.includes('detailed analysis') || lowerQuery.includes('comprehensive analysis') ||
+       lowerQuery.includes('thorough analysis') || lowerQuery.includes('in-depth analysis') || lowerQuery.includes('detailed breakdown') ||
+       lowerQuery.includes('comprehensive breakdown') || lowerQuery.includes('detailed view') || lowerQuery.includes('comprehensive view') ||
+       lowerQuery.includes('detailed picture') || lowerQuery.includes('comprehensive picture') || lowerQuery.includes('detailed report') ||
+       lowerQuery.includes('comprehensive report') || lowerQuery.includes('detailed review') || lowerQuery.includes('comprehensive review') ||
+       lowerQuery.includes('detailed assessment') || lowerQuery.includes('comprehensive assessment') || lowerQuery.includes('detailed evaluation') ||
+       lowerQuery.includes('comprehensive evaluation') || lowerQuery.includes('detailed examination') || lowerQuery.includes('comprehensive examination')) &&
       !detectedPlatform && !detectedCampaign) {
     
     // Group by platform and campaign for advanced analysis
@@ -1041,12 +1075,30 @@ async function processAIQuery(query: string, data: any[]) {
   // Improve specific metrics queries that are currently low performing
   if ((lowerQuery.includes('what is') || lowerQuery.includes('what are') || lowerQuery.includes('how much') || lowerQuery.includes('how many') || 
        lowerQuery.includes('total') || lowerQuery.includes('overall') || lowerQuery.includes('sum') || 
-       lowerQuery.includes('the') || lowerQuery.includes('our')) && 
+       lowerQuery.includes('the') || lowerQuery.includes('our') || lowerQuery.includes('current') || 
+       lowerQuery.includes('average') || lowerQuery.includes('mean') || lowerQuery.includes('median') ||
+       lowerQuery.includes('rate') || lowerQuery.includes('ratio') || lowerQuery.includes('percentage') ||
+       lowerQuery.includes('percent') || lowerQuery.includes('ratio') || lowerQuery.includes('efficiency') ||
+       lowerQuery.includes('performance') || lowerQuery.includes('metric') || lowerQuery.includes('metrics') ||
+       lowerQuery.includes('kpi') || lowerQuery.includes('kpis') || lowerQuery.includes('number') ||
+       lowerQuery.includes('amount') || lowerQuery.includes('value') || lowerQuery.includes('score') ||
+       lowerQuery.includes('index') || lowerQuery.includes('level') || lowerQuery.includes('grade') ||
+       lowerQuery.includes('status') || lowerQuery.includes('condition') || lowerQuery.includes('state')) && 
       (lowerQuery.includes('spend') || lowerQuery.includes('revenue') || lowerQuery.includes('impressions') || 
        lowerQuery.includes('clicks') || lowerQuery.includes('conversions') || lowerQuery.includes('cost') || 
        lowerQuery.includes('budget') || lowerQuery.includes('money') || lowerQuery.includes('ctr') || 
        lowerQuery.includes('roas') || lowerQuery.includes('cpa') || lowerQuery.includes('cpc') || 
-       lowerQuery.includes('cpm') || lowerQuery.includes('click-through rate') || lowerQuery.includes('return on ad spend')) &&
+       lowerQuery.includes('cpm') || lowerQuery.includes('click-through rate') || lowerQuery.includes('return on ad spend') ||
+       lowerQuery.includes('click through rate') || lowerQuery.includes('clickthrough rate') || 
+       lowerQuery.includes('cost per acquisition') || lowerQuery.includes('cost per click') || 
+       lowerQuery.includes('cost per thousand') || lowerQuery.includes('cost per mille') ||
+       lowerQuery.includes('return on investment') || lowerQuery.includes('roi') || 
+       lowerQuery.includes('conversion rate') || lowerQuery.includes('click rate') ||
+       lowerQuery.includes('impression rate') || lowerQuery.includes('engagement rate') ||
+       lowerQuery.includes('performance') || lowerQuery.includes('efficiency') || 
+       lowerQuery.includes('effectiveness') || lowerQuery.includes('productivity') ||
+       lowerQuery.includes('yield') || lowerQuery.includes('output') || lowerQuery.includes('result') ||
+       lowerQuery.includes('outcome') || lowerQuery.includes('achievement') || lowerQuery.includes('success')) &&
       !detectedPlatform && !detectedCampaign) {
     
     // Calculate overall metrics
