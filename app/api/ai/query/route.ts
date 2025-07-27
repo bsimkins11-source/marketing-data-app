@@ -4752,7 +4752,9 @@ function processWithKeywords(query: string, data: MarketingData[]) {
   }
 
   // Handle "What are the spend?" and "What are the revenue?" patterns
-  if (lowerQuery.includes('what are the')) {
+  if (lowerQuery.includes('what are the') && 
+      !lowerQuery.includes('key metrics') && !lowerQuery.includes('key findings') && !lowerQuery.includes('trends') && 
+      !lowerQuery.includes('patterns') && !lowerQuery.includes('insights') && !lowerQuery.includes('analytics')) {
     if (lowerQuery.includes('spend')) {
       const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
       return {
