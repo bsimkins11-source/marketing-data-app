@@ -1189,7 +1189,36 @@ async function processAIQuery(query: string, data: any[]) {
         lowerQuery.includes('worst') || lowerQuery.includes('lowest') || lowerQuery.includes('underperforming') ||
         lowerQuery.includes('failing') || lowerQuery.includes('struggling') || lowerQuery.includes('trouble') ||
         lowerQuery.includes('concern') || lowerQuery.includes('worry') || lowerQuery.includes('alarm') ||
-        lowerQuery.includes('alert')) {
+        lowerQuery.includes('alert') || lowerQuery.includes('not working') || lowerQuery.includes('broken') ||
+        lowerQuery.includes('damaged') || lowerQuery.includes('defective') || lowerQuery.includes('faulty') ||
+        lowerQuery.includes('problematic') || lowerQuery.includes('troublesome') || lowerQuery.includes('difficult') ||
+        lowerQuery.includes('challenging') || lowerQuery.includes('hard') || lowerQuery.includes('tough') ||
+        lowerQuery.includes('rough') || lowerQuery.includes('difficult') || lowerQuery.includes('complicated') ||
+        lowerQuery.includes('complex') || lowerQuery.includes('confusing') || lowerQuery.includes('unclear') ||
+        lowerQuery.includes('vague') || lowerQuery.includes('ambiguous') || lowerQuery.includes('uncertain') ||
+        lowerQuery.includes('doubtful') || lowerQuery.includes('questionable') || lowerQuery.includes('suspicious') ||
+        lowerQuery.includes('peculiar') || lowerQuery.includes('odd') || lowerQuery.includes('strange') ||
+        lowerQuery.includes('weird') || lowerQuery.includes('bizarre') || lowerQuery.includes('unusual') ||
+        lowerQuery.includes('unexpected') || lowerQuery.includes('surprising') || lowerQuery.includes('shocking') ||
+        lowerQuery.includes('disturbing') || lowerQuery.includes('troubling') || lowerQuery.includes('worrisome') ||
+        lowerQuery.includes('concerning') || lowerQuery.includes('alarming') || lowerQuery.includes('critical') ||
+        lowerQuery.includes('urgent') || lowerQuery.includes('emergency') || lowerQuery.includes('dangerous') ||
+        lowerQuery.includes('risky') || lowerQuery.includes('hazardous') || lowerQuery.includes('threatening') ||
+        lowerQuery.includes('worrying') || lowerQuery.includes('stressful') || lowerQuery.includes('frustrating') ||
+        lowerQuery.includes('annoying') || lowerQuery.includes('irritating') || lowerQuery.includes('bothersome') ||
+        lowerQuery.includes('troublesome') || lowerQuery.includes('problematic') || lowerQuery.includes('difficult') ||
+        lowerQuery.includes('challenging') || lowerQuery.includes('hard') || lowerQuery.includes('tough') ||
+        lowerQuery.includes('rough') || lowerQuery.includes('difficult') || lowerQuery.includes('complicated') ||
+        lowerQuery.includes('complex') || lowerQuery.includes('confusing') || lowerQuery.includes('unclear') ||
+        lowerQuery.includes('vague') || lowerQuery.includes('ambiguous') || lowerQuery.includes('uncertain') ||
+        lowerQuery.includes('doubtful') || lowerQuery.includes('questionable') || lowerQuery.includes('suspicious') ||
+        lowerQuery.includes('peculiar') || lowerQuery.includes('odd') || lowerQuery.includes('strange') ||
+        lowerQuery.includes('weird') || lowerQuery.includes('bizarre') || lowerQuery.includes('unusual') ||
+        lowerQuery.includes('unexpected') || lowerQuery.includes('surprising') || lowerQuery.includes('shocking') ||
+        lowerQuery.includes('disturbing') || lowerQuery.includes('troubling') || lowerQuery.includes('worrisome') ||
+        lowerQuery.includes('concerning') || lowerQuery.includes('alarming') || lowerQuery.includes('critical') ||
+        lowerQuery.includes('urgent') || lowerQuery.includes('emergency') || lowerQuery.includes('dangerous') ||
+        lowerQuery.includes('risky') || lowerQuery.includes('hazardous') || lowerQuery.includes('threatening')) {
       
       // Calculate overall metrics for comparison
       const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
@@ -1248,7 +1277,197 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
-  // PHASE 3 IMPROVEMENT 8: Catch-all Comparative Handler (Priority: HIGH)
+  // PHASE 3 IMPROVEMENT 8: Comprehensive Anomaly Detection Handler (Priority: CRITICAL)
+  // Catch any remaining anomaly-related queries that might be falling through
+  if ((lowerQuery.includes('any') || lowerQuery.includes('some') || lowerQuery.includes('anyone') || 
+       lowerQuery.includes('anything') || lowerQuery.includes('something') || lowerQuery.includes('everything')) &&
+      (lowerQuery.includes('anomaly') || lowerQuery.includes('anomalies') || lowerQuery.includes('problem') || 
+       lowerQuery.includes('problems') || lowerQuery.includes('issue') || lowerQuery.includes('issues') ||
+       lowerQuery.includes('wrong') || lowerQuery.includes('bad') || lowerQuery.includes('poor') ||
+       lowerQuery.includes('terrible') || lowerQuery.includes('awful') || lowerQuery.includes('horrible') ||
+       lowerQuery.includes('worst') || lowerQuery.includes('lowest') || lowerQuery.includes('underperforming') ||
+       lowerQuery.includes('failing') || lowerQuery.includes('struggling') || lowerQuery.includes('trouble') ||
+       lowerQuery.includes('concern') || lowerQuery.includes('worry') || lowerQuery.includes('alarm') ||
+       lowerQuery.includes('alert') || lowerQuery.includes('red flag') || lowerQuery.includes('red flags') ||
+       lowerQuery.includes('warning') || lowerQuery.includes('warnings') || lowerQuery.includes('caution') ||
+       lowerQuery.includes('risk') || lowerQuery.includes('risks') || lowerQuery.includes('danger') ||
+       lowerQuery.includes('dangerous') || lowerQuery.includes('critical') || lowerQuery.includes('emergency') ||
+       lowerQuery.includes('urgent') || lowerQuery.includes('concerning') || lowerQuery.includes('worrisome') ||
+       lowerQuery.includes('troubling') || lowerQuery.includes('disturbing') || lowerQuery.includes('shocking') ||
+       lowerQuery.includes('surprising') || lowerQuery.includes('unexpected') || lowerQuery.includes('odd') ||
+       lowerQuery.includes('peculiar') || lowerQuery.includes('suspicious') || lowerQuery.includes('questionable') ||
+       lowerQuery.includes('doubtful') || lowerQuery.includes('uncertain') || lowerQuery.includes('unclear') ||
+       lowerQuery.includes('confusing') || lowerQuery.includes('puzzling') || lowerQuery.includes('mysterious') ||
+       lowerQuery.includes('bizarre'))) {
+    
+    // Calculate overall metrics for comparison
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const avgROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const avgCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const avgCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    // Find anomalies (items with significantly different performance)
+    const anomalies = data.filter(item => {
+      const itemROAS = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+      const itemCTR = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+      const itemCPA = item.metrics.conversions > 0 ? item.metrics.spend / item.metrics.conversions : 0
+      
+      // Flag as anomaly if significantly different from average
+      return itemROAS < avgROAS * 0.5 || itemROAS > avgROAS * 2 || 
+             itemCTR < avgCTR * 0.3 || itemCTR > avgCTR * 3 ||
+             itemCPA > avgCPA * 2
+    }).slice(0, 5) // Top 5 anomalies
+    
+    if (anomalies.length === 0) {
+      return {
+        content: "🔍 Anomaly Detection: No significant anomalies detected. All campaigns are performing within expected ranges.",
+        data: {
+          type: 'anomaly_detection',
+          anomalies: [],
+          avgROAS: avgROAS,
+          avgCTR: avgCTR,
+          avgCPA: avgCPA,
+          query: query
+        }
+      }
+    }
+    
+    const content = `🚨 ANOMALY DETECTION\n\nFound ${anomalies.length} performance anomalies:\n\n${anomalies.map((item, index) => {
+      const itemROAS = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+      const itemCTR = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+      return `${index + 1}. ${item.dimensions.platform} - ${item.dimensions.campaign}\n   ROAS: ${itemROAS.toFixed(2)}x (vs avg ${avgROAS.toFixed(2)}x)\n   CTR: ${(itemCTR * 100).toFixed(2)}% (vs avg ${(avgCTR * 100).toFixed(2)}%)`
+    }).join('\n\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'anomaly_detection',
+        anomalies: anomalies,
+        avgROAS: avgROAS,
+        avgCTR: avgCTR,
+        avgCPA: avgCPA,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 9: Comprehensive Specific Metrics Handler (Priority: CRITICAL)
+  // Catch any remaining specific metrics queries that might be falling through
+  if ((lowerQuery.includes('tell me') || lowerQuery.includes('show me') || lowerQuery.includes('give me') ||
+       lowerQuery.includes('what is') || lowerQuery.includes('what are') || lowerQuery.includes('how is') ||
+       lowerQuery.includes('how are') || lowerQuery.includes('what was') || lowerQuery.includes('what were') ||
+       lowerQuery.includes('how was') || lowerQuery.includes('how were') || lowerQuery.includes('what has') ||
+       lowerQuery.includes('what have') || lowerQuery.includes('how has') || lowerQuery.includes('how have') ||
+       lowerQuery.includes('what does') || lowerQuery.includes('what do') || lowerQuery.includes('how does') ||
+       lowerQuery.includes('how do') || lowerQuery.includes('what can') || lowerQuery.includes('how can') ||
+       lowerQuery.includes('what will') || lowerQuery.includes('how will') || lowerQuery.includes('what would') ||
+       lowerQuery.includes('how would') || lowerQuery.includes('what could') || lowerQuery.includes('how could') ||
+       lowerQuery.includes('what should') || lowerQuery.includes('how should') || lowerQuery.includes('what might') ||
+       lowerQuery.includes('how might') || lowerQuery.includes('what may') || lowerQuery.includes('how may')) &&
+      (lowerQuery.includes('ctr') || lowerQuery.includes('roas') || lowerQuery.includes('cpa') || 
+       lowerQuery.includes('cpc') || lowerQuery.includes('cpm') || lowerQuery.includes('click-through rate') ||
+       lowerQuery.includes('click through rate') || lowerQuery.includes('clickthrough rate') ||
+       lowerQuery.includes('return on ad spend') || lowerQuery.includes('return on investment') ||
+       lowerQuery.includes('roi') || lowerQuery.includes('cost per acquisition') || 
+       lowerQuery.includes('cost per click') || lowerQuery.includes('cost per thousand') ||
+       lowerQuery.includes('cost per mille') || lowerQuery.includes('conversion rate') ||
+       lowerQuery.includes('click rate') || lowerQuery.includes('impression rate') ||
+       lowerQuery.includes('engagement rate') || lowerQuery.includes('performance') ||
+       lowerQuery.includes('efficiency') || lowerQuery.includes('effectiveness') ||
+       lowerQuery.includes('productivity') || lowerQuery.includes('yield') ||
+       lowerQuery.includes('output') || lowerQuery.includes('result') ||
+       lowerQuery.includes('outcome') || lowerQuery.includes('achievement') ||
+       lowerQuery.includes('success') || lowerQuery.includes('metric') ||
+       lowerQuery.includes('metrics') || lowerQuery.includes('kpi') ||
+       lowerQuery.includes('kpis') || lowerQuery.includes('number') ||
+       lowerQuery.includes('amount') || lowerQuery.includes('value') ||
+       lowerQuery.includes('score') || lowerQuery.includes('index') ||
+       lowerQuery.includes('level') || lowerQuery.includes('grade') ||
+       lowerQuery.includes('status') || lowerQuery.includes('condition') ||
+       lowerQuery.includes('state') || lowerQuery.includes('rate') ||
+       lowerQuery.includes('ratio') || lowerQuery.includes('percentage') ||
+       lowerQuery.includes('percent') || lowerQuery.includes('efficiency') ||
+       lowerQuery.includes('performance') || lowerQuery.includes('metric') ||
+       lowerQuery.includes('metrics') || lowerQuery.includes('kpi') ||
+       lowerQuery.includes('kpis') || lowerQuery.includes('number') ||
+       lowerQuery.includes('amount') || lowerQuery.includes('value') ||
+       lowerQuery.includes('score') || lowerQuery.includes('index') ||
+       lowerQuery.includes('level') || lowerQuery.includes('grade') ||
+       lowerQuery.includes('status') || lowerQuery.includes('condition') ||
+       lowerQuery.includes('state')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Calculate overall metrics
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    // Determine which metric is being asked for
+    let metric = 'roas'
+    let metricName = 'Overall ROAS'
+    let formatFunction = (value: number) => `${value.toFixed(2)}x`
+    let value = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    
+    if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate') || lowerQuery.includes('clickthrough rate') || lowerQuery.includes('click rate')) {
+      metric = 'ctr'
+      metricName = 'Overall CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      value = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    } else if (lowerQuery.includes('roas') || lowerQuery.includes('return on ad spend') || lowerQuery.includes('return on investment') || lowerQuery.includes('roi')) {
+      metric = 'roas'
+      metricName = 'Overall ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+      value = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition') || lowerQuery.includes('conversion rate')) {
+      metric = 'cpa'
+      metricName = 'Overall CPA'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      value = totalConversions > 0 ? totalSpend / totalConversions : 0
+    } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+      metric = 'cpc'
+      metricName = 'Overall CPC'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      value = totalClicks > 0 ? totalSpend / totalClicks : 0
+    } else if (lowerQuery.includes('cpm') || lowerQuery.includes('cost per thousand') || lowerQuery.includes('cost per mille')) {
+      metric = 'cpm'
+      metricName = 'Overall CPM'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+      value = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    } else if (lowerQuery.includes('impression rate') || lowerQuery.includes('engagement rate')) {
+      metric = 'engagement'
+      metricName = 'Overall Engagement Rate'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      value = totalImpressions > 0 ? (totalClicks + totalConversions) / totalImpressions : 0
+    } else if (lowerQuery.includes('performance') || lowerQuery.includes('efficiency') || lowerQuery.includes('effectiveness') || lowerQuery.includes('productivity') || lowerQuery.includes('yield') || lowerQuery.includes('output') || lowerQuery.includes('result') || lowerQuery.includes('outcome') || lowerQuery.includes('achievement') || lowerQuery.includes('success')) {
+      metric = 'performance'
+      metricName = 'Overall Performance Score'
+      formatFunction = (value: number) => `${value.toFixed(2)}`
+      // Calculate a composite performance score
+      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+      value = (roas * 0.4) + (ctr * 100 * 0.3) + (1 / Math.max(cpa, 1) * 0.3)
+    }
+    
+    return {
+      content: `${metricName}: ${formatFunction(value)}`,
+      data: {
+        type: 'specific_metrics',
+        metric: metric,
+        value: value,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 10: Catch-all Comparative Handler (Priority: HIGH)
   // Handle any remaining comparative queries that might be falling through
   if ((lowerQuery.includes('which') || lowerQuery.includes('what')) && 
       (lowerQuery.includes('platform') || lowerQuery.includes('campaign')) &&
