@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { TrendingUp, TrendingDown, Eye, MousePointer, DollarSign, Users, Filter } from 'lucide-react'
 import { formatNumber, formatCurrency, formatPercentage } from '@/lib/utils'
-import { loadCampaignData, getDataSummary } from '@/lib/server-data-service'
 
 interface MetricCardProps {
   title: string
@@ -57,72 +56,119 @@ export default function MetricsOverview({ summary }: MetricsOverviewProps) {
   const [selectedBrand, setSelectedBrand] = useState<string>('all')
   const [selectedCampaign, setSelectedCampaign] = useState<string>('all')
   const [filteredSummary, setFilteredSummary] = useState(summary)
-  const [allData, setAllData] = useState<any[]>([])
   const [uniqueBrands, setUniqueBrands] = useState<string[]>([])
   const [uniqueCampaigns, setUniqueCampaigns] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
 
-  // Load data and extract unique brands/campaigns
+  // Load initial data and filters
   useEffect(() => {
-    const loadData = async () => {
-      const data = await loadCampaignData()
-      setAllData(data)
-      
-      // Extract unique brands and campaigns
-      const brands = Array.from(new Set(data.map(item => item.dimensions.brand)))
-      const campaigns = Array.from(new Set(data.map(item => item.dimensions.campaign)))
-      
-      setUniqueBrands(brands)
-      setUniqueCampaigns(campaigns)
+    const loadInitialData = async () => {
+      try {
+        const response = await fetch('/api/data/summary')
+        const data = await response.json()
+        
+        if (data.success) {
+          setFilteredSummary(data.summary)
+          setUniqueBrands(data.filters.brands)
+          setUniqueCampaigns(data.filters.campaigns)
+        }
+      } catch (error) {
+        console.error('Failed to load initial data:', error)
+      }
     }
     
-    loadData()
+    loadInitialData()
   }, [])
 
-  // Apply filters and recalculate summary
+  // Apply filters and fetch filtered data
   useEffect(() => {
-    const applyFilters = () => {
-      let filteredData = allData
-
-      // Apply brand filter
-      if (selectedBrand !== 'all') {
-        filteredData = filteredData.filter(item => item.dimensions.brand === selectedBrand)
+    const applyFilters = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/data/filtered-summary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            brand: selectedBrand,
+            campaign: selectedCampaign
+          })
+        })
+        
+        const data = await response.json()
+        if (data.success) {
+          setFilteredSummary(data.summary)
+        }
+      } catch (error) {
+        console.error('Failed to apply filters:', error)
+      } finally {
+        setLoading(false)
       }
-
-      // Apply campaign filter
-      if (selectedCampaign !== 'all') {
-        filteredData = filteredData.filter(item => item.dimensions.campaign === selectedCampaign)
-      }
-
-      // Recalculate summary with filtered data
-      const newSummary = getDataSummary(filteredData)
-      setFilteredSummary(newSummary)
     }
 
-    if (allData.length > 0) {
-      applyFilters()
-    }
-  }, [selectedBrand, selectedCampaign, allData])
+    applyFilters()
+  }, [selectedBrand, selectedCampaign])
 
   // Update available campaigns when brand changes
   useEffect(() => {
-    if (selectedBrand !== 'all') {
-      const brandCampaigns = Array.from(new Set(
-        allData
-          .filter(item => item.dimensions.brand === selectedBrand)
-          .map(item => item.dimensions.campaign)
-      ))
-      setUniqueCampaigns(brandCampaigns)
-      
-      // Reset campaign selection if current campaign is not available for selected brand
-      if (!brandCampaigns.includes(selectedCampaign)) {
-        setSelectedCampaign('all')
+    const updateCampaigns = async () => {
+      if (selectedBrand !== 'all') {
+        try {
+          const response = await fetch('/api/data/filtered-summary', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              brand: selectedBrand,
+              campaign: 'all'
+            })
+          })
+          
+          const data = await response.json()
+          if (data.success) {
+            // Get campaigns for this brand from the full data
+            const brandResponse = await fetch('/api/data/summary')
+            const brandData = await brandResponse.json()
+            
+                         if (brandData.success) {
+               const allData = brandData.allData || []
+               const brandCampaigns = Array.from(new Set(
+                 allData
+                   .filter((item: any) => item.dimensions.brand === selectedBrand)
+                   .map((item: any) => item.dimensions.campaign)
+               )) as string[]
+               setUniqueCampaigns(brandCampaigns)
+              
+              // Reset campaign selection if current campaign is not available for selected brand
+              if (!brandCampaigns.includes(selectedCampaign)) {
+                setSelectedCampaign('all')
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Failed to update campaigns:', error)
+        }
+      } else {
+        // Reset to all campaigns when brand is 'all'
+        const loadAllCampaigns = async () => {
+          try {
+            const response = await fetch('/api/data/summary')
+            const data = await response.json()
+            if (data.success) {
+              setUniqueCampaigns(data.filters.campaigns)
+            }
+          } catch (error) {
+            console.error('Failed to load all campaigns:', error)
+          }
+        }
+        loadAllCampaigns()
       }
-    } else {
-      // Reset to all campaigns when brand is 'all'
-      const allCampaigns = Array.from(new Set(allData.map(item => item.dimensions.campaign)))
-      setUniqueCampaigns(allCampaigns)
     }
-  }, [selectedBrand, allData, selectedCampaign])
+
+    updateCampaigns()
+  }, [selectedBrand, selectedCampaign])
   
   const metrics = [
     {
