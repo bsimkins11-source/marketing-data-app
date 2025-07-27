@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { BarChart3 } from 'lucide-react'
 
 interface SharedHeaderProps {
@@ -49,6 +50,17 @@ export default function SharedHeader({ showNavigation = false, currentPage }: Sh
             )}
           </div>
 
+          {/* Right Side - Logo */}
+          <div className="flex items-center">
+            <Image
+              src="/images/transparent-partners-logo.png"
+              alt="Partners Logo"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
+          </div>
 
         </div>
       </div>
