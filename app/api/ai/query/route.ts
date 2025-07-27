@@ -108,9 +108,11 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     const lowerQuery = query.toLowerCase()
     
     // PLATFORM PERFORMANCE HANDLERS (ABSOLUTE HIGHEST PRIORITY)
-    if ((lowerQuery.includes('performance') || lowerQuery.includes('performing') || lowerQuery.includes('results')) && 
-        (lowerQuery.includes('meta') || lowerQuery.includes('dv360') || lowerQuery.includes('cm360') || lowerQuery.includes('sa360') || lowerQuery.includes('amazon') || lowerQuery.includes('tradedesk'))) {
-      
+    // More explicit and robust platform performance detection
+    const hasPerformanceKeyword = lowerQuery.includes('performance') || lowerQuery.includes('performing') || lowerQuery.includes('results');
+    const hasPlatformKeyword = lowerQuery.includes('meta') || lowerQuery.includes('dv360') || lowerQuery.includes('cm360') || lowerQuery.includes('sa360') || lowerQuery.includes('amazon') || lowerQuery.includes('tradedesk');
+    
+    if (hasPerformanceKeyword && hasPlatformKeyword) {
       const platform = KEYWORDS.PLATFORMS.find(p => lowerQuery.includes(p.toLowerCase()));
       if (platform) {
         const platformData = data.filter(row => row.dimensions.platform === platform);
@@ -159,9 +161,11 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
 
     // CONVERSIONS HANDLERS (ABSOLUTE HIGHEST PRIORITY)
-    if (lowerQuery.includes('conversions') && 
-        (lowerQuery.includes('meta') || lowerQuery.includes('dv360') || lowerQuery.includes('cm360') || lowerQuery.includes('sa360') || lowerQuery.includes('amazon') || lowerQuery.includes('tradedesk'))) {
-      
+    // More explicit and robust platform conversions detection
+    const hasConversionsKeyword = lowerQuery.includes('conversions');
+    const hasPlatformForConversions = lowerQuery.includes('meta') || lowerQuery.includes('dv360') || lowerQuery.includes('cm360') || lowerQuery.includes('sa360') || lowerQuery.includes('amazon') || lowerQuery.includes('tradedesk');
+    
+    if (hasConversionsKeyword && hasPlatformForConversions) {
       const platform = KEYWORDS.PLATFORMS.find(p => lowerQuery.includes(p.toLowerCase()));
       if (platform) {
         const platformData = data.filter(row => row.dimensions.platform === platform);
