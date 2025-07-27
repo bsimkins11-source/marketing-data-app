@@ -1370,6 +1370,55 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
+  // PHASE 4 IMPROVEMENT 5: Direct Anomaly Detection Handler (Priority: CRITICAL)
+  // Simple, direct handler for "anomaly" queries that are falling through
+  if (lowerQuery.includes('anomaly') || lowerQuery.includes('anomalies')) {
+    // Find campaigns with unusual performance patterns
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const avgROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const avgCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const avgCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    // Identify anomalies
+    const anomalies = data.filter(item => {
+      const roas = item.metrics.revenue / item.metrics.spend
+      const ctr = item.metrics.clicks / item.metrics.impressions
+      const cpa = item.metrics.spend / item.metrics.conversions
+      
+      return roas < avgROAS * 0.5 || ctr < avgCTR * 0.5 || cpa > avgCPA * 2 || 
+             item.metrics.conversions === 0 || item.metrics.clicks === 0
+    })
+    
+    if (anomalies.length > 0) {
+      const anomalyList = anomalies.map(item => 
+        `${item.campaign} (${item.platform}): ROAS ${(item.metrics.revenue / item.metrics.spend).toFixed(2)}x, CTR ${((item.metrics.clicks / item.metrics.impressions) * 100).toFixed(2)}%, CPA $${(item.metrics.spend / item.metrics.conversions).toFixed(2)}`
+      ).join('\n')
+      
+      return {
+        content: `Found ${anomalies.length} anomaly/anomalies:\n${anomalyList}`,
+        data: {
+          type: 'anomaly_detection',
+          anomalies: anomalies,
+          query: query
+        }
+      }
+    } else {
+      return {
+        content: "No significant anomalies detected in the current data. All campaigns are performing within expected ranges.",
+        data: {
+          type: 'anomaly_detection',
+          anomalies: [],
+          query: query
+        }
+      }
+    }
+  }
+
   // Simple fallback response for now
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
