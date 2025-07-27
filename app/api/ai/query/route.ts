@@ -161,6 +161,72 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
+  // PHASE 2 IMPROVEMENT 3: Enhanced Platform Conversion Performance (Priority: MEDIUM)
+  // Handle conversion performance and success queries
+  if (detectedPlatform && (lowerQuery.includes('conversion') || lowerQuery.includes('conversions')) && 
+      (lowerQuery.includes('performance') || lowerQuery.includes('success') || lowerQuery.includes('how did') || lowerQuery.includes('analysis'))) {
+    
+    const platform = PLATFORM_MAP[detectedPlatform] || detectedPlatform
+    
+    // Filter data for the specific platform
+    const platformData = data.filter(item => 
+      item.dimensions.platform.toLowerCase() === detectedPlatform
+    )
+    
+    if (platformData.length === 0) {
+      return {
+        content: `No data found for ${platform}`,
+        data: {
+          type: 'platform_conversion_performance',
+          platform: platform,
+          performance: 'no_data',
+          query: query
+        }
+      }
+    }
+    
+    // Calculate comprehensive conversion performance metrics
+    const totalConversions = platformData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    const totalImpressions = platformData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = platformData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalSpend = platformData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = platformData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    
+    // Calculate performance metrics
+    const conversionRate = totalImpressions > 0 ? (totalConversions / totalImpressions) * 100 : 0
+    const clickToConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0
+    const costPerConversion = totalConversions > 0 ? totalSpend / totalConversions : 0
+    const revenuePerConversion = totalConversions > 0 ? totalRevenue / totalConversions : 0
+    const conversionROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    
+    // Determine performance grade
+    let performanceGrade = 'Good'
+    if (conversionRate > 5) performanceGrade = 'Excellent'
+    else if (conversionRate > 2) performanceGrade = 'Good'
+    else if (conversionRate > 1) performanceGrade = 'Average'
+    else performanceGrade = 'Needs Improvement'
+    
+    const content = `${platform} Conversion Performance Analysis:\n\n🎯 Performance Grade: ${performanceGrade}\n📊 Conversion Rate: ${conversionRate.toFixed(2)}%\n🖱️ Click-to-Conversion Rate: ${clickToConversionRate.toFixed(2)}%\n💸 Cost Per Conversion: $${costPerConversion.toFixed(2)}\n💰 Revenue Per Conversion: $${revenuePerConversion.toFixed(2)}\n📈 Conversion ROAS: ${conversionROAS.toFixed(2)}x`
+    
+    return {
+      content,
+      data: {
+        type: 'platform_conversion_performance',
+        platform: platform,
+        performance: performanceGrade,
+        conversionRate: conversionRate,
+        clickToConversionRate: clickToConversionRate,
+        costPerConversion: costPerConversion,
+        revenuePerConversion: revenuePerConversion,
+        conversionROAS: conversionROAS,
+        totalConversions: totalConversions,
+        totalSpend: totalSpend,
+        totalRevenue: totalRevenue,
+        query: query
+      }
+    }
+  }
+
   // Simple fallback response for now
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
