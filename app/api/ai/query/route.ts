@@ -1128,7 +1128,75 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
-  // PHASE 3 IMPROVEMENT 7: Catch-all Comparative Handler (Priority: HIGH)
+  // PHASE 3 IMPROVEMENT 7: Enhanced "What's" Query Handler (Priority: HIGH)
+  // Handle "What's" queries that might be falling through
+  if (lowerQuery.includes('whats') || lowerQuery.includes('what\'s')) {
+    // Check for anomaly-related "What's" queries
+    if (lowerQuery.includes('wrong') || lowerQuery.includes('bad') || lowerQuery.includes('poor') || 
+        lowerQuery.includes('terrible') || lowerQuery.includes('awful') || lowerQuery.includes('horrible') ||
+        lowerQuery.includes('worst') || lowerQuery.includes('lowest') || lowerQuery.includes('underperforming') ||
+        lowerQuery.includes('failing') || lowerQuery.includes('struggling') || lowerQuery.includes('trouble') ||
+        lowerQuery.includes('concern') || lowerQuery.includes('worry') || lowerQuery.includes('alarm') ||
+        lowerQuery.includes('alert')) {
+      
+      // Calculate overall metrics for comparison
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+      
+      const avgROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      const avgCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      const avgCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+      
+      // Find anomalies (items with significantly different performance)
+      const anomalies = data.filter(item => {
+        const itemROAS = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+        const itemCTR = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+        const itemCPA = item.metrics.conversions > 0 ? item.metrics.spend / item.metrics.conversions : 0
+        
+        // Flag as anomaly if significantly different from average
+        return itemROAS < avgROAS * 0.5 || itemROAS > avgROAS * 2 || 
+               itemCTR < avgCTR * 0.3 || itemCTR > avgCTR * 3 ||
+               itemCPA > avgCPA * 2
+      }).slice(0, 5) // Top 5 anomalies
+      
+      if (anomalies.length === 0) {
+        return {
+          content: "🔍 Anomaly Detection: No significant anomalies detected. All campaigns are performing within expected ranges.",
+          data: {
+            type: 'anomaly_detection',
+            anomalies: [],
+            avgROAS: avgROAS,
+            avgCTR: avgCTR,
+            avgCPA: avgCPA,
+            query: query
+          }
+        }
+      }
+      
+      const content = `🚨 ANOMALY DETECTION\n\nFound ${anomalies.length} performance anomalies:\n\n${anomalies.map((item, index) => {
+        const itemROAS = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+        const itemCTR = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+        return `${index + 1}. ${item.dimensions.platform} - ${item.dimensions.campaign}\n   ROAS: ${itemROAS.toFixed(2)}x (vs avg ${avgROAS.toFixed(2)}x)\n   CTR: ${(itemCTR * 100).toFixed(2)}% (vs avg ${(avgCTR * 100).toFixed(2)}%)`
+      }).join('\n\n')}`
+      
+      return {
+        content,
+        data: {
+          type: 'anomaly_detection',
+          anomalies: anomalies,
+          avgROAS: avgROAS,
+          avgCTR: avgCTR,
+          avgCPA: avgCPA,
+          query: query
+        }
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 8: Catch-all Comparative Handler (Priority: HIGH)
   // Handle any remaining comparative queries that might be falling through
   if ((lowerQuery.includes('which') || lowerQuery.includes('what')) && 
       (lowerQuery.includes('platform') || lowerQuery.includes('campaign')) &&
