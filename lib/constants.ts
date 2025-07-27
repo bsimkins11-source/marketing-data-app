@@ -8,6 +8,7 @@ export const KEYWORDS: KeywordGroups = {
   SPEND: ['spend', 'cost', 'budget', 'expense', 'expenditure', 'investment'],
   CAMPAIGN: ['campaign', 'campaigns', 'ad campaign', 'ad campaigns'],
   CREATIVE: ['creative', 'creatives', 'creative units', 'create units', 'ad creative', 'ad creatives', 'advertisement', 'advertisements', 'ad', 'ads'],
+  AUDIENCE: ['audience', 'audiences', 'target audience', 'target audiences', 'demographic', 'demographics', 'segment', 'segments', 'targeting', 'targets', 'against'],
   PLATFORM: ['platform', 'platforms', 'channel', 'channels', 'network', 'networks'],
   VIZ: ['visual', 'visualize', 'chart', 'graph', 'plot', 'show me', 'display', 'visualization'],
   TOP: ['top', 'best', 'highest', 'leading', 'top performing', 'best performing'],

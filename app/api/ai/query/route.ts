@@ -217,6 +217,178 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // PHASE 4 IMPROVEMENT 12: Optimization Strategy Handler (Priority: CRITICAL)
+  // Handle optimization strategy queries
+  if (lowerQuery.includes('optimization strategy') || 
+      lowerQuery.includes('optimizing platform') ||
+      lowerQuery.includes('how would you go about optimizing') ||
+      lowerQuery.includes('optimization approach') ||
+      lowerQuery.includes('optimization plan')) {
+    
+    try {
+      // Analyze platform performance
+      const platformMetrics = data.reduce((acc, item) => {
+        const platform = item.dimensions.platform
+        if (!acc[platform]) {
+          acc[platform] = {
+            spend: 0,
+            revenue: 0,
+            impressions: 0,
+            clicks: 0,
+            conversions: 0
+          }
+        }
+        acc[platform].spend += item.metrics.spend
+        acc[platform].revenue += item.metrics.revenue
+        acc[platform].impressions += item.metrics.impressions
+        acc[platform].clicks += item.metrics.clicks
+        acc[platform].conversions += item.metrics.conversions
+        return acc
+      }, {} as Record<string, any>)
+      
+      // Calculate platform performance
+      const platformPerformance = Object.entries(platformMetrics).map(([platform, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        return { platform, roas, ctr, spend: metrics.spend, revenue: metrics.revenue }
+      }).sort((a, b) => b.roas - a.roas)
+      
+      // Get top platforms
+      const topPlatforms = platformPerformance.slice(0, 3)
+      
+      const content = `🎯 **OPTIMIZATION STRATEGY ANALYSIS**
+
+## **📊 Current Performance Overview**
+
+### **🏆 Top Performing Platforms:**
+${topPlatforms.map((platform, index) => 
+  `${index + 1}. **${platform.platform}**: ROAS ${platform.roas.toFixed(2)}x, CTR ${(platform.ctr * 100).toFixed(2)}%, Spend $${platform.spend.toLocaleString()}`
+).join('\n')}
+
+## **🚀 Optimization Recommendations**
+
+### **1. Platform Optimization (Priority: HIGH)**
+- **Scale Up**: ${topPlatforms[0] ? topPlatforms[0].platform : 'Unknown'} shows the highest ROAS (${topPlatforms[0] ? topPlatforms[0].roas.toFixed(2) : '0.00'}x) - increase budget allocation
+- **Optimize**: Focus on improving CTR for ${topPlatforms[1] ? topPlatforms[1].platform : 'Unknown'} (${topPlatforms[1] ? (topPlatforms[1].ctr * 100).toFixed(2) : '0.00'}%)
+- **Test**: Experiment with new ad formats on ${topPlatforms[2] ? topPlatforms[2].platform : 'Unknown'}
+
+### **2. Next Steps**
+1. **Immediate**: Increase spend on ${topPlatforms[0] ? topPlatforms[0].platform : 'Unknown'} by 25%
+2. **Short-term**: Create platform-specific creative strategies
+3. **Long-term**: Develop cross-platform optimization framework`
+
+      return {
+        content,
+        data: {
+          type: 'optimization_strategy',
+          platforms: topPlatforms,
+          query: query
+        }
+      }
+    } catch (error) {
+      return {
+        content: "Error generating optimization strategy. Please try a more specific query.",
+        data: {
+          type: 'error',
+          query: query
+        }
+      }
+    }
+  }
+
+  // PHASE 4 IMPROVEMENT 11: Advanced Cross-Dimensional Analysis Handler (Priority: CRITICAL)
+  // Handle complex queries combining creatives, audiences, and platforms
+  if ((KEYWORDS.CREATIVE.some(keyword => lowerQuery.includes(keyword)) &&
+       KEYWORDS.AUDIENCE.some(keyword => lowerQuery.includes(keyword)) &&
+       KEYWORDS.PLATFORM.some(keyword => lowerQuery.includes(keyword))) ||
+      (lowerQuery.includes('performed best') && 
+       (lowerQuery.includes('against') || lowerQuery.includes('on'))) ||
+      (lowerQuery.includes('creatives performed best') && 
+       (lowerQuery.includes('audiences') || lowerQuery.includes('platforms')))) {
+    
+    // Group data by creative, audience, and platform combination
+    const crossDimensionalMetrics = data.reduce((acc, item) => {
+      const creativeKey = item.dimensions.creativeName || item.dimensions.creativeId
+      const audience = item.dimensions.audience
+      const platform = item.dimensions.platform
+      
+      // Skip search platform for audience analysis
+      if (platform.toLowerCase() === 'sa360') {
+        return acc
+      }
+      
+      const key = `${creativeKey}-${audience}-${platform}`
+      
+      if (!acc[key]) {
+        acc[key] = {
+          creativeName: item.dimensions.creativeName,
+          creativeId: item.dimensions.creativeId,
+          creativeFormat: item.dimensions.creative_format,
+          audience: audience,
+          platform: platform,
+          campaign: item.dimensions.campaign,
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0
+        }
+      }
+      
+      acc[key].spend += item.metrics.spend
+      acc[key].revenue += item.metrics.revenue
+      acc[key].impressions += item.metrics.impressions
+      acc[key].clicks += item.metrics.clicks
+      acc[key].conversions += item.metrics.conversions
+      
+      return acc
+    }, {} as Record<string, any>)
+    
+    // Calculate performance metrics and filter for meaningful data
+    const crossDimensionalPerformance = Object.values(crossDimensionalMetrics)
+      .map((item: any) => {
+        const roas = item.spend > 0 ? item.revenue / item.spend : 0
+        const ctr = item.impressions > 0 ? item.clicks / item.impressions : 0
+        const cpa = item.conversions > 0 ? item.spend / item.conversions : 0
+        
+        return {
+          ...item,
+          roas,
+          ctr,
+          cpa
+        }
+      })
+      .filter((item: any) => item.spend > 0) // Only combinations with spend
+      .sort((a: any, b: any) => b.roas - a.roas) // Sort by ROAS descending
+    
+    // Get top 10 performing combinations
+    const topCombinations = crossDimensionalPerformance.slice(0, 10)
+    
+    if (topCombinations.length === 0) {
+      return {
+        content: "No meaningful performance data found for creative-audience-platform combinations with conversions.",
+        data: {
+          type: 'cross_dimensional_analysis',
+          combinations: [],
+          query: query
+        }
+      }
+    }
+    
+    const content = `🎯 Top Creative-Audience-Platform Combinations:\n\n${topCombinations.map((combo, index) => 
+      `${index + 1}. ${combo.creativeName} (${combo.creativeFormat})\n   • Audience: ${combo.audience}\n   • Platform: ${combo.platform}\n   • Campaign: ${combo.campaign}\n   • ROAS: ${combo.roas.toFixed(2)}x\n   • CTR: ${(combo.ctr * 100).toFixed(2)}%\n   • CPA: $${combo.cpa.toFixed(2)}\n   • Spend: $${combo.spend.toLocaleString()}\n   • Revenue: $${combo.revenue.toLocaleString()}\n   • Conversions: ${combo.conversions.toLocaleString()}`
+    ).join('\n\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'cross_dimensional_analysis',
+        combinations: topCombinations,
+        query: query
+      }
+    }
+  }
+
   // PHASE 2 IMPROVEMENT 6: Campaign-Specific Handlers (Priority: HIGH)
   // Handle campaign-specific queries that are currently falling through
   if (detectedCampaign && (lowerQuery.includes('spend') || lowerQuery.includes('revenue') || 
@@ -1764,6 +1936,88 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
         type: 'campaign_names',
         campaigns: sortedCampaigns,
         count: sortedCampaigns.length,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 4 IMPROVEMENT 10: Audience Performance Handler (Priority: CRITICAL)
+  // Handle "audience performance", "target audience", "demographics" queries
+  if (KEYWORDS.AUDIENCE.some(keyword => lowerQuery.includes(keyword))) {
+    
+    // Check if this is a search platform query
+    const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => 
+      lowerQuery.includes(platform.toLowerCase())
+    )
+    
+    if (detectedPlatform && detectedPlatform.toLowerCase() === 'sa360') {
+      return {
+        content: "We do not proactively target audiences in search.",
+        data: {
+          type: 'audience_search_response',
+          platform: 'Sa360',
+          query: query
+        }
+      }
+    }
+    
+    // Group data by audience and calculate metrics
+    const audienceMetrics = data.reduce((acc, item) => {
+      const audience = item.dimensions.audience
+      if (!acc[audience]) {
+        acc[audience] = {
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          platforms: new Set(),
+          campaigns: new Set()
+        }
+      }
+      acc[audience].spend += item.metrics.spend
+      acc[audience].revenue += item.metrics.revenue
+      acc[audience].impressions += item.metrics.impressions
+      acc[audience].clicks += item.metrics.clicks
+      acc[audience].conversions += item.metrics.conversions
+      acc[audience].platforms.add(item.dimensions.platform)
+      acc[audience].campaigns.add(item.dimensions.campaign)
+      return acc
+    }, {} as Record<string, any>)
+    
+    // Calculate performance metrics and sort
+    const audiencePerformance = Object.entries(audienceMetrics).map(([audience, metrics]: [string, any]) => {
+      const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+      const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+      const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+      
+      return {
+        audience,
+        roas,
+        ctr,
+        cpa,
+        spend: metrics.spend,
+        revenue: metrics.revenue,
+        conversions: metrics.conversions,
+        impressions: metrics.impressions,
+        clicks: metrics.clicks,
+        platformCount: metrics.platforms.size,
+        campaignCount: metrics.campaigns.size
+      }
+    }).sort((a, b) => b.roas - a.roas) // Sort by ROAS descending
+    
+    // Get top 5 performing audiences
+    const topAudiences = audiencePerformance.slice(0, 5)
+    
+    const content = `🎯 Top Performing Audiences:\n\n${topAudiences.map((audience, index) => 
+      `${index + 1}. ${audience.audience}\n   • ROAS: ${audience.roas.toFixed(2)}x\n   • CTR: ${(audience.ctr * 100).toFixed(2)}%\n   • CPA: $${audience.cpa.toFixed(2)}\n   • Spend: $${audience.spend.toLocaleString()}\n   • Revenue: $${audience.revenue.toLocaleString()}\n   • Conversions: ${audience.conversions.toLocaleString()}\n   • Platforms: ${audience.platformCount}\n   • Campaigns: ${audience.campaignCount}`
+    ).join('\n\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'audience_performance',
+        audiences: topAudiences,
         query: query
       }
     }
