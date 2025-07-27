@@ -47,6 +47,84 @@ export async function POST(request: NextRequest) {
 }
 
 async function processAIQuery(query: string, data: any[]) {
+  const lowerQuery = query.toLowerCase()
+  
+  // Keyword detection
+  const isCTRQuery = KEYWORDS.CTR.some(keyword => lowerQuery.includes(keyword))
+  const isROASQuery = KEYWORDS.ROAS.some(keyword => lowerQuery.includes(keyword))
+  
+  // Platform detection
+  const detectedPlatform = KEYWORDS.PLATFORMS.find(platform => lowerQuery.includes(platform))
+  const detectedCampaign = KEYWORDS.CAMPAIGN_NAMES.find(campaign => lowerQuery.includes(campaign))
+
+  // PHASE 2 IMPROVEMENT: Enhanced Specific Metrics Handling (Priority: HIGH)
+  // Handle context-aware metric queries without platform/campaign context
+  if ((lowerQuery.includes('what is the') || lowerQuery.includes('what is our') || lowerQuery.includes('what is')) && 
+      (isCTRQuery || isROASQuery || lowerQuery.includes('cpa') || lowerQuery.includes('cpc') || lowerQuery.includes('cpm')) &&
+      !detectedPlatform && !detectedCampaign && !lowerQuery.includes('platform') && !lowerQuery.includes('campaign')) {
+    
+    // Determine which metric is being asked for
+    let metric = 'roas'
+    let metricName = 'ROAS'
+    let formatFunction = (value: number) => `${value.toFixed(2)}x`
+    
+    if (isCTRQuery) {
+      metric = 'ctr'
+      metricName = 'CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+    } else if (isROASQuery) {
+      metric = 'roas'
+      metricName = 'ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
+    } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+      metric = 'cpa'
+      metricName = 'CPA'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+      metric = 'cpc'
+      metricName = 'CPC'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    } else if (lowerQuery.includes('cpm') || lowerQuery.includes('cost per thousand')) {
+      metric = 'cpm'
+      metricName = 'CPM'
+      formatFunction = (value: number) => `$${value.toFixed(2)}`
+    }
+    
+    // Calculate overall metric
+    let value = 0
+    if (metric === 'roas') {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+      value = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    } else if (metric === 'ctr') {
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      value = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    } else if (metric === 'cpa') {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+      value = totalConversions > 0 ? totalSpend / totalConversions : 0
+    } else if (metric === 'cpc') {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      value = totalClicks > 0 ? totalSpend / totalClicks : 0
+    } else if (metric === 'cpm') {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      value = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    }
+    
+    return {
+      content: `Overall ${metricName} across all campaigns: ${formatFunction(value)}`,
+      data: {
+        type: 'overall_metric',
+        metric: metric,
+        value: value,
+        query: query
+      }
+    }
+  }
+
   // Simple fallback response for now
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
