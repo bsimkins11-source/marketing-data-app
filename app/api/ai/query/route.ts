@@ -1640,58 +1640,65 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       )
     }
     
-    // Group data by campaign (since we don't have creative-level data, we'll show top campaigns)
-    const campaignMetrics = filteredData.reduce((acc, item) => {
-      const campaign = item.dimensions.campaign
-      if (!acc[campaign]) {
-        acc[campaign] = {
+    // Group data by creative (using creative_id and creative_name)
+    const creativeMetrics = filteredData.reduce((acc, item) => {
+      const creativeKey = `${item.dimensions.creativeId}-${item.dimensions.creativeName}`
+      if (!acc[creativeKey]) {
+        acc[creativeKey] = {
+          creativeId: item.dimensions.creativeId,
+          creativeName: item.dimensions.creativeName,
+          creativeFormat: item.dimensions.creative_format,
+          campaign: item.dimensions.campaign,
+          platform: item.dimensions.platform,
           spend: 0,
           revenue: 0,
           impressions: 0,
           clicks: 0,
-          conversions: 0,
-          platform: item.dimensions.platform
+          conversions: 0
         }
       }
-      acc[campaign].spend += item.metrics.spend
-      acc[campaign].revenue += item.metrics.revenue
-      acc[campaign].impressions += item.metrics.impressions
-      acc[campaign].clicks += item.metrics.clicks
-      acc[campaign].conversions += item.metrics.conversions
+      acc[creativeKey].spend += item.metrics.spend
+      acc[creativeKey].revenue += item.metrics.revenue
+      acc[creativeKey].impressions += item.metrics.impressions
+      acc[creativeKey].clicks += item.metrics.clicks
+      acc[creativeKey].conversions += item.metrics.conversions
       return acc
     }, {} as Record<string, any>)
     
     // Calculate performance metrics and sort
-    const campaignPerformance = Object.entries(campaignMetrics).map(([campaign, metrics]: [string, any]) => {
-      const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
-      const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
-      const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+    const creativePerformance = Object.values(creativeMetrics).map((creative: any) => {
+      const roas = creative.spend > 0 ? creative.revenue / creative.spend : 0
+      const ctr = creative.impressions > 0 ? creative.clicks / creative.impressions : 0
+      const cpa = creative.conversions > 0 ? creative.spend / creative.conversions : 0
       
       return {
-        campaign,
-        platform: metrics.platform,
+        creativeId: creative.creativeId,
+        creativeName: creative.creativeName,
+        creativeFormat: creative.creativeFormat,
+        campaign: creative.campaign,
+        platform: creative.platform,
         roas,
         ctr,
         cpa,
-        spend: metrics.spend,
-        revenue: metrics.revenue,
-        conversions: metrics.conversions
+        spend: creative.spend,
+        revenue: creative.revenue,
+        conversions: creative.conversions
       }
     }).sort((a, b) => b.roas - a.roas) // Sort by ROAS descending
     
-    // Get top 3 performing campaigns
-    const topCampaigns = campaignPerformance.slice(0, 3)
+    // Get top 3 performing creatives
+    const topCreatives = creativePerformance.slice(0, 3)
     
     const platformText = detectedPlatform ? ` on ${detectedPlatform}` : ''
-    const content = `🏆 Top Performing Campaigns${platformText}:\n\n${topCampaigns.map((campaign, index) => 
-      `${index + 1}. ${campaign.campaign} (${campaign.platform})\n   • ROAS: ${campaign.roas.toFixed(2)}x\n   • CTR: ${(campaign.ctr * 100).toFixed(2)}%\n   • CPA: $${campaign.cpa.toFixed(2)}\n   • Spend: $${campaign.spend.toLocaleString()}\n   • Revenue: $${campaign.revenue.toLocaleString()}\n   • Conversions: ${campaign.conversions.toLocaleString()}`
+    const content = `🏆 Top Performing Creatives${platformText}:\n\n${topCreatives.map((creative, index) => 
+      `${index + 1}. ${creative.creativeName} (${creative.creativeFormat})\n   • Campaign: ${creative.campaign}\n   • Platform: ${creative.platform}\n   • ROAS: ${creative.roas.toFixed(2)}x\n   • CTR: ${(creative.ctr * 100).toFixed(2)}%\n   • CPA: $${creative.cpa.toFixed(2)}\n   • Spend: $${creative.spend.toLocaleString()}\n   • Revenue: $${creative.revenue.toLocaleString()}\n   • Conversions: ${creative.conversions.toLocaleString()}`
     ).join('\n\n')}`
     
     return {
       content,
       data: {
         type: 'top_performing_creatives',
-        campaigns: topCampaigns,
+        creatives: topCreatives,
         platform: detectedPlatform,
         query: query
       }
