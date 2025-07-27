@@ -2513,27 +2513,6 @@ async function processAIQuery(query: string, data: MarketingData[]) {
       return processWithKeywords(query, data)
     }
     
-    // TEMPORARILY DISABLED: Check for platform queries with "platform" keyword (IMPROVED: Better detection)
-    // if (lowerQuery.includes('platform') && (lowerQuery.includes('highest') || lowerQuery.includes('best') || lowerQuery.includes('top') || lowerQuery.includes('which')) &&
-    //     !lowerQuery.includes('performed best') && 
-    //     !lowerQuery.includes('was the best') && 
-    //     !lowerQuery.includes('had the best performance') &&
-    //     !lowerQuery.includes('highest revenue') &&
-    //     !lowerQuery.includes('generated the most revenue') &&
-    //     !lowerQuery.includes('most revenue') &&
-    //     !lowerQuery.includes('most impressions') &&
-    //     !lowerQuery.includes('got the most impressions') &&
-    //     !lowerQuery.includes('most traffic') &&
-    //     !lowerQuery.includes('most clicks') &&
-    //     !lowerQuery.includes('got the most clicks') &&
-    //     !lowerQuery.includes('most engagement') &&
-    //     !lowerQuery.includes('most expensive') &&
-    //     !lowerQuery.includes('costs the most') &&
-    //     !lowerQuery.includes('most profitable') &&
-    //     !lowerQuery.includes('makes the most money')) {
-    //   return processWithKeywords(query, data)
-    // }
-    
     // Check for "which platform" queries specifically (BUT NOT comparative queries)
     if (lowerQuery.includes('which platform') && 
         !lowerQuery.includes('performed best') && 
@@ -2563,7 +2542,7 @@ async function processAIQuery(query: string, data: MarketingData[]) {
     }
     
     // If no handler was triggered, use OpenAI or fallback
-    console.log('DEBUG: No handler triggered, using OpenAI or fallback')
+    // No specific handler triggered, using OpenAI or fallback
     if (config.openai.apiKey) {
       try {
         return await processWithOpenAI(query, data)
