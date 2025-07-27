@@ -212,7 +212,10 @@ async function processAIQuery(query: string, data: any[]) {
   // Handle all platform-specific performance queries that are currently falling through
   if (detectedPlatform && (lowerQuery.includes('performance') || lowerQuery.includes('performing') || 
       lowerQuery.includes('results') || lowerQuery.includes('how is') || lowerQuery.includes('what is') || 
-      lowerQuery.includes('doing') || lowerQuery.includes('performed'))) {
+      lowerQuery.includes('doing') || lowerQuery.includes('performed') || lowerQuery.includes('spend') ||
+      lowerQuery.includes('revenue') || lowerQuery.includes('impressions') || lowerQuery.includes('clicks') ||
+      lowerQuery.includes('conversions') || lowerQuery.includes('ctr') || lowerQuery.includes('roas') ||
+      lowerQuery.includes('cpa') || lowerQuery.includes('cpc') || lowerQuery.includes('cpm'))) {
     
     const platform = PLATFORM_MAP[detectedPlatform] || detectedPlatform
     
@@ -247,6 +250,84 @@ async function processAIQuery(query: string, data: any[]) {
     const cpc = totalClicks > 0 ? totalSpend / totalClicks : 0
     const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
     
+    // Check if this is a specific metric query or a general performance query
+    const isSpecificMetricQuery = lowerQuery.includes('spend') || lowerQuery.includes('revenue') || 
+                                 lowerQuery.includes('impressions') || lowerQuery.includes('clicks') || 
+                                 lowerQuery.includes('conversions') || lowerQuery.includes('ctr') || 
+                                 lowerQuery.includes('roas') || lowerQuery.includes('cpa') || 
+                                 lowerQuery.includes('cpc') || lowerQuery.includes('cpm')
+    
+    const isGeneralPerformanceQuery = lowerQuery.includes('performance') || lowerQuery.includes('performing') || 
+                                     lowerQuery.includes('results') || lowerQuery.includes('how is') || 
+                                     lowerQuery.includes('doing') || lowerQuery.includes('performed')
+    
+    // If it's a specific metric query, provide targeted response
+    if (isSpecificMetricQuery && !isGeneralPerformanceQuery) {
+      let metric = 'spend'
+      let metricName = 'Spend'
+      let formatFunction = (value: number) => `$${value.toLocaleString()}`
+      let value = totalSpend
+      
+      if (lowerQuery.includes('revenue')) {
+        metric = 'revenue'
+        metricName = 'Revenue'
+        formatFunction = (value: number) => `$${value.toLocaleString()}`
+        value = totalRevenue
+      } else if (lowerQuery.includes('impressions')) {
+        metric = 'impressions'
+        metricName = 'Impressions'
+        formatFunction = (value: number) => value.toLocaleString()
+        value = totalImpressions
+      } else if (lowerQuery.includes('clicks')) {
+        metric = 'clicks'
+        metricName = 'Clicks'
+        formatFunction = (value: number) => value.toLocaleString()
+        value = totalClicks
+      } else if (lowerQuery.includes('conversions')) {
+        metric = 'conversions'
+        metricName = 'Conversions'
+        formatFunction = (value: number) => value.toLocaleString()
+        value = totalConversions
+      } else if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate')) {
+        metric = 'ctr'
+        metricName = 'CTR'
+        formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+        value = ctr
+      } else if (lowerQuery.includes('roas') || lowerQuery.includes('return on ad spend')) {
+        metric = 'roas'
+        metricName = 'ROAS'
+        formatFunction = (value: number) => `${value.toFixed(2)}x`
+        value = roas
+      } else if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+        metric = 'cpa'
+        metricName = 'CPA'
+        formatFunction = (value: number) => `$${value.toFixed(2)}`
+        value = cpa
+      } else if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+        metric = 'cpc'
+        metricName = 'CPC'
+        formatFunction = (value: number) => `$${value.toFixed(2)}`
+        value = cpc
+      } else if (lowerQuery.includes('cpm') || lowerQuery.includes('cost per thousand')) {
+        metric = 'cpm'
+        metricName = 'CPM'
+        formatFunction = (value: number) => `$${value.toFixed(2)}`
+        value = cpm
+      }
+      
+      return {
+        content: `${platform} ${metricName}: ${formatFunction(value)}`,
+        data: {
+          type: 'platform_specific_metric',
+          platform: platform,
+          metric: metric,
+          value: value,
+          query: query
+        }
+      }
+    }
+    
+    // Default to full performance summary for general queries
     const content = `${platform} Performance Summary:\n\n💰 Total Spend: $${totalSpend.toLocaleString()}\n💵 Total Revenue: $${totalRevenue.toLocaleString()}\n📈 ROAS: ${roas.toFixed(2)}x\n👁️ Total Impressions: ${totalImpressions.toLocaleString()}\n🖱️ Total Clicks: ${totalClicks.toLocaleString()}\n🎯 Total Conversions: ${totalConversions.toLocaleString()}\n📊 CTR: ${(ctr * 100).toFixed(2)}%\n💸 CPA: $${cpa.toFixed(2)}\n🖱️ CPC: $${cpc.toFixed(2)}\n📈 CPM: $${cpm.toFixed(2)}`
     
     return {
