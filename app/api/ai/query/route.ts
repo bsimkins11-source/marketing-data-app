@@ -1467,7 +1467,87 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
-  // PHASE 3 IMPROVEMENT 10: Catch-all Comparative Handler (Priority: HIGH)
+  // PHASE 3 IMPROVEMENT 10: Enhanced Strategic Insights Handler (Priority: CRITICAL)
+  // Catch any remaining strategic queries that might be falling through
+  if ((lowerQuery.includes('what actions') || lowerQuery.includes('how should we proceed') || 
+       lowerQuery.includes('what\'s our next move') || lowerQuery.includes('how can we increase') ||
+       lowerQuery.includes('how can we reduce') || lowerQuery.includes('what\'s the optimal') ||
+       lowerQuery.includes('how should we allocate') || lowerQuery.includes('what\'s the optimal approach') ||
+       lowerQuery.includes('how should we proceed') || lowerQuery.includes('what should we do') ||
+       lowerQuery.includes('how can we improve') || lowerQuery.includes('what should we focus') ||
+       lowerQuery.includes('what\'s the best') || lowerQuery.includes('what\'s our next') ||
+       lowerQuery.includes('how can we increase') || lowerQuery.includes('how can we reduce') ||
+       lowerQuery.includes('what\'s the optimal') || lowerQuery.includes('how should we allocate') ||
+       lowerQuery.includes('what\'s the most effective') || lowerQuery.includes('how can we maximize') ||
+       lowerQuery.includes('what\'s the best course') || lowerQuery.includes('how should we optimize') ||
+       lowerQuery.includes('what improvements') || lowerQuery.includes('what\'s the recommended') ||
+       lowerQuery.includes('how can we enhance') || lowerQuery.includes('what\'s the most efficient') ||
+       lowerQuery.includes('how should we improve') || lowerQuery.includes('what\'s the best way') ||
+       lowerQuery.includes('how can we achieve') || lowerQuery.includes('what\'s the optimal approach') ||
+       lowerQuery.includes('how should we proceed') || lowerQuery.includes('what\'s the recommended action') ||
+       lowerQuery.includes('how can we improve efficiency') || lowerQuery.includes('what\'s the best strategy')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Calculate overall metrics for strategic insights
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const avgROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const avgCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const avgCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    // Find best and worst performing campaigns
+    const campaignPerformance = data.map(item => {
+      const itemROAS = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+      const itemCTR = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+      return {
+        ...item,
+        performance: (itemROAS * 0.4) + (itemCTR * 100 * 0.3) + (1 / Math.max(item.metrics.conversions, 1) * 0.3)
+      }
+    }).sort((a, b) => b.performance - a.performance)
+    
+    const bestCampaign = campaignPerformance[0]
+    const worstCampaign = campaignPerformance[campaignPerformance.length - 1]
+    
+    // Generate strategic recommendations
+    const recommendations = []
+    
+    if (avgROAS < 2) {
+      recommendations.push("Focus on improving ROAS by optimizing ad copy and targeting")
+    }
+    if (avgCTR < 0.02) {
+      recommendations.push("Work on improving CTR through better ad creative and audience targeting")
+    }
+    if (avgCPA > 50) {
+      recommendations.push("Reduce CPA by refining audience targeting and improving landing pages")
+    }
+    
+    if (bestCampaign && worstCampaign) {
+      recommendations.push(`Scale successful campaigns like "${bestCampaign.dimensions.campaign}" on ${bestCampaign.dimensions.platform}`)
+      recommendations.push(`Optimize underperforming campaigns like "${worstCampaign.dimensions.campaign}" on ${worstCampaign.dimensions.platform}`)
+    }
+    
+    const content = `🎯 STRATEGIC RECOMMENDATIONS\n\n${recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}\n\n📊 Current Performance:\n• Average ROAS: ${avgROAS.toFixed(2)}x\n• Average CTR: ${(avgCTR * 100).toFixed(2)}%\n• Average CPA: $${avgCPA.toFixed(2)}`
+    
+    return {
+      content,
+      data: {
+        type: 'strategic_insights',
+        recommendations: recommendations,
+        avgROAS: avgROAS,
+        avgCTR: avgCTR,
+        avgCPA: avgCPA,
+        bestCampaign: bestCampaign,
+        worstCampaign: worstCampaign,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 11: Catch-all Comparative Handler (Priority: HIGH)
   // Handle any remaining comparative queries that might be falling through
   if ((lowerQuery.includes('which') || lowerQuery.includes('what')) && 
       (lowerQuery.includes('platform') || lowerQuery.includes('campaign')) &&
