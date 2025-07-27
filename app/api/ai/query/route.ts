@@ -1469,23 +1469,21 @@ async function processAIQuery(query: string, data: any[]) {
 
   // PHASE 3 IMPROVEMENT 10: Enhanced Strategic Insights Handler (Priority: CRITICAL)
   // Catch any remaining strategic queries that might be falling through
-  if ((lowerQuery.includes('what actions') || lowerQuery.includes('how should we proceed') || 
-       lowerQuery.includes('what\'s our next move') || lowerQuery.includes('how can we increase') ||
-       lowerQuery.includes('how can we reduce') || lowerQuery.includes('what\'s the optimal') ||
-       lowerQuery.includes('how should we allocate') || lowerQuery.includes('what\'s the optimal approach') ||
-       lowerQuery.includes('how should we proceed') || lowerQuery.includes('what should we do') ||
-       lowerQuery.includes('how can we improve') || lowerQuery.includes('what should we focus') ||
-       lowerQuery.includes('what\'s the best') || lowerQuery.includes('what\'s our next') ||
-       lowerQuery.includes('how can we increase') || lowerQuery.includes('how can we reduce') ||
-       lowerQuery.includes('what\'s the optimal') || lowerQuery.includes('how should we allocate') ||
-       lowerQuery.includes('what\'s the most effective') || lowerQuery.includes('how can we maximize') ||
-       lowerQuery.includes('what\'s the best course') || lowerQuery.includes('how should we optimize') ||
-       lowerQuery.includes('what improvements') || lowerQuery.includes('what\'s the recommended') ||
-       lowerQuery.includes('how can we enhance') || lowerQuery.includes('what\'s the most efficient') ||
-       lowerQuery.includes('how should we improve') || lowerQuery.includes('what\'s the best way') ||
-       lowerQuery.includes('how can we achieve') || lowerQuery.includes('what\'s the optimal approach') ||
-       lowerQuery.includes('how should we proceed') || lowerQuery.includes('what\'s the recommended action') ||
-       lowerQuery.includes('how can we improve efficiency') || lowerQuery.includes('what\'s the best strategy')) &&
+  if ((lowerQuery.includes('actions') || lowerQuery.includes('proceed') || 
+       lowerQuery.includes('next move') || lowerQuery.includes('increase') ||
+       lowerQuery.includes('reduce') || lowerQuery.includes('optimal') ||
+       lowerQuery.includes('allocate') || lowerQuery.includes('budget') ||
+       lowerQuery.includes('strategy') || lowerQuery.includes('approach') ||
+       lowerQuery.includes('recommendations') || lowerQuery.includes('recommended') ||
+       lowerQuery.includes('improve') || lowerQuery.includes('focus') ||
+       lowerQuery.includes('best') || lowerQuery.includes('next') ||
+       lowerQuery.includes('effective') || lowerQuery.includes('maximize') ||
+       lowerQuery.includes('course') || lowerQuery.includes('optimize') ||
+       lowerQuery.includes('improvements') || lowerQuery.includes('enhance') ||
+       lowerQuery.includes('efficient') || lowerQuery.includes('achieve') ||
+       lowerQuery.includes('way forward') || lowerQuery.includes('better results') ||
+       lowerQuery.includes('efficiency') || lowerQuery.includes('going forward')) &&
+      (lowerQuery.includes('what') || lowerQuery.includes('how')) &&
       !detectedPlatform && !detectedCampaign) {
     
     // Calculate overall metrics for strategic insights
