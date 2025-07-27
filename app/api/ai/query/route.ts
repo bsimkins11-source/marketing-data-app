@@ -572,6 +572,174 @@ async function processAIQuery(query: string, data: any[]) {
     }
   }
 
+  // PHASE 3 IMPROVEMENT 1: Executive Summary Handler (Priority: HIGH)
+  // Handle executive summary and overview queries
+  if ((lowerQuery.includes('summary') || lowerQuery.includes('overview') || lowerQuery.includes('executive') ||
+       lowerQuery.includes('dashboard') || lowerQuery.includes('report') || lowerQuery.includes('status')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Calculate comprehensive summary metrics
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const overallCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    // Group by platform for platform breakdown
+    const platformGroups: Record<string, { spend: number, revenue: number, roas: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, roas: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += item.metrics.revenue
+    })
+    
+    // Calculate ROAS for each platform
+    Object.keys(platformGroups).forEach(platform => {
+      const group = platformGroups[platform]
+      group.roas = group.spend > 0 ? group.revenue / group.spend : 0
+    })
+    
+    const content = `📊 EXECUTIVE SUMMARY\n\n💰 Total Spend: $${totalSpend.toLocaleString()}\n💵 Total Revenue: $${totalRevenue.toLocaleString()}\n📈 Overall ROAS: ${overallROAS.toFixed(2)}x\n👁️ Total Impressions: ${totalImpressions.toLocaleString()}\n🖱️ Total Clicks: ${totalClicks.toLocaleString()}\n🎯 Total Conversions: ${totalConversions.toLocaleString()}\n📊 Overall CTR: ${(overallCTR * 100).toFixed(2)}%\n💸 Overall CPA: $${overallCPA.toFixed(2)}\n\n🏢 Platform Performance:\n${Object.entries(platformGroups).map(([platform, metrics]) => 
+      `• ${platform}: $${metrics.spend.toLocaleString()} spend, ${metrics.roas.toFixed(2)}x ROAS`
+    ).join('\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'executive_summary',
+        totalSpend: totalSpend,
+        totalRevenue: totalRevenue,
+        overallROAS: overallROAS,
+        overallCTR: overallCTR,
+        overallCPA: overallCPA,
+        totalImpressions: totalImpressions,
+        totalClicks: totalClicks,
+        totalConversions: totalConversions,
+        platformBreakdown: platformGroups,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 2: Anomaly Detection Handler (Priority: HIGH)
+  // Handle anomaly detection and unusual performance queries
+  if ((lowerQuery.includes('anomaly') || lowerQuery.includes('unusual') || lowerQuery.includes('outlier') ||
+       lowerQuery.includes('strange') || lowerQuery.includes('weird') || lowerQuery.includes('concerning') ||
+       lowerQuery.includes('problem') || lowerQuery.includes('issue')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Calculate overall metrics for comparison
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const avgROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const avgCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const avgCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    // Find anomalies (items with significantly different performance)
+    const anomalies = data.filter(item => {
+      const itemROAS = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+      const itemCTR = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+      const itemCPA = item.metrics.conversions > 0 ? item.metrics.spend / item.metrics.conversions : 0
+      
+      // Flag as anomaly if significantly different from average
+      return itemROAS < avgROAS * 0.5 || itemROAS > avgROAS * 2 || 
+             itemCTR < avgCTR * 0.3 || itemCTR > avgCTR * 3 ||
+             itemCPA > avgCPA * 2
+    }).slice(0, 5) // Top 5 anomalies
+    
+    if (anomalies.length === 0) {
+      return {
+        content: "🔍 Anomaly Detection: No significant anomalies detected. All campaigns are performing within expected ranges.",
+        data: {
+          type: 'anomaly_detection',
+          anomalies: [],
+          avgROAS: avgROAS,
+          avgCTR: avgCTR,
+          avgCPA: avgCPA,
+          query: query
+        }
+      }
+    }
+    
+    const content = `🚨 ANOMALY DETECTION\n\nFound ${anomalies.length} performance anomalies:\n\n${anomalies.map((item, index) => {
+      const itemROAS = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+      const itemCTR = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+      return `${index + 1}. ${item.dimensions.platform} - ${item.dimensions.campaign}\n   ROAS: ${itemROAS.toFixed(2)}x (vs avg ${avgROAS.toFixed(2)}x)\n   CTR: ${(itemCTR * 100).toFixed(2)}% (vs avg ${(avgCTR * 100).toFixed(2)}%)`
+    }).join('\n\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'anomaly_detection',
+        anomalies: anomalies,
+        avgROAS: avgROAS,
+        avgCTR: avgCTR,
+        avgCPA: avgCPA,
+        query: query
+      }
+    }
+  }
+
+  // PHASE 3 IMPROVEMENT 3: Optimization Handler (Priority: MEDIUM)
+  // Handle optimization and improvement queries
+  if ((lowerQuery.includes('optimize') || lowerQuery.includes('optimization') || lowerQuery.includes('improve') ||
+       lowerQuery.includes('better') || lowerQuery.includes('enhance') || lowerQuery.includes('boost')) &&
+      !detectedPlatform && !detectedCampaign) {
+    
+    // Group by platform for optimization analysis
+    const platformGroups: Record<string, { spend: number, revenue: number, roas: number, ctr: number, cpa: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, roas: 0, ctr: 0, cpa: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += item.metrics.revenue
+    })
+    
+    // Calculate metrics for each platform
+    Object.keys(platformGroups).forEach(platform => {
+      const group = platformGroups[platform]
+      const platformData = data.filter(item => item.dimensions.platform === platform)
+      const totalImpressions = platformData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const totalClicks = platformData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      const totalConversions = platformData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+      
+      group.roas = group.spend > 0 ? group.revenue / group.spend : 0
+      group.ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      group.cpa = totalConversions > 0 ? group.spend / totalConversions : 0
+    })
+    
+    // Find optimization opportunities
+    const platforms = Object.entries(platformGroups).sort((a, b) => a[1].roas - b[1].roas)
+    const worstPlatform = platforms[0]
+    const bestPlatform = platforms[platforms.length - 1]
+    
+    const content = `🎯 OPTIMIZATION RECOMMENDATIONS\n\n📈 Best Performing: ${bestPlatform[0]} (${bestPlatform[1].roas.toFixed(2)}x ROAS)\n📉 Needs Optimization: ${worstPlatform[0]} (${worstPlatform[1].roas.toFixed(2)}x ROAS)\n\n💡 Recommendations:\n• Increase budget allocation to ${bestPlatform[0]} for higher returns\n• Optimize ${worstPlatform[0]} targeting and creative performance\n• Focus on improving conversion rates across all platforms\n• Consider A/B testing for underperforming campaigns`
+    
+    return {
+      content,
+      data: {
+        type: 'optimization_recommendations',
+        bestPlatform: bestPlatform[0],
+        worstPlatform: worstPlatform[0],
+        platformAnalysis: platformGroups,
+        query: query
+      }
+    }
+  }
+
   // Simple fallback response for now
   return {
     content: `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n• Total impressions, spend, or revenue\n• Best performing campaigns by CTR or ROAS\n• Average CTR or ROAS for specific platforms\n• List all campaigns\n• Generate graphs/charts by spend, impressions, clicks, or revenue\n• Compare performance by device or location\n• Filter campaigns by specific criteria\n• Which platform had the highest ROAS`,
