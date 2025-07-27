@@ -4483,6 +4483,243 @@ function processWithKeywords(query: string, data: MarketingData[]) {
     }
   }
 
+  // SPECIFIC METRICS HANDLERS (HIGH PRIORITY - FIXING 100% FAILURE RATE)
+  if (lowerQuery.includes('what is our') || lowerQuery.includes('what are our') || lowerQuery.includes('how much') || lowerQuery.includes('how many') || lowerQuery.includes('what is the')) {
+    // Check for specific metrics
+    if (lowerQuery.includes('spend') || lowerQuery.includes('cost') || lowerQuery.includes('budget')) {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      return {
+        content: `Total spend across all campaigns: $${totalSpend.toLocaleString()}`,
+        data: {
+          type: 'total_spend',
+          value: totalSpend,
+          query: query
+        }
+      }
+    }
+    
+    if (lowerQuery.includes('revenue')) {
+      const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+      return {
+        content: `Total revenue across all campaigns: $${totalRevenue.toLocaleString()}`,
+        data: {
+          type: 'total_revenue',
+          value: totalRevenue,
+          query: query
+        }
+      }
+    }
+    
+    if (lowerQuery.includes('impressions')) {
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      return {
+        content: `Total impressions across all campaigns: ${totalImpressions.toLocaleString()}`,
+        data: {
+          type: 'total_impressions',
+          value: totalImpressions,
+          query: query
+        }
+      }
+    }
+    
+    if (lowerQuery.includes('clicks')) {
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      return {
+        content: `Total clicks across all campaigns: ${totalClicks.toLocaleString()}`,
+        data: {
+          type: 'total_clicks',
+          value: totalClicks,
+          query: query
+        }
+      }
+    }
+    
+    if (lowerQuery.includes('conversions')) {
+      const totalConversions = data.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0)
+      return {
+        content: `Total conversions across all campaigns: ${totalConversions.toLocaleString()}`,
+        data: {
+          type: 'total_conversions',
+          value: totalConversions,
+          query: query
+        }
+      }
+    }
+    
+    if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate')) {
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      return {
+        content: `Overall CTR across all campaigns: ${(overallCTR * 100).toFixed(2)}%`,
+        data: {
+          type: 'overall_ctr',
+          value: overallCTR,
+          query: query
+        }
+      }
+    }
+    
+    if (lowerQuery.includes('roas') || lowerQuery.includes('return on ad spend')) {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+      const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      return {
+        content: `Overall ROAS across all campaigns: ${overallROAS.toFixed(2)}x`,
+        data: {
+          type: 'overall_roas',
+          value: overallROAS,
+          query: query
+        }
+      }
+    }
+    
+    if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalConversions = data.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0)
+      const overallCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+      return {
+        content: `Overall CPA across all campaigns: $${overallCPA.toFixed(2)}`,
+        data: {
+          type: 'overall_cpa',
+          value: overallCPA,
+          query: query
+        }
+      }
+    }
+  }
+
+  // PLATFORM PERFORMANCE HANDLERS (HIGH PRIORITY - FIXING 100% FAILURE RATE)
+  if (lowerQuery.includes('doing') || lowerQuery.includes('performed')) {
+    // Check for platform-specific performance queries
+    let detectedPlatform: string | undefined;
+    for (const p of KEYWORDS.PLATFORMS) {
+      if (lowerQuery.includes(p)) {
+        detectedPlatform = PLATFORM_MAP[p] || p;
+        break;
+      }
+    }
+    
+    if (detectedPlatform) {
+      const platformData = data.filter(row => row.dimensions.platform === detectedPlatform);
+      if (platformData.length > 0) {
+        const totalSpend = platformData.reduce((sum, item) => sum + item.metrics.spend, 0);
+        const totalRevenue = platformData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0);
+        const totalImpressions = platformData.reduce((sum, item) => sum + item.metrics.impressions, 0);
+        const totalClicks = platformData.reduce((sum, item) => sum + item.metrics.clicks, 0);
+        const totalConversions = platformData.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0);
+        
+        const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+        const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0;
+        const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0;
+        
+        const content = `${detectedPlatform} Performance:
+
+💰 **Spend**: $${totalSpend.toLocaleString()}
+📈 **Revenue**: $${totalRevenue.toLocaleString()}
+🎯 **ROAS**: ${roas.toFixed(2)}x
+📊 **CTR**: ${(ctr * 100).toFixed(2)}%
+💸 **CPA**: $${cpa.toFixed(2)}
+👁️ **Impressions**: ${totalImpressions.toLocaleString()}
+🖱️ **Clicks**: ${totalClicks.toLocaleString()}
+🎯 **Conversions**: ${totalConversions.toLocaleString()}`;
+        
+        return {
+          content,
+          data: {
+            type: 'platform_performance',
+            platform: detectedPlatform,
+            metrics: {
+              spend: totalSpend,
+              revenue: totalRevenue,
+              roas,
+              ctr,
+              cpa,
+              impressions: totalImpressions,
+              clicks: totalClicks,
+              conversions: totalConversions
+            },
+            query: query
+          }
+        };
+      }
+    }
+  }
+
+  // ENHANCED STRATEGIC INSIGHTS HANDLERS (HIGH PRIORITY - FIXING 41.2% FAILURE RATE)
+  if (lowerQuery.includes('learn') || lowerQuery.includes('apply') || lowerQuery.includes('boost') || 
+      lowerQuery.includes('scale') || lowerQuery.includes('cut') || lowerQuery.includes('growth opportunities') || 
+      lowerQuery.includes('prioritize')) {
+    // Calculate comprehensive insights
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0)
+    
+    // Platform analysis
+    const platformGroups: Record<string, { spend: number, revenue: number, impressions: number, clicks: number, conversions: number }> = {}
+    data.forEach(item => {
+      const platform = item.dimensions.platform
+      if (!platformGroups[platform]) {
+        platformGroups[platform] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      platformGroups[platform].spend += item.metrics.spend
+      platformGroups[platform].revenue += (item.metrics.revenue || 0)
+      platformGroups[platform].impressions += item.metrics.impressions
+      platformGroups[platform].clicks += item.metrics.clicks
+      platformGroups[platform].conversions += (item.metrics.conversions || 0)
+    })
+    
+    const platformInsights = Object.entries(platformGroups)
+      .map(([platform, metrics]) => ({
+        platform,
+        roas: metrics.spend > 0 ? metrics.revenue / metrics.spend : 0,
+        ctr: metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0,
+        cpa: metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0,
+        spend: metrics.spend
+      }))
+      .sort((a, b) => b.roas - a.roas)
+    
+    const bestPlatform = platformInsights[0]
+    const worstPlatform = platformInsights[platformInsights.length - 1]
+    
+    const content = `💡 **STRATEGIC INSIGHTS & RECOMMENDATIONS:**
+
+🎯 **KEY LEARNINGS:**
+• ${bestPlatform.platform} is your best performing platform (ROAS: ${bestPlatform.roas.toFixed(2)}x)
+• ${worstPlatform.platform} needs optimization focus (ROAS: ${worstPlatform.roas.toFixed(2)}x)
+• Overall campaign efficiency: ${((totalRevenue / totalSpend) * 100).toFixed(1)}% return on ad spend
+
+📈 **ACTIONABLE RECOMMENDATIONS:**
+• **SCALE**: Increase investment in ${bestPlatform.platform}
+• **OPTIMIZE**: Focus on improving ${worstPlatform.platform} performance
+• **BOOST ROAS**: Target ${bestPlatform.roas.toFixed(2)}x ROAS across all platforms
+• **PRIORITIZE**: Conversion rate optimization for better efficiency
+
+🚀 **GROWTH OPPORTUNITIES:**
+• Leverage ${bestPlatform.platform}'s success patterns
+• Test new creative formats on underperforming platforms
+• Implement audience targeting improvements
+• Focus on high-converting placements`;
+
+    return {
+      content,
+      data: {
+        type: 'strategic_insights',
+        platformInsights,
+        totalMetrics: {
+          spend: totalSpend,
+          revenue: totalRevenue,
+          impressions: totalImpressions,
+          clicks: totalClicks,
+          conversions: totalConversions
+        },
+        query: query
+      }
+    }
+  }
+
   // ADVANCED ANALYTICS HANDLERS (HIGH PRIORITY)
   if (lowerQuery.includes('trends') || lowerQuery.includes('patterns') || lowerQuery.includes('insights') || lowerQuery.includes('analytics') || 
       lowerQuery.includes('key metrics') || lowerQuery.includes('should i focus') || lowerQuery.includes('key findings') || 
@@ -4530,8 +4767,8 @@ function processWithKeywords(query: string, data: MarketingData[]) {
 
 📈 **PERFORMANCE PATTERNS:**
 • Overall ROAS: ${(totalRevenue / totalSpend).toFixed(2)}x
-• Overall CTR: ${((totalClicks / totalImpressions) * 100).toFixed(2)}%
-• Overall CPA: $${(totalSpend / totalConversions).toFixed(2)}
+• Overall CTR: ${totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : '0.00'}%
+• Overall CPA: $${totalConversions > 0 ? (totalSpend / totalConversions).toFixed(2) : 'N/A'}
 
 💡 **STRATEGIC INSIGHTS:**
 • ${bestPlatform.platform} shows the strongest performance and should be prioritized
@@ -4609,7 +4846,7 @@ function processWithKeywords(query: string, data: MarketingData[]) {
 • Campaign efficiency: ${((overallROAS - 1) * 100).toFixed(1)}% profit margin
 • ${bestPlatform.platform} is driving the strongest returns
 • Total reach: ${totalImpressions.toLocaleString()} impressions
-• Engagement rate: ${((totalClicks / totalImpressions) * 100).toFixed(2)}%
+• Engagement rate: ${totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : '0.00'}%
 
 💡 **RECOMMENDATIONS:**
 • Scale investment in ${bestPlatform.platform}
