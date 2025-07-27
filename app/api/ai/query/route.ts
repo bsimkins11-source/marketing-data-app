@@ -793,7 +793,12 @@ async function processAIQuery(query: string, data: any[]) {
   // Handle anomaly detection and unusual performance queries
   if ((lowerQuery.includes('anomaly') || lowerQuery.includes('unusual') || lowerQuery.includes('outlier') ||
        lowerQuery.includes('strange') || lowerQuery.includes('weird') || lowerQuery.includes('concerning') ||
-       lowerQuery.includes('problem') || lowerQuery.includes('issue')) &&
+       lowerQuery.includes('problem') || lowerQuery.includes('issue') || lowerQuery.includes('wrong') ||
+       lowerQuery.includes('bad') || lowerQuery.includes('poor') || lowerQuery.includes('terrible') ||
+       lowerQuery.includes('awful') || lowerQuery.includes('horrible') || lowerQuery.includes('worst') ||
+       lowerQuery.includes('lowest') || lowerQuery.includes('underperforming') || lowerQuery.includes('failing') ||
+       lowerQuery.includes('struggling') || lowerQuery.includes('trouble') || lowerQuery.includes('concern') ||
+       lowerQuery.includes('worry') || lowerQuery.includes('alarm') || lowerQuery.includes('alert')) &&
       !detectedPlatform && !detectedCampaign) {
     
     // Calculate overall metrics for comparison
