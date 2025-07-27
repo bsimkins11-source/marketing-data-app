@@ -1611,18 +1611,22 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     
     // Identify anomalies
     const anomalies = data.filter(item => {
-      const roas = item.metrics.revenue / item.metrics.spend
-      const ctr = item.metrics.clicks / item.metrics.impressions
-      const cpa = item.metrics.spend / item.metrics.conversions
+      const roas = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+      const ctr = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+      const cpa = item.metrics.conversions > 0 ? item.metrics.spend / item.metrics.conversions : 0
       
       return roas < avgROAS * 0.5 || ctr < avgCTR * 0.5 || cpa > avgCPA * 2 || 
              item.metrics.conversions === 0 || item.metrics.clicks === 0
     })
     
     if (anomalies.length > 0) {
-      const anomalyList = anomalies.map(item => 
-        `${item.campaign} (${item.platform}): ROAS ${(item.metrics.revenue / item.metrics.spend).toFixed(2)}x, CTR ${((item.metrics.clicks / item.metrics.impressions) * 100).toFixed(2)}%, CPA $${(item.metrics.spend / item.metrics.conversions).toFixed(2)}`
-      ).join('\n')
+      const anomalyList = anomalies.map(item => {
+        const roas = item.metrics.spend > 0 ? item.metrics.revenue / item.metrics.spend : 0
+        const ctr = item.metrics.impressions > 0 ? item.metrics.clicks / item.metrics.impressions : 0
+        const cpa = item.metrics.conversions > 0 ? item.metrics.spend / item.metrics.conversions : 0
+        
+        return `${item.dimensions.campaign} (${item.dimensions.platform}): ROAS ${roas.toFixed(2)}x, CTR ${(ctr * 100).toFixed(2)}%, CPA $${cpa.toFixed(2)}`
+      }).join('\n')
       
       return {
         content: `Found ${anomalies.length} anomaly/anomalies:\n${anomalyList}`,
