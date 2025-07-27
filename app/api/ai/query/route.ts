@@ -1534,6 +1534,67 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // PHASE 4 IMPROVEMENT 6: Top/Best Performing Handler (Priority: CRITICAL)
+  // Handle "top performing", "best performing", "highest" queries
+  if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
+      (lowerQuery.includes('campaign') || lowerQuery.includes('campaigns'))) {
+    
+    // Group data by campaign and calculate metrics
+    const campaignMetrics = data.reduce((acc, item) => {
+      const campaign = item.dimensions.campaign
+      if (!acc[campaign]) {
+        acc[campaign] = {
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          platform: item.dimensions.platform
+        }
+      }
+      acc[campaign].spend += item.metrics.spend
+      acc[campaign].revenue += item.metrics.revenue
+      acc[campaign].impressions += item.metrics.impressions
+      acc[campaign].clicks += item.metrics.clicks
+      acc[campaign].conversions += item.metrics.conversions
+      return acc
+    }, {} as Record<string, any>)
+    
+    // Calculate ROAS for each campaign and sort by performance
+    const campaignPerformance = Object.entries(campaignMetrics).map(([campaign, metrics]: [string, any]) => {
+      const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+      const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+      const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+      
+      return {
+        campaign,
+        platform: metrics.platform,
+        roas,
+        ctr,
+        cpa,
+        spend: metrics.spend,
+        revenue: metrics.revenue,
+        conversions: metrics.conversions
+      }
+    }).sort((a, b) => b.roas - a.roas) // Sort by ROAS descending
+    
+    // Get top 3 performing campaigns
+    const topCampaigns = campaignPerformance.slice(0, 3)
+    
+    const content = `🏆 Top Performing Campaigns:\n\n${topCampaigns.map((campaign, index) => 
+      `${index + 1}. ${campaign.campaign} (${campaign.platform})\n   • ROAS: ${campaign.roas.toFixed(2)}x\n   • CTR: ${(campaign.ctr * 100).toFixed(2)}%\n   • CPA: $${campaign.cpa.toFixed(2)}\n   • Spend: $${campaign.spend.toLocaleString()}\n   • Revenue: $${campaign.revenue.toLocaleString()}\n   • Conversions: ${campaign.conversions.toLocaleString()}`
+    ).join('\n\n')}`
+    
+    return {
+      content,
+      data: {
+        type: 'top_performing',
+        campaigns: topCampaigns,
+        query: query
+      }
+    }
+  }
+
   // PHASE 4 IMPROVEMENT 5: Direct Anomaly Detection Handler (Priority: CRITICAL)
   // Simple, direct handler for "anomaly" queries that are falling through
   if (lowerQuery.includes('anomaly') || lowerQuery.includes('anomalies')) {
