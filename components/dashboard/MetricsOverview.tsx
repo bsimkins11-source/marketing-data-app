@@ -7,7 +7,7 @@ interface MetricCardProps {
   value: string | number
   change: number
   icon: React.ReactNode
-  format?: 'number' | 'currency' | 'percentage'
+  format?: 'number' | 'currency' | 'percentage' | 'roas'
 }
 
 function MetricCard({ title, value, change, icon, format = 'number' }: MetricCardProps) {
@@ -16,6 +16,8 @@ function MetricCard({ title, value, change, icon, format = 'number' }: MetricCar
     ? formatCurrency(Number(value))
     : format === 'percentage'
     ? formatPercentage(Number(value))
+    : format === 'roas'
+    ? Number(value).toFixed(2)
     : formatNumber(Number(value))
 
   return (
@@ -91,7 +93,7 @@ export default function MetricsOverview({ summary }: MetricsOverviewProps) {
       value: summary.averageROAS || 0,
       change: 18.9, // Mock change for now
       icon: <DollarSign className="w-6 h-6 text-primary-600" />,
-      format: 'number' as const
+      format: 'roas' as const
     }
   ]
 
