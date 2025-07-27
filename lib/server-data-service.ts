@@ -36,6 +36,7 @@ export async function loadCampaignData(): Promise<MarketingData[]> {
           roas: parseFloat(row.roas || '0')
         },
         dimensions: {
+          brand: row.brand || 'Unknown Brand',
           campaign: row.campaign_name || row.canonical_campaign || 'Unknown Campaign',
           campaignId: row.campaign_id || '',
           adGroup: row.ad_group_name || 'Unknown Ad Group',

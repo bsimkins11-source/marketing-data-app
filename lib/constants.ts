@@ -9,6 +9,7 @@ export const KEYWORDS: KeywordGroups = {
   CAMPAIGN: ['campaign', 'campaigns', 'ad campaign', 'ad campaigns'],
   CREATIVE: ['creative', 'creatives', 'creative units', 'create units', 'ad creative', 'ad creatives', 'advertisement', 'advertisements', 'ad', 'ads'],
   AUDIENCE: ['audience', 'audiences', 'target audience', 'target audiences', 'demographic', 'demographics', 'segment', 'segments', 'targeting', 'targets', 'against'],
+  BRAND: ['brand', 'brands', 'company', 'companies', 'organization', 'organizations'],
   PLATFORM: ['platform', 'platforms', 'channel', 'channels', 'network', 'networks'],
   VIZ: ['visual', 'visualize', 'chart', 'graph', 'plot', 'show me', 'display', 'visualization'],
   TOP: ['top', 'best', 'highest', 'leading', 'top performing', 'best performing'],
@@ -22,7 +23,16 @@ export const KEYWORDS: KeywordGroups = {
     'summer grilling', 
     'back to school', 
     'holiday recipes', 
-    'pantry staples'
+    'pantry staples',
+    'ecofresh organic produce',
+    'ecofresh sustainable packaging',
+    'ecofresh farm to table',
+    'ecofresh zero waste',
+    'ecofresh',
+    'organic produce',
+    'sustainable packaging',
+    'farm to table',
+    'zero waste'
   ],
   DRILL_DOWN: [
     'drill down', 'drilldown', 'break down', 'breakdown', 'detail', 'details', 

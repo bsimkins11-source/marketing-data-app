@@ -113,6 +113,336 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // Brand-Level Analytics Handler
+  if ((lowerQuery.includes('brand') || lowerQuery.includes('brands')) &&
+      (lowerQuery.includes('performance') || lowerQuery.includes('analytics') || lowerQuery.includes('summary') || lowerQuery.includes('overview'))) {
+    
+    try {
+      // Get unique brands
+      const uniqueBrands = Array.from(new Set(data.map(item => item.dimensions.brand)))
+      
+      // Calculate brand-level metrics
+      const brandMetrics = uniqueBrands.map(brandName => {
+        const brandData = data.filter(item => item.dimensions.brand === brandName)
+        const brandSpend = brandData.reduce((sum, item) => sum + item.metrics.spend, 0)
+        const brandRevenue = brandData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+        const brandImpressions = brandData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+        const brandClicks = brandData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+        const brandConversions = brandData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+        
+        const brandRoas = brandSpend > 0 ? brandRevenue / brandSpend : 0
+        const brandCtr = brandImpressions > 0 ? brandClicks / brandImpressions : 0
+        const brandCpa = brandConversions > 0 ? brandSpend / brandConversions : 0
+        
+        // Get campaigns for this brand
+        const campaigns = Array.from(new Set(brandData.map(item => item.dimensions.campaign)))
+        
+        // Get platforms used by this brand
+        const platforms = Array.from(new Set(brandData.map(item => item.dimensions.platform)))
+        
+        // Get audiences for this brand
+        const audiences = Array.from(new Set(brandData.map(item => item.dimensions.audience)))
+        
+        return {
+          brand: brandName,
+          spend: brandSpend,
+          revenue: brandRevenue,
+          impressions: brandImpressions,
+          clicks: brandClicks,
+          conversions: brandConversions,
+          roas: brandRoas,
+          ctr: brandCtr,
+          cpa: brandCpa,
+          campaigns: campaigns,
+          campaignCount: campaigns.length,
+          platforms: platforms,
+          platformCount: platforms.length,
+          audiences: audiences,
+          audienceCount: audiences.length
+        }
+      }).sort((a, b) => b.roas - a.roas)
+      
+      // Calculate cross-brand insights
+      const totalSpend = brandMetrics.reduce((sum, brand) => sum + brand.spend, 0)
+      const totalRevenue = brandMetrics.reduce((sum, brand) => sum + brand.revenue, 0)
+      const overallRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      
+      const topBrand = brandMetrics[0]
+      const bottomBrand = brandMetrics[brandMetrics.length - 1]
+      
+      const content = `🏢 **BRAND-LEVEL ANALYTICS & PERFORMANCE**
+
+## **🎯 EXECUTIVE BRAND OVERVIEW**
+- **Total Brands**: ${uniqueBrands.length}
+- **Total Spend**: $${totalSpend.toLocaleString()}
+- **Total Revenue**: $${totalRevenue.toLocaleString()}
+- **Overall ROAS**: ${overallRoas.toFixed(2)}x
+- **Date Range**: ${data[0]?.date} to ${data[data.length - 1]?.date}
+
+## **🏆 BRAND PERFORMANCE RANKING**
+
+${brandMetrics.map((brand, index) => 
+  `${index + 1}. **${brand.brand}**
+   • ROAS: ${brand.roas.toFixed(2)}x
+   • CTR: ${(brand.ctr * 100).toFixed(2)}%
+   • CPA: $${brand.cpa.toFixed(2)}
+   • Spend: $${brand.spend.toLocaleString()}
+   • Revenue: $${brand.revenue.toLocaleString()}
+   • Campaigns: ${brand.campaignCount} (${brand.campaigns.slice(0, 3).join(', ')}${brand.campaignCount > 3 ? '...' : ''})
+   • Platforms: ${brand.platformCount} (${brand.platforms.join(', ')})
+   • Audiences: ${brand.audienceCount}`
+).join('\n\n')}
+
+## **📊 CROSS-BRAND INSIGHTS**
+
+### **Performance Leaders:**
+- **Top Performing Brand**: ${topBrand.brand} (ROAS: ${topBrand.roas.toFixed(2)}x)
+- **Revenue Leader**: ${brandMetrics.reduce((max, brand) => brand.revenue > max.revenue ? brand : max).brand} ($${brandMetrics.reduce((max, brand) => brand.revenue > max.revenue ? brand : max).revenue.toLocaleString()})
+- **Efficiency Leader**: ${topBrand.brand} (Best ROAS)
+
+### **Growth Opportunities:**
+- **Underperforming Brand**: ${bottomBrand.brand} (ROAS: ${bottomBrand.roas.toFixed(2)}x)
+- **Budget Reallocation**: Consider shifting budget from ${bottomBrand.brand} to ${topBrand.brand}
+
+## **🎯 STRATEGIC RECOMMENDATIONS**
+
+### **Brand Portfolio Strategy:**
+1. **Scale Winners**: Increase investment in ${topBrand.brand} by 40%
+2. **Optimize Underperformers**: Review ${bottomBrand.brand} strategy and creative approach
+3. **Cross-Brand Learning**: Apply successful strategies from ${topBrand.brand} to ${bottomBrand.brand}
+4. **Audience Expansion**: Leverage successful audiences across brands
+
+### **Platform Strategy by Brand:**
+${brandMetrics.map(brand => 
+  `**${brand.brand}**: Focus on ${brand.platforms.slice(0, 2).join(', ')} (highest performing platforms)`
+).join('\n')}
+
+### **Campaign Strategy by Brand:**
+${brandMetrics.map(brand => 
+  `**${brand.brand}**: Scale ${brand.campaigns[0]} (top campaign), optimize ${brand.campaigns[brand.campaigns.length - 1]} (bottom campaign)`
+).join('\n')}
+
+## **📈 NEXT STEPS**
+
+1. **Immediate Actions (Week 1):**
+   - Reallocate 30% budget from ${bottomBrand.brand} to ${topBrand.brand}
+   - Review creative strategy for ${bottomBrand.brand}
+
+2. **Short-term Actions (Month 1):**
+   - Implement cross-brand audience testing
+   - Develop brand-specific optimization strategies
+
+3. **Long-term Strategy (Quarter 1):**
+   - Build brand-specific creative guidelines
+   - Establish cross-brand performance benchmarks`
+
+      updateConversationContext(sessionId, query, { content, data: { type: 'brand_analytics', brands: brandMetrics, overallMetrics: { totalSpend, totalRevenue, overallRoas }, query: query } })
+      return {
+        content,
+        data: {
+          type: 'brand_analytics',
+          brands: brandMetrics,
+          overallMetrics: {
+            totalSpend,
+            totalRevenue,
+            overallRoas
+          },
+          query: query
+        }
+      }
+    } catch (error) {
+      return {
+        content: "Error generating brand analytics. Please try again.",
+        data: {
+          type: 'error',
+          query: query
+        }
+      }
+    }
+  }
+
+  // Campaign Summary Handler
+  if ((lowerQuery.includes('overall summary') || lowerQuery.includes('summary of') || lowerQuery.includes('campaign summary')) &&
+      (lowerQuery.includes('campaign') || lowerQuery.includes('campaigns'))) {
+    
+    try {
+      // Get unique campaigns
+      const uniqueCampaigns = Array.from(new Set(data.map(item => item.dimensions.campaign)))
+      
+      // Calculate overall metrics
+      const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+      const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+      const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+      const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+      const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+      
+      const overallRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      const overallCtr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      const overallCpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+      
+      // Calculate metrics by campaign
+      const campaignMetrics = uniqueCampaigns.map(campaignName => {
+        const campaignData = data.filter(item => item.dimensions.campaign === campaignName)
+        const campaignSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
+        const campaignRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+        const campaignImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+        const campaignClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+        const campaignConversions = campaignData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+        
+        const campaignRoas = campaignSpend > 0 ? campaignRevenue / campaignSpend : 0
+        const campaignCtr = campaignImpressions > 0 ? campaignClicks / campaignImpressions : 0
+        const campaignCpa = campaignConversions > 0 ? campaignSpend / campaignConversions : 0
+        
+        // Get platforms used in this campaign
+        const platforms = Array.from(new Set(campaignData.map(item => item.dimensions.platform)))
+        
+                 return {
+           campaign: campaignName,
+           brand: campaignData[0]?.dimensions.brand || 'Unknown Brand',
+           spend: campaignSpend,
+           revenue: campaignRevenue,
+           impressions: campaignImpressions,
+           clicks: campaignClicks,
+           conversions: campaignConversions,
+           roas: campaignRoas,
+           ctr: campaignCtr,
+           cpa: campaignCpa,
+           platforms: platforms,
+           platformCount: platforms.length
+         }
+      }).sort((a, b) => b.roas - a.roas)
+      
+      // Calculate platform performance
+      const platformMetrics = data.reduce((acc, item) => {
+        const platform = item.dimensions.platform
+        if (!acc[platform]) {
+          acc[platform] = {
+            spend: 0,
+            revenue: 0,
+            impressions: 0,
+            clicks: 0,
+            conversions: 0,
+            campaigns: new Set()
+          }
+        }
+        acc[platform].spend += item.metrics.spend
+        acc[platform].revenue += item.metrics.revenue
+        acc[platform].impressions += item.metrics.impressions
+        acc[platform].clicks += item.metrics.clicks
+        acc[platform].conversions += item.metrics.conversions
+        acc[platform].campaigns.add(item.dimensions.campaign)
+        return acc
+      }, {} as Record<string, any>)
+      
+      const platformPerformance = Object.entries(platformMetrics).map(([platform, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        
+        return {
+          platform,
+          roas,
+          ctr,
+          cpa,
+          spend: metrics.spend,
+          revenue: metrics.revenue,
+          conversions: metrics.conversions,
+          campaignCount: Array.from(metrics.campaigns).length
+        }
+      }).sort((a, b) => b.roas - a.roas)
+      
+      // Get top and bottom performers
+      const topCampaign = campaignMetrics[0]
+      const bottomCampaign = campaignMetrics[campaignMetrics.length - 1]
+      const topPlatform = platformPerformance[0]
+      const bottomPlatform = platformPerformance[platformPerformance.length - 1]
+      
+             const content = `📊 **OVERALL CAMPAIGN SUMMARY - ${uniqueCampaigns.length} CAMPAIGNS**
+
+## **🎯 EXECUTIVE OVERVIEW**
+- **Total Campaigns**: ${uniqueCampaigns.length}
+- **Total Brands**: ${Array.from(new Set(data.map(item => item.dimensions.brand))).length}
+- **Total Spend**: $${totalSpend.toLocaleString()}
+- **Total Revenue**: $${totalRevenue.toLocaleString()}
+- **Overall ROAS**: ${overallRoas.toFixed(2)}x
+- **Overall CTR**: ${(overallCtr * 100).toFixed(2)}%
+- **Overall CPA**: $${overallCpa.toFixed(2)}
+- **Date Range**: ${data[0]?.date} to ${data[data.length - 1]?.date}
+
+## **🏆 CAMPAIGN PERFORMANCE RANKING**
+
+${campaignMetrics.map((campaign, index) => 
+  `${index + 1}. **${campaign.campaign}** (${campaign.brand})
+   • ROAS: ${campaign.roas.toFixed(2)}x
+   • CTR: ${(campaign.ctr * 100).toFixed(2)}%
+   • CPA: $${campaign.cpa.toFixed(2)}
+   • Spend: $${campaign.spend.toLocaleString()}
+   • Revenue: $${campaign.revenue.toLocaleString()}
+   • Platforms: ${campaign.platforms.join(', ')}`
+).join('\n\n')}
+
+## **🌐 PLATFORM PERFORMANCE**
+
+${platformPerformance.map((platform, index) => 
+  `${index + 1}. **${platform.platform}**
+   • ROAS: ${platform.roas.toFixed(2)}x
+   • CTR: ${(platform.ctr * 100).toFixed(2)}%
+   • CPA: $${platform.cpa.toFixed(2)}
+   • Spend: $${platform.spend.toLocaleString()}
+   • Revenue: $${platform.revenue.toLocaleString()}
+   • Campaigns: ${platform.campaignCount}`
+).join('\n\n')}
+
+## **📈 KEY INSIGHTS**
+
+### **Top Performers:**
+- **Best Campaign**: ${topCampaign.campaign} (ROAS: ${topCampaign.roas.toFixed(2)}x)
+- **Best Platform**: ${topPlatform.platform} (ROAS: ${topPlatform.roas.toFixed(2)}x)
+
+### **Areas for Improvement:**
+- **Lowest Campaign**: ${bottomCampaign.campaign} (ROAS: ${bottomCampaign.roas.toFixed(2)}x)
+- **Lowest Platform**: ${bottomPlatform.platform} (ROAS: ${bottomPlatform.roas.toFixed(2)}x)
+
+### **Performance Distribution:**
+- **High Performers** (ROAS > 3.0x): ${campaignMetrics.filter(c => c.roas > 3.0).length} campaigns
+- **Medium Performers** (ROAS 2.0-3.0x): ${campaignMetrics.filter(c => c.roas >= 2.0 && c.roas <= 3.0).length} campaigns
+- **Low Performers** (ROAS < 2.0x): ${campaignMetrics.filter(c => c.roas < 2.0).length} campaigns
+
+## **🎯 STRATEGIC RECOMMENDATIONS**
+
+1. **Scale Winners**: Increase budget allocation to ${topCampaign.campaign} by 40%
+2. **Optimize Underperformers**: Review and optimize ${bottomCampaign.campaign} strategy
+3. **Platform Focus**: Prioritize ${topPlatform.platform} for future campaigns
+4. **Cross-Platform Learning**: Apply successful strategies from ${topCampaign.campaign} to other campaigns`
+
+      updateConversationContext(sessionId, query, { content, data: { type: 'campaign_summary', campaigns: campaignMetrics, platforms: platformPerformance, overallMetrics: { totalSpend, totalRevenue, overallRoas, overallCtr, overallCpa }, query: query } })
+      return {
+        content,
+        data: {
+          type: 'campaign_summary',
+          campaigns: campaignMetrics,
+          platforms: platformPerformance,
+          overallMetrics: {
+            totalSpend,
+            totalRevenue,
+            overallRoas,
+            overallCtr,
+            overallCpa
+          },
+          query: query
+        }
+      }
+    } catch (error) {
+      return {
+        content: "Error generating campaign summary. Please try again.",
+        data: {
+          type: 'error',
+          query: query
+        }
+      }
+    }
+  }
+
   // Universal & Campaign-Specific Optimization Recommendations Handler
   if ((lowerQuery.includes('optimization recommendations') && 
        (lowerQuery.includes('spend') || lowerQuery.includes('platforms') || lowerQuery.includes('audiences') || lowerQuery.includes('creatives'))) ||

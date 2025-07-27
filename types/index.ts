@@ -21,6 +21,7 @@ export interface MarketingMetrics {
 }
 
 export interface MarketingDimensions {
+  brand: string
   campaign: string
   campaignId: string
   adGroup: string
