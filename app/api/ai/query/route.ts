@@ -1467,6 +1467,168 @@ ${topCampaigns.map((campaign, index) =>
     }
   }
 
+  // Time-based Query Handler with Clarification
+  const timeKeywords = ['q1', 'q2', 'q3', 'q4', 'quarter', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+  const hasTimeKeyword = timeKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  if (hasTimeKeyword) {
+    // Check if year is specified
+    const yearPattern = /\b(20\d{2})\b/
+    const yearMatch = query.match(yearPattern)
+    
+    if (!yearMatch) {
+      // Ask for year clarification
+      const timeReference = timeKeywords.find(keyword => lowerQuery.includes(keyword))
+      const clarificationQuestion = timeReference?.startsWith('q') 
+        ? `I see you're asking about ${timeReference.toUpperCase()}. Which year would you like data for? (e.g., 2024, 2023)`
+        : `I see you're asking about ${timeReference}. Which year would you like data for? (e.g., 2024, 2023)`
+      
+      return {
+        content: clarificationQuestion,
+        data: {
+          type: 'time_clarification',
+          timeReference: timeReference,
+          query: query
+        }
+      }
+    }
+    
+    // If year is specified, process the time-based query
+    const year = parseInt(yearMatch[1])
+    const timeReference = timeKeywords.find(keyword => lowerQuery.includes(keyword))
+    
+    // Calculate date ranges based on time reference
+    let startDate: string, endDate: string, periodName: string
+    
+    if (timeReference?.startsWith('q')) {
+      const quarter = parseInt(timeReference[1])
+      const startMonth = (quarter - 1) * 3
+      startDate = `${year}-${String(startMonth + 1).padStart(2, '0')}-01`
+      endDate = `${year}-${String(startMonth + 3).padStart(2, '0')}-31`
+      periodName = `Q${quarter} ${year}`
+    } else {
+      // Month-based query
+      const monthMap: { [key: string]: number } = {
+        'january': 1, 'jan': 1, 'february': 2, 'feb': 2, 'march': 3, 'mar': 3,
+        'april': 4, 'apr': 4, 'may': 5, 'june': 6, 'jun': 6, 'july': 7, 'jul': 7,
+        'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'october': 10, 'oct': 10,
+        'november': 11, 'nov': 11, 'december': 12, 'dec': 12
+      }
+      
+      const month = monthMap[timeReference!]
+      startDate = `${year}-${String(month).padStart(2, '0')}-01`
+      endDate = `${year}-${String(month).padStart(2, '0')}-31`
+      periodName = `${timeReference} ${year}`
+    }
+    
+    // Filter data by date range
+    const filteredData = data.filter(item => {
+      const itemDate = new Date(item.date)
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      return itemDate >= start && itemDate <= end
+    })
+    
+    if (filteredData.length === 0) {
+      return {
+        content: `I don't have data for ${periodName}. The available data ranges from ${data[0]?.date} to ${data[data.length - 1]?.date}. Would you like to see data for a different time period?`,
+        data: {
+          type: 'no_data_for_period',
+          requestedPeriod: periodName,
+          availableRange: { start: data[0]?.date, end: data[data.length - 1]?.date },
+          query: query
+        }
+      }
+    }
+    
+         // Process the filtered data based on what the user is asking for
+     if (lowerQuery.includes('spend') && lowerQuery.includes('platform')) {
+       // Group by platform and sum spend
+       const platformSpend = filteredData.reduce((acc, item) => {
+         const platform = item.dimensions.platform
+         acc[platform] = (acc[platform] || 0) + item.metrics.spend
+         return acc
+       }, {} as { [key: string]: number })
+       
+       const platformSpendArray = Object.entries(platformSpend)
+         .map(([platform, spend]) => ({ platform, spend: spend as number }))
+         .sort((a, b) => (b.spend as number) - (a.spend as number))
+      
+      const content = `📊 **SPEND BY PLATFORM - ${periodName.toUpperCase()}**
+
+ ${platformSpendArray.map((item, index) => 
+   `${index + 1}. **${item.platform}**: $${(item.spend as number).toLocaleString()}`
+ ).join('\n')}
+
+ **Total Spend**: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}
+**Data Points**: ${filteredData.length} records`
+
+      return {
+        content,
+        data: {
+          type: 'platform_spend_by_period',
+          period: periodName,
+          platformSpend: platformSpendArray,
+          totalSpend: platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0),
+          recordCount: filteredData.length,
+          query: query
+        }
+      }
+    }
+    
+    // Generic time-based response
+    const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = filteredData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = filteredData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = filteredData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    const content = `📅 **${periodName.toUpperCase()} PERFORMANCE SUMMARY**
+
+**💰 Financial Metrics:**
+• Total Spend: $${totalSpend.toLocaleString()}
+• Total Revenue: $${totalRevenue.toLocaleString()}
+• ROAS: ${roas.toFixed(2)}x
+
+**📊 Engagement Metrics:**
+• Total Impressions: ${totalImpressions.toLocaleString()}
+• Total Clicks: ${totalClicks.toLocaleString()}
+• Total Conversions: ${totalConversions.toLocaleString()}
+• CTR: ${(ctr * 100).toFixed(2)}%
+• CPA: $${cpa.toFixed(2)}
+
+**📈 Data Coverage:**
+• Records: ${filteredData.length}
+• Date Range: ${startDate} to ${endDate}
+
+What specific aspect of ${periodName} performance would you like to explore further?`
+
+    return {
+      content,
+      data: {
+        type: 'time_period_summary',
+        period: periodName,
+        metrics: {
+          spend: totalSpend,
+          revenue: totalRevenue,
+          impressions: totalImpressions,
+          clicks: totalClicks,
+          conversions: totalConversions,
+          roas,
+          ctr,
+          cpa
+        },
+        recordCount: filteredData.length,
+        dateRange: { start: startDate, end: endDate },
+        query: query
+      }
+    }
+  }
+
   // Anomaly Detection Handler
   if (lowerQuery.includes('anomaly') || lowerQuery.includes('anomalies')) {
     // Find campaigns with unusual performance patterns
