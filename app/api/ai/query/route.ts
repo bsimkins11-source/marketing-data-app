@@ -98,10 +98,18 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
       'please show', 'please create', 'please make',
       'show me a', 'create a', 'make a',
       'turn this into', 'convert this to', 'transform this into',
-      'put this in', 'put that in', 'put it in'
+      'put this in', 'put that in', 'put it in',
+      'produce a', 'generate a', 'create a graph', 'make a graph'
     ]
     
     const hasAdditionalPattern = additionalPatterns.some(pattern => lowerQuery.includes(pattern))
+    
+    console.log('🔍 Chart follow-up detected!')
+    console.log('🔍 Query:', lowerQuery)
+    console.log('🔍 Has chart keyword:', hasChartKeyword)
+    console.log('🔍 Has context keyword:', hasContextKeyword)
+    console.log('🔍 Has additional pattern:', hasAdditionalPattern)
+    console.log('🔍 Matching pattern:', additionalPatterns.find(pattern => lowerQuery.includes(pattern)))
     
     if ((hasChartKeyword && hasContextKeyword) || hasAdditionalPattern) {
       
@@ -170,6 +178,60 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
           conversions: audience.conversions || 0
         }))
         chartTitle = 'Audience Performance'
+      } else if (lastResult.data?.type === 'platform_spend_by_period' && lastResult.data.platformSpend) {
+        // Time-based platform spend data - convert to chart format
+        chartData = lastResult.data.platformSpend.map((platform: any) => ({
+          campaign: platform.platform,
+          platform: platform.platform,
+          roas: 0, // Not available in spend-only data
+          ctr: 0, // Not available in spend-only data
+          cpa: 0, // Not available in spend-only data
+          spend: platform.spend,
+          revenue: 0, // Not available in spend-only data
+          conversions: 0 // Not available in spend-only data
+        }))
+        chartTitle = `${lastResult.data.period} Platform Spend`
+      } else if (lastResult.data?.type === 'time_period_summary') {
+        // Time period summary - create a simple summary chart
+        const metrics = lastResult.data.metrics
+        chartData = [{
+          campaign: lastResult.data.period,
+          platform: 'All Platforms',
+          roas: metrics.roas,
+          ctr: metrics.ctr,
+          cpa: metrics.cpa,
+          spend: metrics.spend,
+          revenue: metrics.revenue,
+          conversions: metrics.conversions
+        }]
+        chartTitle = `${lastResult.data.period} Performance Summary`
+      } else if (lastResult.data?.type === 'optimization_insights') {
+        // Optimization insights - create charts from platform and campaign data
+        if (lastResult.data.platformMetrics && lastResult.data.platformMetrics.length > 0) {
+          chartData = lastResult.data.platformMetrics.map((platform: any) => ({
+            campaign: platform.platform,
+            platform: platform.platform,
+            roas: platform.roas,
+            ctr: platform.ctr,
+            cpa: platform.cpa,
+            spend: platform.spend,
+            revenue: platform.revenue,
+            conversions: platform.conversions || 0
+          }))
+          chartTitle = 'Platform Performance Comparison'
+        } else if (lastResult.data.topCampaigns && lastResult.data.topCampaigns.length > 0) {
+          chartData = lastResult.data.topCampaigns.map((campaign: any) => ({
+            campaign: campaign.campaign,
+            platform: 'Multi-Platform',
+            roas: campaign.roas,
+            ctr: campaign.ctr,
+            cpa: campaign.cpa,
+            spend: campaign.spend,
+            revenue: campaign.revenue,
+            conversions: campaign.conversions || 0
+          }))
+          chartTitle = 'Top Performing Campaigns'
+        }
       } else if (lastResult.data?.type === 'anomaly_detection' && lastResult.data.anomalies) {
         // Anomaly data - convert to chart format
         chartData = lastResult.data.anomalies.map((anomaly: any) => ({
@@ -221,18 +283,31 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
           chartType = 'line'
         }
         
+        // Customize content based on data type
+        let chartContent = ''
+        if (lastResult.data?.type === 'platform_spend_by_period') {
+          // For platform spend data, focus on spend amounts
+          chartContent = `${chartData.map((item: any, index: number) => 
+            `${index + 1}. ${item.campaign}
+             • Spend: $${item.spend.toLocaleString()}`
+          ).join('\n\n')}`
+        } else {
+          // For other data types, show full metrics
+          chartContent = `${chartData.map((item: any, index: number) => 
+            `${index + 1}. ${item.campaign}
+             • Revenue: $${item.revenue.toLocaleString()}
+             • Spend: $${item.spend.toLocaleString()}
+             • ROAS: ${item.roas.toFixed(2)}x
+             • CTR: ${(item.ctr * 100).toFixed(2)}%
+             • Platform: ${item.platform}`
+          ).join('\n\n')}`
+        }
+        
         const content = `📊 CHART GENERATED FROM PREVIOUS RESULTS
 
 ## ${chartType.toUpperCase()} CHART: ${chartTitle}
 
-${chartData.map((item: any, index: number) => 
-  `${index + 1}. ${item.campaign}
-   • Revenue: $${item.revenue.toLocaleString()}
-   • Spend: $${item.spend.toLocaleString()}
-   • ROAS: ${item.roas.toFixed(2)}x
-   • CTR: ${(item.ctr * 100).toFixed(2)}%
-   • Platform: ${item.platform}`
-).join('\n\n')}
+${chartContent}
 
 *Chart visualization will be displayed below with download options.*`
 
@@ -350,11 +425,19 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   
   // Get or create conversation context
   const context = getConversationContext(sessionId)
+  console.log('🔍 Session ID:', sessionId)
+  console.log('🔍 Context has lastContext:', !!context.lastContext)
+  console.log('🔍 Last result type:', context.lastContext?.result?.data?.type)
+  console.log('🔍 Context object:', JSON.stringify(context, null, 2))
   
   // Handle drill-down queries with context
   if (context.lastContext) {
+    console.log('🔍 Drill-down handler called with query:', query)
+    console.log('🔍 Context has lastContext:', !!context.lastContext)
+    console.log('🔍 Last result type:', context.lastContext.result?.data?.type)
     const drillDownResult = handleDrillDownQuery(query, data, context)
     if (drillDownResult) {
+      console.log('🔍 Drill-down result found:', drillDownResult.data?.type)
       updateConversationContext(sessionId, query, drillDownResult)
       return drillDownResult
     }
@@ -1677,6 +1760,183 @@ What specific aspect of ${periodName} performance would you like to explore furt
           anomalies: [],
           query: query
         }
+      }
+    }
+  }
+
+  // Optimization and Learning Handler
+  if (lowerQuery.includes('learn') || lowerQuery.includes('apply') || lowerQuery.includes('next campaign') || 
+      lowerQuery.includes('optimization') || lowerQuery.includes('improve') || lowerQuery.includes('recommendation') ||
+      lowerQuery.includes('insight') || lowerQuery.includes('lesson') || lowerQuery.includes('strategy')) {
+    
+    // Analyze overall performance
+    const totalSpend = data.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const overallROAS = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const overallCTR = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const overallCPA = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    // Analyze by platform
+    const platformAnalysis = data.reduce((acc, item) => {
+      const platform = item.dimensions.platform
+      if (!acc[platform]) {
+        acc[platform] = {
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          campaigns: new Set()
+        }
+      }
+      acc[platform].spend += item.metrics.spend
+      acc[platform].revenue += item.metrics.revenue
+      acc[platform].impressions += item.metrics.impressions
+      acc[platform].clicks += item.metrics.clicks
+      acc[platform].conversions += item.metrics.conversions
+      acc[platform].campaigns.add(item.dimensions.campaign)
+      return acc
+    }, {} as any)
+    
+    // Calculate platform metrics
+    const platformMetrics = Object.entries(platformAnalysis).map(([platform, data]: [string, any]) => {
+      const roas = data.spend > 0 ? data.revenue / data.spend : 0
+      const ctr = data.impressions > 0 ? data.clicks / data.impressions : 0
+      const cpa = data.conversions > 0 ? data.spend / data.conversions : 0
+      return {
+        platform,
+        spend: data.spend,
+        revenue: data.revenue,
+        roas,
+        ctr,
+        cpa,
+        campaignCount: data.campaigns.size
+      }
+    }).sort((a, b) => b.roas - a.roas)
+    
+    // Find top performing campaigns
+    const campaignAnalysis = data.reduce((acc, item) => {
+      const campaign = item.dimensions.campaign
+      if (!acc[campaign]) {
+        acc[campaign] = {
+          spend: 0,
+          revenue: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          platforms: new Set()
+        }
+      }
+      acc[campaign].spend += item.metrics.spend
+      acc[campaign].revenue += item.metrics.revenue
+      acc[campaign].impressions += item.metrics.impressions
+      acc[campaign].clicks += item.metrics.clicks
+      acc[campaign].conversions += item.metrics.conversions
+      acc[campaign].platforms.add(item.dimensions.platform)
+      return acc
+    }, {} as any)
+    
+    const topCampaigns = Object.entries(campaignAnalysis)
+      .map(([campaign, data]: [string, any]) => {
+        const roas = data.spend > 0 ? data.revenue / data.spend : 0
+        const ctr = data.impressions > 0 ? data.clicks / data.impressions : 0
+        const cpa = data.conversions > 0 ? data.spend / data.conversions : 0
+        return {
+          campaign,
+          spend: data.spend,
+          revenue: data.revenue,
+          roas,
+          ctr,
+          cpa,
+          platformCount: data.platforms.size
+        }
+      })
+      .sort((a, b) => b.roas - a.roas)
+      .slice(0, 5)
+    
+    // Generate insights and recommendations
+    const bestPlatform = platformMetrics[0]
+    const worstPlatform = platformMetrics[platformMetrics.length - 1]
+    const bestCampaign = topCampaigns[0]
+    
+    const content = `🎯 CAMPAIGN OPTIMIZATION INSIGHTS & RECOMMENDATIONS
+
+## 📊 OVERALL PERFORMANCE
+• Total Spend: $${totalSpend.toLocaleString()}
+• Total Revenue: $${totalRevenue.toLocaleString()}
+• Overall ROAS: ${overallROAS.toFixed(2)}x
+• Overall CTR: ${(overallCTR * 100).toFixed(2)}%
+• Overall CPA: $${overallCPA.toFixed(2)}
+
+## 🏆 TOP PERFORMING PLATFORM: ${bestPlatform.platform}
+• ROAS: ${bestPlatform.roas.toFixed(2)}x
+• CTR: ${(bestPlatform.ctr * 100).toFixed(2)}%
+• CPA: $${bestPlatform.cpa.toFixed(2)}
+• Spend: $${bestPlatform.spend.toLocaleString()}
+
+## 📈 TOP PERFORMING CAMPAIGN: ${bestCampaign.campaign}
+• ROAS: ${bestCampaign.roas.toFixed(2)}x
+• CTR: ${(bestCampaign.ctr * 100).toFixed(2)}%
+• CPA: $${bestCampaign.cpa.toFixed(2)}
+• Platforms Used: ${bestCampaign.platformCount}
+
+## 💡 KEY INSIGHTS & RECOMMENDATIONS
+
+### 1. PLATFORM STRATEGY
+• **Focus on ${bestPlatform.platform}**: Highest ROAS at ${bestPlatform.roas.toFixed(2)}x
+• **Optimize ${worstPlatform.platform}**: Lowest ROAS at ${worstPlatform.roas.toFixed(2)}x
+• Consider reallocating budget from ${worstPlatform.platform} to ${bestPlatform.platform}
+
+### 2. CAMPAIGN STRUCTURE
+• **Emulate ${bestCampaign.campaign}**: Best performing campaign structure
+• Multi-platform approach shows success (${bestCampaign.platformCount} platforms)
+• Focus on campaigns with ROAS > ${(overallROAS * 1.2).toFixed(2)}x
+
+### 3. BUDGET OPTIMIZATION
+• Allocate 60-70% of budget to ${bestPlatform.platform}
+• Reduce spend on ${worstPlatform.platform} by 50%
+• Set minimum ROAS target of ${(overallROAS * 1.1).toFixed(2)}x
+
+### 4. PERFORMANCE TARGETS
+• Target CTR: ${(overallCTR * 1.2 * 100).toFixed(2)}%
+• Target CPA: $${(overallCPA * 0.8).toFixed(2)}
+• Target ROAS: ${(overallROAS * 1.2).toFixed(2)}x
+
+### 5. NEXT CAMPAIGN STRATEGY
+• Start with ${bestPlatform.platform} as primary platform
+• Use ${bestCampaign.campaign} as template for campaign structure
+• Implement A/B testing for creative optimization
+• Set up automated bidding for CPA optimization
+• Monitor performance weekly and adjust budget allocation
+
+## 🚀 ACTIONABLE NEXT STEPS
+1. Increase ${bestPlatform.platform} budget by 30%
+2. Pause or optimize underperforming campaigns on ${worstPlatform.platform}
+3. Replicate ${bestCampaign.campaign} structure for new campaigns
+4. Implement conversion tracking improvements
+5. Set up automated reporting for real-time optimization`
+
+    return {
+      content,
+      data: {
+        type: 'optimization_insights',
+        overallMetrics: {
+          spend: totalSpend,
+          revenue: totalRevenue,
+          roas: overallROAS,
+          ctr: overallCTR,
+          cpa: overallCPA
+        },
+        platformMetrics,
+        topCampaigns,
+        bestPlatform,
+        worstPlatform,
+        bestCampaign,
+        query: query
       }
     }
   }
