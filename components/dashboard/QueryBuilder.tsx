@@ -283,10 +283,7 @@ export default function QueryBuilder() {
       
       let data = result.data || []
       
-      // Apply date range filter
-      data = applyDateRange(data, dateRange)
-      
-      // Apply custom filters
+      // Apply custom filters (date range is already handled by API)
       data = applyFilters(data, filters)
       
       // Group data by selected dimensions
