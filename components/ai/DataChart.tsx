@@ -133,7 +133,7 @@ export default function DataChart({ data }: DataChartProps) {
     switch (chartType) {
       case 'pie':
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie
                 data={pieChartData}
@@ -141,7 +141,7 @@ export default function DataChart({ data }: DataChartProps) {
                 cy="50%"
                 labelLine={false}
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
+                outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -149,49 +149,98 @@ export default function DataChart({ data }: DataChartProps) {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, 'Revenue']} />
-              <Legend />
+              <Tooltip 
+                formatter={(value) => [`$${value.toLocaleString()}`, 'Revenue']}
+                labelStyle={{ fontSize: 12 }}
+              />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36}
+                wrapperStyle={{ paddingTop: '10px' }}
+              />
             </PieChart>
           </ResponsiveContainer>
         )
 
       case 'line':
         return (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={lineChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-              <YAxis />
-              <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, 'Amount']} />
-              <Legend />
-              <Line type="monotone" dataKey="Revenue" stroke="#8884d8" strokeWidth={2} />
-              <Line type="monotone" dataKey="Spend" stroke="#82ca9d" strokeWidth={2} />
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart 
+              data={lineChartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" opacity={0.3} />
+              <XAxis 
+                dataKey="name" 
+                angle={-45} 
+                textAnchor="end" 
+                height={100}
+                tick={{ fontSize: 12 }}
+                interval={0}
+              />
+              <YAxis 
+                tick={{ fontSize: 12 }}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
+              />
+              <Tooltip 
+                formatter={(value) => [`$${value.toLocaleString()}`, 'Amount']}
+                labelStyle={{ fontSize: 12 }}
+              />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36}
+                wrapperStyle={{ paddingTop: '10px' }}
+              />
+              <Line type="monotone" dataKey="Revenue" stroke="#8884d8" strokeWidth={2} name="Revenue" />
+              <Line type="monotone" dataKey="Spend" stroke="#82ca9d" strokeWidth={2} name="Spend" />
             </LineChart>
           </ResponsiveContainer>
         )
 
       default: // bar chart
         return (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={barChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-              <YAxis />
-              <Tooltip formatter={(value, name) => {
-                if (name === 'Revenue' || name === 'Spend') {
-                  return [`$${value.toLocaleString()}`, name]
-                }
-                if (name === 'CTR') {
-                  return [`${value}%`, name]
-                }
-                if (name === 'ROAS') {
-                  return [`${value}x`, name]
-                }
-                return [value, name]
-              }} />
-              <Legend />
-              <Bar dataKey="Revenue" fill="#8884d8" />
-              <Bar dataKey="Spend" fill="#82ca9d" />
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart 
+              data={barChartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" opacity={0.3} />
+              <XAxis 
+                dataKey="name" 
+                angle={-45} 
+                textAnchor="end" 
+                height={100}
+                tick={{ fontSize: 12 }}
+                interval={0}
+              />
+              <YAxis 
+                tick={{ fontSize: 12 }}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                label={{ value: 'Amount ($)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
+              />
+              <Tooltip 
+                formatter={(value, name) => {
+                  if (name === 'Revenue' || name === 'Spend') {
+                    return [`$${value.toLocaleString()}`, name]
+                  }
+                  if (name === 'CTR') {
+                    return [`${value}%`, name]
+                  }
+                  if (name === 'ROAS') {
+                    return [`${value}x`, name]
+                  }
+                  return [value, name]
+                }}
+                labelStyle={{ fontSize: 12 }}
+              />
+              <Legend 
+                verticalAlign="bottom" 
+                height={36}
+                wrapperStyle={{ paddingTop: '10px' }}
+              />
+              <Bar dataKey="Revenue" fill="#8884d8" name="Revenue" />
+              <Bar dataKey="Spend" fill="#82ca9d" name="Spend" />
             </BarChart>
           </ResponsiveContainer>
         )
@@ -201,9 +250,14 @@ export default function DataChart({ data }: DataChartProps) {
   return (
     <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">
-          📊 {chartType.toUpperCase()} Chart Visualization
-        </h3>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-1">
+            📊 Campaign Performance Analysis
+          </h3>
+          <p className="text-sm text-gray-600">
+            Revenue vs Spend Comparison
+          </p>
+        </div>
         
         {/* Download Buttons */}
         <div className="flex space-x-2">
@@ -238,7 +292,7 @@ export default function DataChart({ data }: DataChartProps) {
       </div>
       
       {/* Chart Container */}
-      <div ref={chartRef} className="mb-4" style={{ height: '300px' }}>
+      <div ref={chartRef} className="mb-4" style={{ height: '350px' }}>
         {renderChart()}
       </div>
       
