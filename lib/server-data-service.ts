@@ -2,6 +2,18 @@ import { MarketingData } from '@/types'
 import fs from 'fs'
 import path from 'path'
 
+// Extract brand from campaign name
+function extractBrandFromCampaign(campaignName: string): string {
+  if (campaignName.startsWith('TasteBuds')) {
+    return 'TasteBuds'
+  }
+  if (campaignName.startsWith('FreshNest')) {
+    return 'FreshNest'
+  }
+  // Default to FreshNest for any other campaigns
+  return 'FreshNest'
+}
+
 // Load CSV data from the backend
 export async function loadCampaignData(): Promise<MarketingData[]> {
   try {
@@ -36,7 +48,7 @@ export async function loadCampaignData(): Promise<MarketingData[]> {
           roas: parseFloat(row.roas || '0')
         },
         dimensions: {
-          brand: row.brand || 'FreshNest', // Default brand for sample data
+          brand: extractBrandFromCampaign(row.campaign_name || row.canonical_campaign || 'Unknown Campaign'),
           campaign: row.campaign_name || row.canonical_campaign || 'Unknown Campaign',
           campaignId: row.campaign_id || '',
           adGroup: row.ad_group_name || 'Unknown Ad Group',
