@@ -305,7 +305,7 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
         
         const content = `📊 CHART GENERATED FROM PREVIOUS RESULTS
 
-## ${chartType.toUpperCase()} CHART: ${chartTitle}
+${chartType.toUpperCase()} CHART: ${chartTitle}
 
 ${chartContent}
 
@@ -471,11 +471,11 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       
       const content = `🏷️ BRANDS USED IN CAMPAIGNS
 
-## 📋 BRAND OVERVIEW
+📋 BRAND OVERVIEW
 - Total Brands: ${uniqueBrands.length}
 - Total Campaigns: ${brandCampaigns.reduce((sum, brand) => sum + brand.campaignCount, 0)}
 
-## 🏢 BRAND DETAILS
+🏢 BRAND DETAILS
 
 ${brandCampaigns.map((brand, index) => 
   `${index + 1}. ${brand.brand}
@@ -486,7 +486,7 @@ ${brandCampaigns.map((brand, index) =>
    • ROAS: ${brand.roas.toFixed(2)}x`
 ).join('\n\n')}
 
-## 📊 SUMMARY
+📊 SUMMARY
 The campaigns use ${uniqueBrands.length} brands:
 ${uniqueBrands.map((brand, index) => `${index + 1}. ${brand}`).join('\n')}
 
@@ -571,14 +571,14 @@ Each brand has its own set of campaigns with different performance metrics and t
       
       const content = `🏢 BRAND-LEVEL ANALYTICS & PERFORMANCE
 
-## 🎯 EXECUTIVE BRAND OVERVIEW
+🎯 EXECUTIVE BRAND OVERVIEW
 - Total Brands: ${uniqueBrands.length}
 - Total Spend: $${totalSpend.toLocaleString()}
 - Total Revenue: $${totalRevenue.toLocaleString()}
 - Overall ROAS: ${overallRoas.toFixed(2)}x
 - Date Range: ${data[0]?.date} to ${data[data.length - 1]?.date}
 
-## 🏆 BRAND PERFORMANCE RANKING
+🏆 BRAND PERFORMANCE RANKING
 
 ${brandMetrics.map((brand, index) => 
   `${index + 1}. ${brand.brand}
@@ -592,36 +592,36 @@ ${brandMetrics.map((brand, index) =>
    • Audiences: ${brand.audienceCount}`
 ).join('\n\n')}
 
-## 📊 CROSS-BRAND INSIGHTS
+📊 CROSS-BRAND INSIGHTS
 
-### Performance Leaders:
+Performance Leaders:
 - Top Performing Brand: ${topBrand.brand} (ROAS: ${topBrand.roas.toFixed(2)}x)
 - Revenue Leader: ${brandMetrics.reduce((max, brand) => brand.revenue > max.revenue ? brand : max).brand} ($${brandMetrics.reduce((max, brand) => brand.revenue > max.revenue ? brand : max).revenue.toLocaleString()})
 - Efficiency Leader: ${topBrand.brand} (Best ROAS)
 
-### Growth Opportunities:
+Growth Opportunities:
 - Underperforming Brand: ${bottomBrand.brand} (ROAS: ${bottomBrand.roas.toFixed(2)}x)
 - Budget Reallocation: Consider shifting budget from ${bottomBrand.brand} to ${topBrand.brand}
 
-## 🎯 STRATEGIC RECOMMENDATIONS
+🎯 STRATEGIC RECOMMENDATIONS
 
-### Brand Portfolio Strategy:
+Brand Portfolio Strategy:
 1. Scale Winners: Increase investment in ${topBrand.brand} by 40%
 2. Optimize Underperformers: Review ${bottomBrand.brand} strategy and creative approach
 3. Cross-Brand Learning: Apply successful strategies from ${topBrand.brand} to ${bottomBrand.brand}
 4. Audience Expansion: Leverage successful audiences across brands
 
-### Platform Strategy by Brand:
+Platform Strategy by Brand:
 ${brandMetrics.map(brand => 
   `${brand.brand}: Focus on ${brand.platforms.slice(0, 2).join(', ')} (highest performing platforms)`
 ).join('\n')}
 
-### Campaign Strategy by Brand:
+Campaign Strategy by Brand:
 ${brandMetrics.map(brand => 
   `${brand.brand}: Scale ${brand.campaigns[0]} (top campaign), optimize ${brand.campaigns[brand.campaigns.length - 1]} (bottom campaign)`
 ).join('\n')}
 
-## 📈 NEXT STEPS
+📈 NEXT STEPS
 
 1. Immediate Actions (Week 1):
    - Reallocate 30% budget from ${bottomBrand.brand} to ${topBrand.brand}
@@ -758,7 +758,7 @@ ${brandMetrics.map(brand =>
       
              const content = `📊 OVERALL CAMPAIGN SUMMARY - ${uniqueCampaigns.length} CAMPAIGNS
 
-## 🎯 EXECUTIVE OVERVIEW
+🎯 EXECUTIVE OVERVIEW
 - Total Campaigns: ${uniqueCampaigns.length}
 - Total Brands: ${Array.from(new Set(data.map(item => item.dimensions.brand))).length}
 - Total Spend: $${totalSpend.toLocaleString()}
@@ -768,7 +768,7 @@ ${brandMetrics.map(brand =>
 - Overall CPA: $${overallCpa.toFixed(2)}
 - Date Range: ${data[0]?.date} to ${data[data.length - 1]?.date}
 
-## 🏆 CAMPAIGN PERFORMANCE RANKING
+🏆 CAMPAIGN PERFORMANCE RANKING
 
 ${campaignMetrics.map((campaign, index) => 
   `${index + 1}. ${campaign.campaign} (${campaign.brand})
@@ -780,7 +780,7 @@ ${campaignMetrics.map((campaign, index) =>
    • Platforms: ${campaign.platforms.join(', ')}`
 ).join('\n\n')}
 
-## 🌐 PLATFORM PERFORMANCE
+🌐 PLATFORM PERFORMANCE
 
 ${platformPerformance.map((platform, index) => 
   `${index + 1}. ${platform.platform}
@@ -792,22 +792,22 @@ ${platformPerformance.map((platform, index) =>
    • Campaigns: ${platform.campaignCount}`
 ).join('\n\n')}
 
-## 📈 KEY INSIGHTS
+📈 KEY INSIGHTS
 
-### Top Performers:
+Top Performers:
 - Best Campaign: ${topCampaign.campaign} (ROAS: ${topCampaign.roas.toFixed(2)}x)
 - Best Platform: ${topPlatform.platform} (ROAS: ${topPlatform.roas.toFixed(2)}x)
 
-### Areas for Improvement:
+Areas for Improvement:
 - Lowest Campaign: ${bottomCampaign.campaign} (ROAS: ${bottomCampaign.roas.toFixed(2)}x)
 - Lowest Platform: ${bottomPlatform.platform} (ROAS: ${bottomPlatform.roas.toFixed(2)}x)
 
-### Performance Distribution:
+Performance Distribution:
 - High Performers (ROAS > 3.0x): ${campaignMetrics.filter(c => c.roas > 3.0).length} campaigns
 - Medium Performers (ROAS 2.0-3.0x): ${campaignMetrics.filter(c => c.roas >= 2.0 && c.roas <= 3.0).length} campaigns
 - Low Performers (ROAS < 2.0x): ${campaignMetrics.filter(c => c.roas < 2.0).length} campaigns
 
-## 🎯 STRATEGIC RECOMMENDATIONS
+🎯 STRATEGIC RECOMMENDATIONS
 
 1. Scale Winners: Increase budget allocation to ${topCampaign.campaign} by 40%
 2. Optimize Underperformers: Review and optimize ${bottomCampaign.campaign} strategy
@@ -999,24 +999,24 @@ ${platformPerformance.map((platform, index) =>
       
       const content = `🎯 OPTIMIZATION RECOMMENDATIONS - ${scope}
       
-      ## 📊 Performance Summary
+      📊 Performance Summary
       - Scope: ${isCampaignSpecific ? `Campaign: ${campaignName}` : 'All Campaigns'}
       - Total Spend: $${totalSpend.toLocaleString()}
       - Total Revenue: $${totalRevenue.toLocaleString()}
       - Overall ROAS: ${overallRoas.toFixed(2)}x
       - Platforms Analyzed: ${platformPerformance.length}
       
-      ## 💰 SPEND OPTIMIZATION RECOMMENDATIONS
+      💰 SPEND OPTIMIZATION RECOMMENDATIONS
       
-      ### Budget Reallocation Strategy:
+      Budget Reallocation Strategy:
       1. Increase Investment: ${topPlatforms[0]?.platform} (ROAS: ${topPlatforms[0]?.roas.toFixed(2)}x) - Increase budget by 40%
       2. Maintain Current: ${topPlatforms[1]?.platform} (ROAS: ${topPlatforms[1]?.roas.toFixed(2)}x) - Keep current allocation
       3. Reduce Investment: ${bottomPlatforms[0]?.platform} (ROAS: ${bottomPlatforms[0]?.roas.toFixed(2)}x) - Decrease by 30%
       4. Optimize or Pause: ${bottomPlatforms[1]?.platform} (ROAS: ${bottomPlatforms[1]?.roas.toFixed(2)}x) - Consider pausing if ROAS < 2.0x
       
-      ## 🌐 PLATFORM OPTIMIZATION RECOMMENDATIONS
+      🌐 PLATFORM OPTIMIZATION RECOMMENDATIONS
       
-      ### Top Performing Platforms:
+      Top Performing Platforms:
       ${topPlatforms.map((platform, index) => 
         `${index + 1}. ${platform.platform} - ROAS: ${platform.roas.toFixed(2)}x, CTR: ${(platform.ctr * 100).toFixed(2)}%
          • Scale campaigns by 40%
@@ -1024,7 +1024,7 @@ ${platformPerformance.map((platform, index) =>
          • Target high-value audiences`
       ).join('\n\n')}
       
-      ### Underperforming Platforms:
+      Underperforming Platforms:
       ${bottomPlatforms.map((platform, index) => 
         `${index + 1}. ${platform.platform} - ROAS: ${platform.roas.toFixed(2)}x, CTR: ${(platform.ctr * 100).toFixed(2)}%
          • Optimize bidding strategy
@@ -1032,56 +1032,56 @@ ${platformPerformance.map((platform, index) =>
          • Refine audience targeting`
       ).join('\n\n')}
       
-      ## 🎯 AUDIENCE OPTIMIZATION RECOMMENDATIONS
+      🎯 AUDIENCE OPTIMIZATION RECOMMENDATIONS
       
-      ### ${isCampaignSpecific ? 'Campaign-Specific' : 'Universal'} Audience Strategy:
+      ${isCampaignSpecific ? 'Campaign-Specific' : 'Universal'} Audience Strategy:
       1. Scale Top Audiences: Focus on audiences with ROAS > 3.0x
       2. Exclude Poor Performers: Remove audiences with ROAS < 1.5x
       3. Create Lookalikes: Build lookalike audiences from top 20% performers
       4. Cross-Platform Testing: Test successful audiences across different platforms
       
-      ### Platform-Specific Audience Insights:
+      Platform-Specific Audience Insights:
       ${platformPerformance.slice(0, 3).map(platform => 
         `${platform.platform}: ${platform.audiencePerformance[0]?.audience} (ROAS: ${platform.audiencePerformance[0]?.roas.toFixed(2)}x)`
       ).join('\n')}
       
-      ## 🎨 CREATIVE OPTIMIZATION RECOMMENDATIONS
+      🎨 CREATIVE OPTIMIZATION RECOMMENDATIONS
       
-      ### ${isCampaignSpecific ? 'Campaign-Specific' : 'Universal'} Creative Strategy:
+      ${isCampaignSpecific ? 'Campaign-Specific' : 'Universal'} Creative Strategy:
       1. Scale Winners: Increase spend on creatives with ROAS > 4.0x by 50%
       2. Test Variations: Create A/B tests for top-performing creative formats
       3. Platform-Specific: Adapt creative messaging for each platform's audience
       4. Performance Monitoring: Track creative fatigue and refresh every 2-3 weeks
       
-      ### Top Creative Formats by Platform:
+      Top Creative Formats by Platform:
       ${platformPerformance.slice(0, 3).map(platform => 
         `${platform.platform}: ${platform.creativePerformance[0]?.creativeFormat} (ROAS: ${platform.creativePerformance[0]?.roas.toFixed(2)}x)`
       ).join('\n')}
       
-      ## 📈 STRATEGIC NEXT STEPS
+      📈 STRATEGIC NEXT STEPS
       
-      ### Immediate Actions (Week 1):
+      Immediate Actions (Week 1):
       1. Reallocate 40% of budget from ${bottomPlatforms[0]?.platform} to ${topPlatforms[0]?.platform}
       2. Pause creatives with ROAS < 2.0x
       3. Scale top 3 audiences by 30%
       
-      ### Short-term Actions (Month 1):
+      Short-term Actions (Month 1):
       1. Launch A/B tests for creative variations on ${topPlatforms[0]?.platform}
       2. Create lookalike audiences from top performers
       3. Implement platform-specific bidding strategies
       
-      ### Long-term Strategy (Quarter 1):
+      Long-term Strategy (Quarter 1):
       1. Develop platform-specific creative strategies
       2. Build audience personas based on performance data
       3. Implement automated optimization rules
       
-      ## 🎯 KEY PERFORMANCE INDICATORS TO TRACK:
+      🎯 KEY PERFORMANCE INDICATORS TO TRACK:
       - ROAS by Platform: Target > 3.0x
       - CTR by Creative: Target > 2.0%
       - Audience Efficiency: Target CPA < $50
       - Creative Performance: Refresh when CTR drops > 20%
       
-      ${isCampaignSpecific ? `\n## 📋 CAMPAIGN-SPECIFIC NOTES:
+      ${isCampaignSpecific ? `\n📋 CAMPAIGN-SPECIFIC NOTES:
       This analysis is focused on "${campaignName}" campaign. Consider these insights in the context of your overall marketing strategy and cross-campaign performance.` : ''}`
     
     return {
@@ -1339,7 +1339,7 @@ ${platformPerformance.map((platform, index) =>
       
       const content = `📊 CHART DATA GENERATED
 
-## ${chartType.toUpperCase()} CHART: ${query}
+${chartType.toUpperCase()} CHART: ${query}
 
 ${topCampaigns.map((campaign, index) => 
   `${index + 1}. ${campaign.campaign}
@@ -1865,55 +1865,55 @@ What specific aspect of ${periodName} performance would you like to explore furt
     
     const content = `🎯 CAMPAIGN OPTIMIZATION INSIGHTS & RECOMMENDATIONS
 
-## 📊 OVERALL PERFORMANCE
+📊 OVERALL PERFORMANCE
 • Total Spend: $${totalSpend.toLocaleString()}
 • Total Revenue: $${totalRevenue.toLocaleString()}
 • Overall ROAS: ${overallROAS.toFixed(2)}x
 • Overall CTR: ${(overallCTR * 100).toFixed(2)}%
 • Overall CPA: $${overallCPA.toFixed(2)}
 
-## 🏆 TOP PERFORMING PLATFORM: ${bestPlatform.platform}
+🏆 TOP PERFORMING PLATFORM: ${bestPlatform.platform}
 • ROAS: ${bestPlatform.roas.toFixed(2)}x
 • CTR: ${(bestPlatform.ctr * 100).toFixed(2)}%
 • CPA: $${bestPlatform.cpa.toFixed(2)}
 • Spend: $${bestPlatform.spend.toLocaleString()}
 
-## 📈 TOP PERFORMING CAMPAIGN: ${bestCampaign.campaign}
+📈 TOP PERFORMING CAMPAIGN: ${bestCampaign.campaign}
 • ROAS: ${bestCampaign.roas.toFixed(2)}x
 • CTR: ${(bestCampaign.ctr * 100).toFixed(2)}%
 • CPA: $${bestCampaign.cpa.toFixed(2)}
 • Platforms Used: ${bestCampaign.platformCount}
 
-## 💡 KEY INSIGHTS & RECOMMENDATIONS
+💡 KEY INSIGHTS & RECOMMENDATIONS
 
-### 1. PLATFORM STRATEGY
-• **Focus on ${bestPlatform.platform}**: Highest ROAS at ${bestPlatform.roas.toFixed(2)}x
-• **Optimize ${worstPlatform.platform}**: Lowest ROAS at ${worstPlatform.roas.toFixed(2)}x
+1. PLATFORM STRATEGY
+• Focus on ${bestPlatform.platform}: Highest ROAS at ${bestPlatform.roas.toFixed(2)}x
+• Optimize ${worstPlatform.platform}: Lowest ROAS at ${worstPlatform.roas.toFixed(2)}x
 • Consider reallocating budget from ${worstPlatform.platform} to ${bestPlatform.platform}
 
-### 2. CAMPAIGN STRUCTURE
-• **Emulate ${bestCampaign.campaign}**: Best performing campaign structure
+2. CAMPAIGN STRUCTURE
+• Emulate ${bestCampaign.campaign}: Best performing campaign structure
 • Multi-platform approach shows success (${bestCampaign.platformCount} platforms)
 • Focus on campaigns with ROAS > ${(overallROAS * 1.2).toFixed(2)}x
 
-### 3. BUDGET OPTIMIZATION
+3. BUDGET OPTIMIZATION
 • Allocate 60-70% of budget to ${bestPlatform.platform}
 • Reduce spend on ${worstPlatform.platform} by 50%
 • Set minimum ROAS target of ${(overallROAS * 1.1).toFixed(2)}x
 
-### 4. PERFORMANCE TARGETS
+4. PERFORMANCE TARGETS
 • Target CTR: ${(overallCTR * 1.2 * 100).toFixed(2)}%
 • Target CPA: $${(overallCPA * 0.8).toFixed(2)}
 • Target ROAS: ${(overallROAS * 1.2).toFixed(2)}x
 
-### 5. NEXT CAMPAIGN STRATEGY
+5. NEXT CAMPAIGN STRATEGY
 • Start with ${bestPlatform.platform} as primary platform
 • Use ${bestCampaign.campaign} as template for campaign structure
 • Implement A/B testing for creative optimization
 • Set up automated bidding for CPA optimization
 • Monitor performance weekly and adjust budget allocation
 
-## 🚀 ACTIONABLE NEXT STEPS
+🚀 ACTIONABLE NEXT STEPS
 1. Increase ${bestPlatform.platform} budget by 30%
 2. Pause or optimize underperforming campaigns on ${worstPlatform.platform}
 3. Replicate ${bestCampaign.campaign} structure for new campaigns
