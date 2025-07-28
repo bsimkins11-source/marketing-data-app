@@ -298,18 +298,6 @@ export default function QueryBuilder() {
             <Save className="w-4 h-4" />
             <span>Save</span>
           </button>
-          <button 
-            onClick={runQuery}
-            className="btn-primary flex items-center space-x-2"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <Play className="w-4 h-4" />
-            )}
-            <span>{isLoading ? 'Running...' : 'Run Query'}</span>
-          </button>
         </div>
       </div>
 
@@ -366,6 +354,31 @@ export default function QueryBuilder() {
             </label>
           ))}
         </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mb-4 flex items-center space-x-3">
+        <button 
+          onClick={runQuery}
+          className="btn-primary flex items-center space-x-2"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <Play className="w-4 h-4" />
+          )}
+          <span>{isLoading ? 'Running...' : 'Run Query'}</span>
+        </button>
+        {queryResult && (
+          <button
+            onClick={exportResults}
+            className="btn-secondary flex items-center space-x-2"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export CSV</span>
+          </button>
+        )}
       </div>
 
       {/* Metrics Selection */}
@@ -457,20 +470,11 @@ export default function QueryBuilder() {
       {/* Query Results */}
       {queryResult && (
         <div className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900">Query Results</h4>
-              <p className="text-sm text-gray-600">
-                {queryResult.totalRows} rows • {queryResult.executionTime}ms
-              </p>
-            </div>
-            <button
-              onClick={exportResults}
-              className="btn-secondary flex items-center space-x-2"
-            >
-              <Download className="w-4 h-4" />
-              <span>Export CSV</span>
-            </button>
+          <div className="mb-4">
+            <h4 className="text-lg font-semibold text-gray-900">Query Results</h4>
+            <p className="text-sm text-gray-600">
+              {queryResult.totalRows} rows • {queryResult.executionTime}ms
+            </p>
           </div>
           
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
