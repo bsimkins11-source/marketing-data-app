@@ -156,7 +156,7 @@ export default function DataChart({ data }: DataChartProps) {
               <Legend 
                 verticalAlign="bottom" 
                 height={36}
-                wrapperStyle={{ paddingTop: '10px' }}
+                wrapperStyle={{ paddingTop: '5px' }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -167,16 +167,17 @@ export default function DataChart({ data }: DataChartProps) {
           <ResponsiveContainer width="100%" height={350}>
             <LineChart 
               data={lineChartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+              margin={{ top: 30, right: 30, left: 20, bottom: 60 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" opacity={0.3} />
               <XAxis 
                 dataKey="name" 
                 angle={-45} 
                 textAnchor="end" 
-                height={100}
-                tick={{ fontSize: 12 }}
+                height={80}
+                tick={{ fontSize: 11 }}
                 interval={0}
+                dy={10}
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
@@ -190,7 +191,7 @@ export default function DataChart({ data }: DataChartProps) {
               <Legend 
                 verticalAlign="bottom" 
                 height={36}
-                wrapperStyle={{ paddingTop: '10px' }}
+                wrapperStyle={{ paddingTop: '5px' }}
               />
               <Line type="monotone" dataKey="Revenue" stroke="#8884d8" strokeWidth={2} name="Revenue" />
               <Line type="monotone" dataKey="Spend" stroke="#82ca9d" strokeWidth={2} name="Spend" />
@@ -203,16 +204,17 @@ export default function DataChart({ data }: DataChartProps) {
           <ResponsiveContainer width="100%" height={350}>
             <BarChart 
               data={barChartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+              margin={{ top: 30, right: 30, left: 20, bottom: 60 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" opacity={0.3} />
               <XAxis 
                 dataKey="name" 
                 angle={-45} 
                 textAnchor="end" 
-                height={100}
-                tick={{ fontSize: 12 }}
+                height={80}
+                tick={{ fontSize: 11 }}
                 interval={0}
+                dy={10}
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
@@ -237,7 +239,7 @@ export default function DataChart({ data }: DataChartProps) {
               <Legend 
                 verticalAlign="bottom" 
                 height={36}
-                wrapperStyle={{ paddingTop: '10px' }}
+                wrapperStyle={{ paddingTop: '5px' }}
               />
               <Bar dataKey="Revenue" fill="#8884d8" name="Revenue" />
               <Bar dataKey="Spend" fill="#82ca9d" name="Spend" />
