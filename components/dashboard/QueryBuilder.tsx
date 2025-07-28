@@ -356,6 +356,26 @@ export default function QueryBuilder() {
         </div>
       </div>
 
+      {/* Metrics Selection */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Metrics
+        </label>
+        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+          {availableMetrics.map((metric) => (
+            <label key={metric.id} className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedMetrics.includes(metric.id)}
+                onChange={() => toggleMetric(metric.id)}
+                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm text-gray-700">{metric.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {/* Action Buttons */}
       <div className="mb-4 flex items-center space-x-3">
         <button 
@@ -379,26 +399,6 @@ export default function QueryBuilder() {
             <span>Export CSV</span>
           </button>
         )}
-      </div>
-
-      {/* Metrics Selection */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Metrics
-        </label>
-        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-          {availableMetrics.map((metric) => (
-            <label key={metric.id} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedMetrics.includes(metric.id)}
-                onChange={() => toggleMetric(metric.id)}
-                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-              />
-              <span className="text-sm text-gray-700">{metric.name}</span>
-            </label>
-          ))}
-        </div>
       </div>
 
       {/* Filters */}
