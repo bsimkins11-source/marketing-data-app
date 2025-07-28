@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Label } from 'recharts'
 import html2canvas from 'html2canvas'
 import { saveAs } from 'file-saver'
 
@@ -164,20 +164,27 @@ export default function DataChart({ data }: DataChartProps) {
 
       case 'line':
         return (
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={400}>
             <LineChart 
               data={lineChartData}
-              margin={{ top: 30, right: 30, left: 20, bottom: 60 }}
+              margin={{ top: 50, right: 30, left: 20, bottom: 40 }}
             >
+              <Label 
+                value="Campaign Performance Analysis" 
+                position="top" 
+                style={{ textAnchor: 'middle', fontSize: '16px', fontWeight: 'bold' }}
+                offset={0}
+              />
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" opacity={0.3} />
               <XAxis 
                 dataKey="name" 
-                angle={-45} 
+                angle={-60} 
                 textAnchor="end" 
-                height={80}
-                tick={{ fontSize: 11 }}
+                height={120}
+                tick={{ fontSize: 10 }}
                 interval={0}
-                dy={10}
+                dy={15}
+                dx={-5}
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
@@ -191,7 +198,7 @@ export default function DataChart({ data }: DataChartProps) {
               <Legend 
                 verticalAlign="bottom" 
                 height={36}
-                wrapperStyle={{ paddingTop: '5px' }}
+                wrapperStyle={{ paddingTop: '0px' }}
               />
               <Line type="monotone" dataKey="Revenue" stroke="#8884d8" strokeWidth={2} name="Revenue" />
               <Line type="monotone" dataKey="Spend" stroke="#82ca9d" strokeWidth={2} name="Spend" />
@@ -201,20 +208,27 @@ export default function DataChart({ data }: DataChartProps) {
 
       default: // bar chart
         return (
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={400}>
             <BarChart 
               data={barChartData}
-              margin={{ top: 30, right: 30, left: 20, bottom: 60 }}
+              margin={{ top: 50, right: 30, left: 20, bottom: 40 }}
             >
+              <Label 
+                value="Campaign Performance Analysis" 
+                position="top" 
+                style={{ textAnchor: 'middle', fontSize: '16px', fontWeight: 'bold' }}
+                offset={0}
+              />
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" opacity={0.3} />
               <XAxis 
                 dataKey="name" 
-                angle={-45} 
+                angle={-60} 
                 textAnchor="end" 
-                height={80}
-                tick={{ fontSize: 11 }}
+                height={120}
+                tick={{ fontSize: 10 }}
                 interval={0}
-                dy={10}
+                dy={15}
+                dx={-5}
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
@@ -239,7 +253,7 @@ export default function DataChart({ data }: DataChartProps) {
               <Legend 
                 verticalAlign="bottom" 
                 height={36}
-                wrapperStyle={{ paddingTop: '5px' }}
+                wrapperStyle={{ paddingTop: '0px' }}
               />
               <Bar dataKey="Revenue" fill="#8884d8" name="Revenue" />
               <Bar dataKey="Spend" fill="#82ca9d" name="Spend" />
@@ -294,7 +308,7 @@ export default function DataChart({ data }: DataChartProps) {
       </div>
       
       {/* Chart Container */}
-      <div ref={chartRef} className="mb-4" style={{ height: '350px' }}>
+      <div ref={chartRef} className="mb-4" style={{ height: '400px' }}>
         {renderChart()}
       </div>
       
