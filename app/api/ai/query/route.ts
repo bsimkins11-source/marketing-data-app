@@ -25,6 +25,153 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
   if (context.lastContext) {
     const lastResult = context.lastContext.result
     
+    // Handle chart requests for previous results
+    if ((lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('download')) &&
+        (lowerQuery.includes('this') || lowerQuery.includes('that') || lowerQuery.includes('it'))) {
+      
+      // Generate chart data from any previous result
+      let chartData = null
+      let chartTitle = 'Previous Results'
+      
+      // Handle different types of previous results
+      if (lastResult.data?.campaigns && lastResult.data.campaigns.length > 0) {
+        // Direct campaign data available
+        chartData = lastResult.data.campaigns
+        chartTitle = 'Campaign Performance'
+      } else if (lastResult.data?.type === 'top_performing' && lastResult.data.campaigns) {
+        // Top performing campaigns
+        chartData = lastResult.data.campaigns
+        chartTitle = 'Top Performing Campaigns'
+      } else if (lastResult.data?.type === 'brand_query' && lastResult.data.brands) {
+        // Brand data - convert to chart format
+        chartData = lastResult.data.brands.map((brand: any) => ({
+          campaign: brand.brand,
+          platform: 'Multi-Platform',
+          roas: brand.roas,
+          ctr: 0, // Brand level doesn't have CTR
+          cpa: 0, // Brand level doesn't have CPA
+          spend: brand.totalSpend,
+          revenue: brand.totalRevenue,
+          conversions: brand.totalRevenue / (brand.roas * 100) // Estimate
+        }))
+        chartTitle = 'Brand Performance'
+      } else if (lastResult.data?.type === 'top_performing_platforms' && lastResult.data.platforms) {
+        // Platform data - convert to chart format
+        chartData = lastResult.data.platforms.map((platform: any) => ({
+          campaign: platform.platform,
+          platform: platform.platform,
+          roas: platform.roas,
+          ctr: platform.ctr || 0,
+          cpa: platform.cpa || 0,
+          spend: platform.spend,
+          revenue: platform.revenue,
+          conversions: platform.conversions || 0
+        }))
+        chartTitle = 'Platform Performance'
+      } else if (lastResult.data?.type === 'top_performing_creatives' && lastResult.data.creatives) {
+        // Creative data - convert to chart format
+        chartData = lastResult.data.creatives.map((creative: any) => ({
+          campaign: creative.creativeName || creative.creative,
+          platform: creative.platform || 'Unknown',
+          roas: creative.roas,
+          ctr: creative.ctr || 0,
+          cpa: creative.cpa || 0,
+          spend: creative.spend,
+          revenue: creative.revenue,
+          conversions: creative.conversions || 0
+        }))
+        chartTitle = 'Creative Performance'
+      } else if (lastResult.data?.type === 'audience_performance' && lastResult.data.audiences) {
+        // Audience data - convert to chart format
+        chartData = lastResult.data.audiences.map((audience: any) => ({
+          campaign: audience.audience,
+          platform: audience.platform || 'Unknown',
+          roas: audience.roas,
+          ctr: audience.ctr || 0,
+          cpa: audience.cpa || 0,
+          spend: audience.spend,
+          revenue: audience.revenue,
+          conversions: audience.conversions || 0
+        }))
+        chartTitle = 'Audience Performance'
+      } else if (lastResult.data?.type === 'anomaly_detection' && lastResult.data.anomalies) {
+        // Anomaly data - convert to chart format
+        chartData = lastResult.data.anomalies.map((anomaly: any) => ({
+          campaign: anomaly.campaign || anomaly.metric,
+          platform: anomaly.platform || 'Unknown',
+          roas: anomaly.roas || 0,
+          ctr: anomaly.ctr || 0,
+          cpa: anomaly.cpa || 0,
+          spend: anomaly.spend || 0,
+          revenue: anomaly.revenue || 0,
+          conversions: anomaly.conversions || 0
+        }))
+        chartTitle = 'Anomaly Analysis'
+      } else if (lastResult.data?.type === 'comparative_analysis' && lastResult.data.comparison) {
+        // Comparative data - convert to chart format
+        chartData = lastResult.data.comparison.map((item: any) => ({
+          campaign: item.name || item.campaign,
+          platform: item.platform || 'Unknown',
+          roas: item.roas || 0,
+          ctr: item.ctr || 0,
+          cpa: item.cpa || 0,
+          spend: item.spend || 0,
+          revenue: item.revenue || 0,
+          conversions: item.conversions || 0
+        }))
+        chartTitle = 'Comparative Analysis'
+      } else if (lastResult.data?.type === 'executive_summary' && lastResult.data.summary) {
+        // Executive summary data - convert to chart format
+        chartData = lastResult.data.summary.map((item: any) => ({
+          campaign: item.metric || item.name,
+          platform: 'Overall',
+          roas: item.roas || 0,
+          ctr: item.ctr || 0,
+          cpa: item.cpa || 0,
+          spend: item.spend || 0,
+          revenue: item.revenue || 0,
+          conversions: item.conversions || 0
+        }))
+        chartTitle = 'Executive Summary'
+      }
+      
+      // If we have chart data, create the chart
+      if (chartData && chartData.length > 0) {
+        // Determine chart type based on query
+        let chartType = 'bar'
+        if (lowerQuery.includes('pie')) {
+          chartType = 'pie'
+        } else if (lowerQuery.includes('line')) {
+          chartType = 'line'
+        }
+        
+        const content = `📊 **CHART GENERATED FROM PREVIOUS RESULTS**
+
+## **${chartType.toUpperCase()} CHART: ${chartTitle}**
+
+${chartData.map((item: any, index: number) => 
+  `${index + 1}. ${item.campaign}
+   • Revenue: $${item.revenue.toLocaleString()}
+   • Spend: $${item.spend.toLocaleString()}
+   • ROAS: ${item.roas.toFixed(2)}x
+   • CTR: ${(item.ctr * 100).toFixed(2)}%
+   • Platform: ${item.platform}`
+).join('\n\n')}
+
+*Chart visualization will be displayed below with download options.*`
+
+        return {
+          content,
+          data: {
+            type: 'chart_data',
+            campaigns: chartData,
+            chartType: chartType,
+            query: query
+          }
+        }
+      }
+    }
+    
     // If last query was about campaigns, drill down to specific metrics
     if (lastResult.data?.type === 'top_performing' && 
         (lowerQuery.includes('ctr') || lowerQuery.includes('roas') || lowerQuery.includes('spend'))) {
@@ -32,43 +179,43 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
       const campaigns = lastResult.data.campaigns || []
       if (campaigns.length > 0) {
         const topCampaign = campaigns[0]
-    const campaignData = data.filter(item => 
+        const campaignData = data.filter(item => 
           item.dimensions.campaign === topCampaign.campaign
         )
         
         if (campaignData.length > 0) {
-    const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
-    const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
-    const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
-    const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
-    
-    let metric = 'spend'
-    let metricName = 'Spend'
-    let formatFunction = (value: number) => `$${value.toLocaleString()}`
+          const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
+          const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+          const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+          const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+          
+          let metric = 'spend'
+          let metricName = 'Spend'
+          let formatFunction = (value: number) => `$${value.toLocaleString()}`
           let value = totalSpend
           
           if (lowerQuery.includes('ctr')) {
-      metric = 'ctr'
-      metricName = 'CTR'
-      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+            metric = 'ctr'
+            metricName = 'CTR'
+            formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
             value = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-    } else if (lowerQuery.includes('roas')) {
-      metric = 'roas'
-      metricName = 'ROAS'
-      formatFunction = (value: number) => `${value.toFixed(2)}x`
+          } else if (lowerQuery.includes('roas')) {
+            metric = 'roas'
+            metricName = 'ROAS'
+            formatFunction = (value: number) => `${value.toFixed(2)}x`
             value = totalSpend > 0 ? totalRevenue / totalSpend : 0
           }
           
-      return {
+          return {
             content: `${topCampaign.campaign} ${metricName}: ${formatFunction(value)}`,
-        data: {
+            data: {
               type: 'drill_down',
               campaign: topCampaign.campaign,
-          metric: metric,
+              metric: metric,
               value: value,
-          query: query
-        }
-      }
+              query: query
+            }
+          }
         }
       }
     }
@@ -861,7 +1008,7 @@ ${platformPerformance.map((platform, index) =>
       `${index + 1}. ${creative.creativeName} (${creative.creativeFormat})\n   • Campaign: ${creative.campaign}\n   • Platform: ${creative.platform}\n   • ROAS: ${creative.roas.toFixed(2)}x\n   • CTR: ${(creative.ctr * 100).toFixed(2)}%\n   • CPA: $${creative.cpa.toFixed(2)}\n   • Spend: $${creative.spend.toLocaleString()}\n   • Revenue: $${creative.revenue.toLocaleString()}\n   • Conversions: ${creative.conversions.toLocaleString()}`
     ).join('\n\n')}`
     
-    return {
+    const result = {
       content,
       data: {
         type: 'top_performing_creatives',
@@ -870,6 +1017,9 @@ ${platformPerformance.map((platform, index) =>
         query: query
       }
     }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
   }
 
   // Top Performing Platforms Handler
@@ -931,7 +1081,7 @@ ${platformPerformance.map((platform, index) =>
       `${index + 1}. ${platform.platform}\n   • ROAS: ${platform.roas.toFixed(2)}x\n   • CTR: ${(platform.ctr * 100).toFixed(2)}%\n   • CPA: $${platform.cpa.toFixed(2)}\n   • Spend: $${platform.spend.toLocaleString()}\n   • Revenue: $${platform.revenue.toLocaleString()}\n   • Conversions: ${platform.conversions.toLocaleString()}\n   • Campaigns: ${platform.campaignCount}`
     ).join('\n\n')}`
     
-    return {
+    const result = {
       content,
       data: {
         type: 'top_performing_platforms',
@@ -939,12 +1089,16 @@ ${platformPerformance.map((platform, index) =>
         query: query
       }
     }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
   }
 
   // Chart and Graph Handler
-  if (lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('pie') || 
+  if ((lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('pie') || 
       lowerQuery.includes('bar') || lowerQuery.includes('line') || lowerQuery.includes('visualization') ||
-      lowerQuery.includes('download') && lowerQuery.includes('chart')) {
+      lowerQuery.includes('download') && lowerQuery.includes('chart')) &&
+      !(lowerQuery.includes('this') || lowerQuery.includes('that') || lowerQuery.includes('it'))) {
     
     try {
       // Group data by campaign and calculate metrics
@@ -1093,7 +1247,7 @@ ${topCampaigns.map((campaign, index) =>
       `${index + 1}. ${campaign.campaign}${includePlatform ? ` (${campaign.platform})` : ''}\n   • ROAS: ${campaign.roas.toFixed(2)}x\n   • CTR: ${(campaign.ctr * 100).toFixed(2)}%\n   • CPA: $${campaign.cpa.toFixed(2)}\n   • Spend: $${campaign.spend.toLocaleString()}\n   • Revenue: $${campaign.revenue.toLocaleString()}\n   • Conversions: ${campaign.conversions.toLocaleString()}`
     ).join('\n\n')}`
     
-    return {
+    const result = {
       content,
       data: {
         type: 'top_performing',
@@ -1101,6 +1255,9 @@ ${topCampaigns.map((campaign, index) =>
         query: query
       }
     }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
   }
 
   // Campaign Names Handler
