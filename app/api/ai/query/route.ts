@@ -593,7 +593,7 @@ What specific aspect of ${periodName} performance would you like to explore furt
     }
   }
 
-  // Time-based Query Handler with Clarification (Moved to early position)
+  // Time-based Query Handler with Clarification (Moved to early position) - Updated for proper year clarification
   const timeKeywords = ['q1', 'q2', 'q3', 'q4', 'quarter', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
   const hasTimeKeyword = timeKeywords.some(keyword => lowerQuery.includes(keyword))
   
