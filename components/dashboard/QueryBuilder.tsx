@@ -318,7 +318,7 @@ export default function QueryBuilder() {
       {/* Date Range */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Date Range
+          Date Range (YYYY-MM-DD format)
         </label>
         <div className="grid grid-cols-2 gap-2">
           <input
@@ -326,13 +326,27 @@ export default function QueryBuilder() {
             value={dateRange.start}
             onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
             className="input-field"
+            placeholder="Start date"
           />
           <input
             type="date"
             value={dateRange.end}
             onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
             className="input-field"
+            placeholder="End date"
           />
+        </div>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-xs text-gray-500">
+            Use YYYY-MM-DD format (e.g., 2024-06-01 to 2024-06-30)
+          </p>
+          <button
+            type="button"
+            onClick={() => setDateRange({ start: '2024-06-01', end: '2024-06-30' })}
+            className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+          >
+            Set June 2024
+          </button>
         </div>
       </div>
 
