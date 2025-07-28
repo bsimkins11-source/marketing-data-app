@@ -33,48 +33,48 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Feature Cards */}
+      {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="card">
-            <div className="flex items-center mb-4">
-              <Database className="w-8 h-8 text-primary-600 mr-3" />
-              <h3 className="text-lg font-semibold text-gray-900">Data Sources</h3>
-            </div>
-            <p className="text-gray-600">
-              Connect to Google Analytics, Facebook Ads, Twitter, LinkedIn, and more.
-            </p>
+        <div className="card">
+          <div className="flex items-center mb-4">
+            <Database className="w-8 h-8 text-primary-600 mr-3" />
+            <h3 className="text-lg font-semibold text-gray-900">Data Sources</h3>
           </div>
-
-          <div className="card">
-            <div className="flex items-center mb-4">
-              <Database className="w-8 h-8 text-primary-600 mr-3" />
-              <h3 className="text-lg font-semibold text-gray-900">Analytics</h3>
-            </div>
-            <p className="text-gray-600">
-              Advanced analytics and reporting with customizable dashboards.
-            </p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center mb-4">
-              <TrendingUp className="w-8 h-8 text-primary-600 mr-3" />
-              <h3 className="text-lg font-semibold text-gray-900">Performance</h3>
-            </div>
-            <p className="text-gray-600">
-              Track campaign performance and ROI across all channels.
-            </p>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center mb-4">
-              <Users className="w-8 h-8 text-primary-600 mr-3" />
-              <h3 className="text-lg font-semibold text-gray-900">Audience</h3>
-            </div>
-            <p className="text-gray-600">
-              Understand your audience with detailed demographic insights.
-            </p>
-          </div>
+          <p className="text-gray-600">
+            Connect to Google Analytics, Facebook Ads, Twitter, LinkedIn, and more.
+          </p>
         </div>
+
+        <div className="card">
+          <div className="flex items-center mb-4">
+            <Database className="w-8 h-8 text-primary-600 mr-3" />
+            <h3 className="text-lg font-semibold text-gray-900">Analytics</h3>
+          </div>
+          <p className="text-gray-600">
+            Advanced analytics and reporting with customizable dashboards.
+          </p>
+        </div>
+
+        <div className="card">
+          <div className="flex items-center mb-4">
+            <TrendingUp className="w-8 h-8 text-primary-600 mr-3" />
+            <h3 className="text-lg font-semibold text-gray-900">Performance</h3>
+          </div>
+          <p className="text-gray-600">
+            Track campaign performance and ROI across all channels.
+          </p>
+        </div>
+
+        <div className="card">
+          <div className="flex items-center mb-4">
+            <Users className="w-8 h-8 text-primary-600 mr-3" />
+            <h3 className="text-lg font-semibold text-gray-900">Audience</h3>
+          </div>
+          <p className="text-gray-600">
+            Understand your audience with detailed demographic insights.
+          </p>
+        </div>
+      </div>
       </div>
     </div>
   )

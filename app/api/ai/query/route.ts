@@ -311,13 +311,13 @@ ${chartContent}
 
 *Chart visualization will be displayed below with download options.*`
 
-        return {
+      return {
           content,
-          data: {
+        data: {
             type: 'chart_data',
             campaigns: chartData,
             chartType: chartType,
-            query: query
+          query: query
           }
         }
       }
@@ -335,38 +335,38 @@ ${chartContent}
         )
         
         if (campaignData.length > 0) {
-          const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
-          const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
-          const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
-          const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
-          
-          let metric = 'spend'
-          let metricName = 'Spend'
-          let formatFunction = (value: number) => `$${value.toLocaleString()}`
+    const totalSpend = campaignData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = campaignData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = campaignData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = campaignData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    
+    let metric = 'spend'
+    let metricName = 'Spend'
+    let formatFunction = (value: number) => `$${value.toLocaleString()}`
           let value = totalSpend
           
           if (lowerQuery.includes('ctr')) {
-            metric = 'ctr'
-            metricName = 'CTR'
-            formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
+      metric = 'ctr'
+      metricName = 'CTR'
+      formatFunction = (value: number) => `${(value * 100).toFixed(2)}%`
             value = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-          } else if (lowerQuery.includes('roas')) {
-            metric = 'roas'
-            metricName = 'ROAS'
-            formatFunction = (value: number) => `${value.toFixed(2)}x`
+    } else if (lowerQuery.includes('roas')) {
+      metric = 'roas'
+      metricName = 'ROAS'
+      formatFunction = (value: number) => `${value.toFixed(2)}x`
             value = totalSpend > 0 ? totalRevenue / totalSpend : 0
           }
           
-          return {
+      return {
             content: `${topCampaign.campaign} ${metricName}: ${formatFunction(value)}`,
-            data: {
+        data: {
               type: 'drill_down',
               campaign: topCampaign.campaign,
-              metric: metric,
+          metric: metric,
               value: value,
-              query: query
-            }
-          }
+          query: query
+        }
+      }
         }
       }
     }
@@ -440,6 +440,168 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       console.log('🔍 Drill-down result found:', drillDownResult.data?.type)
       updateConversationContext(sessionId, query, drillDownResult)
       return drillDownResult
+    }
+  }
+
+  // Time-based Query Handler with Clarification (Moved to early position)
+  const timeKeywords = ['q1', 'q2', 'q3', 'q4', 'quarter', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+  const hasTimeKeyword = timeKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  if (hasTimeKeyword) {
+    // Check if year is specified
+    const yearPattern = /\b(20\d{2})\b/
+    const yearMatch = query.match(yearPattern)
+    
+    if (!yearMatch) {
+      // Ask for year clarification
+      const timeReference = timeKeywords.find(keyword => lowerQuery.includes(keyword))
+      const clarificationQuestion = timeReference?.startsWith('q') 
+        ? `I see you're asking about ${timeReference.toUpperCase()}. Which year would you like data for? (e.g., 2024, 2023)`
+        : `I see you're asking about ${timeReference}. Which year would you like data for? (e.g., 2024, 2023)`
+      
+      return {
+        content: clarificationQuestion,
+        data: {
+          type: 'time_clarification',
+          timeReference: timeReference,
+          query: query
+        }
+      }
+    }
+    
+    // If year is specified, process the time-based query
+    const year = parseInt(yearMatch[1])
+    const timeReference = timeKeywords.find(keyword => lowerQuery.includes(keyword))
+    
+    // Calculate date ranges based on time reference
+    let startDate: string, endDate: string, periodName: string
+    
+    if (timeReference?.startsWith('q')) {
+      const quarter = parseInt(timeReference[1])
+      const startMonth = (quarter - 1) * 3
+      startDate = `${year}-${String(startMonth + 1).padStart(2, '0')}-01`
+      endDate = `${year}-${String(startMonth + 3).padStart(2, '0')}-31`
+      periodName = `Q${quarter} ${year}`
+    } else {
+      // Month-based query
+      const monthMap: { [key: string]: number } = {
+        'january': 1, 'jan': 1, 'february': 2, 'feb': 2, 'march': 3, 'mar': 3,
+        'april': 4, 'apr': 4, 'may': 5, 'june': 6, 'jun': 6, 'july': 7, 'jul': 7,
+        'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'october': 10, 'oct': 10,
+        'november': 11, 'nov': 11, 'december': 12, 'dec': 12
+      }
+      
+      const month = monthMap[timeReference!]
+      startDate = `${year}-${String(month).padStart(2, '0')}-01`
+      endDate = `${year}-${String(month).padStart(2, '0')}-31`
+      periodName = `${timeReference} ${year}`
+    }
+    
+    // Filter data by date range
+    const filteredData = data.filter(item => {
+      const itemDate = new Date(item.date)
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      return itemDate >= start && itemDate <= end
+    })
+    
+    if (filteredData.length === 0) {
+      return {
+        content: `I don't have data for ${periodName}. The available data ranges from ${data[0]?.date} to ${data[data.length - 1]?.date}. Would you like to see data for a different time period?`,
+        data: {
+          type: 'no_data_for_period',
+          requestedPeriod: periodName,
+          availableRange: { start: data[0]?.date, end: data[data.length - 1]?.date },
+          query: query
+        }
+      }
+    }
+    
+    // Process the filtered data based on what the user is asking for
+    if (lowerQuery.includes('spend') && lowerQuery.includes('platform')) {
+      // Group by platform and sum spend
+      const platformSpend = filteredData.reduce((acc, item) => {
+        const platform = item.dimensions.platform
+        acc[platform] = (acc[platform] || 0) + item.metrics.spend
+        return acc
+      }, {} as { [key: string]: number })
+      
+      const platformSpendArray = Object.entries(platformSpend)
+        .map(([platform, spend]) => ({ platform, spend: spend as number }))
+        .sort((a, b) => (b.spend as number) - (a.spend as number))
+      
+      const content = `📊 SPEND BY PLATFORM - ${periodName.toUpperCase()}
+
+${platformSpendArray.map((item, index) => 
+  `${index + 1}. ${item.platform}: $${(item.spend as number).toLocaleString()}`
+).join('\n')}
+
+Total Spend: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}
+Data Points: ${filteredData.length} records`
+
+      return {
+        content,
+        data: {
+          type: 'platform_spend_by_period',
+          period: periodName,
+          platformSpend: platformSpendArray,
+          totalSpend: platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0),
+          recordCount: filteredData.length,
+          query: query
+        }
+      }
+    }
+    
+    // Generic time-based response
+    const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
+    const totalRevenue = filteredData.reduce((sum, item) => sum + item.metrics.revenue, 0)
+    const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
+    const totalClicks = filteredData.reduce((sum, item) => sum + item.metrics.clicks, 0)
+    const totalConversions = filteredData.reduce((sum, item) => sum + item.metrics.conversions, 0)
+    
+    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    const content = `📅 ${periodName.toUpperCase()} PERFORMANCE SUMMARY
+
+💰 Financial Metrics:
+• Total Spend: $${totalSpend.toLocaleString()}
+• Total Revenue: $${totalRevenue.toLocaleString()}
+• ROAS: ${roas.toFixed(2)}x
+
+📊 Engagement Metrics:
+• Total Impressions: ${totalImpressions.toLocaleString()}
+• Total Clicks: ${totalClicks.toLocaleString()}
+• Total Conversions: ${totalConversions.toLocaleString()}
+• CTR: ${(ctr * 100).toFixed(2)}%
+• CPA: $${cpa.toFixed(2)}
+
+📈 Data Coverage:
+• Records: ${filteredData.length}
+• Date Range: ${startDate} to ${endDate}
+
+What specific aspect of ${periodName} performance would you like to explore further?`
+
+    return {
+      content,
+      data: {
+        type: 'time_period_summary',
+        period: periodName,
+        metrics: {
+          spend: totalSpend,
+          revenue: totalRevenue,
+          impressions: totalImpressions,
+          clicks: totalClicks,
+          conversions: totalConversions,
+          roas,
+          ctr,
+          cpa
+        },
+        recordCount: filteredData.length,
+        dateRange: { start: startDate, end: endDate },
+        query: query
+      }
     }
   }
 
@@ -815,9 +977,9 @@ Performance Distribution:
 4. Cross-Platform Learning: Apply successful strategies from ${topCampaign.campaign} to other campaigns`
 
       updateConversationContext(sessionId, query, { content, data: { type: 'campaign_summary', campaigns: campaignMetrics, platforms: platformPerformance, overallMetrics: { totalSpend, totalRevenue, overallRoas, overallCtr, overallCpa }, query: query } })
-      return {
-        content,
-        data: {
+    return {
+      content,
+      data: {
           type: 'campaign_summary',
           campaigns: campaignMetrics,
           platforms: platformPerformance,
@@ -828,7 +990,7 @@ Performance Distribution:
             overallCtr,
             overallCpa
           },
-          query: query
+        query: query
         }
       }
     } catch (error) {
@@ -866,11 +1028,11 @@ Performance Distribution:
         )
         
         if (analysisData.length === 0) {
-    return {
+      return {
             content: `No data found for campaign "${campaignName}". Available campaigns: ${Array.from(new Set(data.map(item => item.dimensions.campaign))).join(', ')}`,
-      data: {
+        data: {
               type: 'campaign_not_found',
-        query: query
+          query: query
       }
     }
   }
@@ -1168,7 +1330,7 @@ Performance Distribution:
       )
       const ctr = firstCreativeItem?.metrics.ctr || 0
       
-              return {
+        return {
           creativeId: creative.creativeId,
           creativeName: creative.creativeName,
           creativeFormat: creative.creativeFormat,
@@ -1242,8 +1404,8 @@ Performance Distribution:
       // Get the original CTR from the data (we need to find the first item with this platform)
       const firstPlatformItem = data.find(item => item.dimensions.platform === platform)
       const ctr = firstPlatformItem?.metrics.ctr || 0
-      
-              return {
+    
+    return {
           platform,
           roas,
           ctr,
@@ -1351,14 +1513,14 @@ ${topCampaigns.map((campaign, index) =>
 ).join('\n\n')}
 
 *Chart visualization will be displayed below with interactive elements.*`
-
-      return {
-        content,
-        data: {
+    
+    return {
+      content,
+      data: {
           type: 'chart_data',
           campaigns: topCampaigns,
           chartType: chartType,
-          query: query
+        query: query
         }
       }
     } catch (error) {
@@ -1408,7 +1570,7 @@ ${topCampaigns.map((campaign, index) =>
       const firstCampaignItem = data.find(item => item.dimensions.campaign === campaign)
       const ctr = firstCampaignItem?.metrics.ctr || 0
       
-              return {
+      return {
           campaign,
           platform: metrics.platform,
           roas,
@@ -1432,12 +1594,12 @@ ${topCampaigns.map((campaign, index) =>
     
     const result = {
       content,
-      data: {
+        data: {
         type: 'top_performing',
         campaigns: topCampaigns,
-        query: query
+          query: query
+        }
       }
-    }
     
     updateConversationContext(sessionId, query, result)
     return result
@@ -1545,168 +1707,6 @@ ${topCampaigns.map((campaign, index) =>
       data: {
         type: 'audience_performance',
         audiences: topAudiences,
-        query: query
-      }
-    }
-  }
-
-  // Time-based Query Handler with Clarification
-  const timeKeywords = ['q1', 'q2', 'q3', 'q4', 'quarter', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-  const hasTimeKeyword = timeKeywords.some(keyword => lowerQuery.includes(keyword))
-  
-  if (hasTimeKeyword) {
-    // Check if year is specified
-    const yearPattern = /\b(20\d{2})\b/
-    const yearMatch = query.match(yearPattern)
-    
-    if (!yearMatch) {
-      // Ask for year clarification
-      const timeReference = timeKeywords.find(keyword => lowerQuery.includes(keyword))
-      const clarificationQuestion = timeReference?.startsWith('q') 
-        ? `I see you're asking about ${timeReference.toUpperCase()}. Which year would you like data for? (e.g., 2024, 2023)`
-        : `I see you're asking about ${timeReference}. Which year would you like data for? (e.g., 2024, 2023)`
-      
-      return {
-        content: clarificationQuestion,
-        data: {
-          type: 'time_clarification',
-          timeReference: timeReference,
-          query: query
-        }
-      }
-    }
-    
-    // If year is specified, process the time-based query
-    const year = parseInt(yearMatch[1])
-    const timeReference = timeKeywords.find(keyword => lowerQuery.includes(keyword))
-    
-    // Calculate date ranges based on time reference
-    let startDate: string, endDate: string, periodName: string
-    
-    if (timeReference?.startsWith('q')) {
-      const quarter = parseInt(timeReference[1])
-      const startMonth = (quarter - 1) * 3
-      startDate = `${year}-${String(startMonth + 1).padStart(2, '0')}-01`
-      endDate = `${year}-${String(startMonth + 3).padStart(2, '0')}-31`
-      periodName = `Q${quarter} ${year}`
-    } else {
-      // Month-based query
-      const monthMap: { [key: string]: number } = {
-        'january': 1, 'jan': 1, 'february': 2, 'feb': 2, 'march': 3, 'mar': 3,
-        'april': 4, 'apr': 4, 'may': 5, 'june': 6, 'jun': 6, 'july': 7, 'jul': 7,
-        'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'october': 10, 'oct': 10,
-        'november': 11, 'nov': 11, 'december': 12, 'dec': 12
-      }
-      
-      const month = monthMap[timeReference!]
-      startDate = `${year}-${String(month).padStart(2, '0')}-01`
-      endDate = `${year}-${String(month).padStart(2, '0')}-31`
-      periodName = `${timeReference} ${year}`
-    }
-    
-    // Filter data by date range
-    const filteredData = data.filter(item => {
-      const itemDate = new Date(item.date)
-      const start = new Date(startDate)
-      const end = new Date(endDate)
-      return itemDate >= start && itemDate <= end
-    })
-    
-    if (filteredData.length === 0) {
-      return {
-        content: `I don't have data for ${periodName}. The available data ranges from ${data[0]?.date} to ${data[data.length - 1]?.date}. Would you like to see data for a different time period?`,
-        data: {
-          type: 'no_data_for_period',
-          requestedPeriod: periodName,
-          availableRange: { start: data[0]?.date, end: data[data.length - 1]?.date },
-          query: query
-        }
-      }
-    }
-    
-         // Process the filtered data based on what the user is asking for
-     if (lowerQuery.includes('spend') && lowerQuery.includes('platform')) {
-       // Group by platform and sum spend
-       const platformSpend = filteredData.reduce((acc, item) => {
-         const platform = item.dimensions.platform
-         acc[platform] = (acc[platform] || 0) + item.metrics.spend
-         return acc
-       }, {} as { [key: string]: number })
-       
-       const platformSpendArray = Object.entries(platformSpend)
-         .map(([platform, spend]) => ({ platform, spend: spend as number }))
-         .sort((a, b) => (b.spend as number) - (a.spend as number))
-      
-      const content = `📊 SPEND BY PLATFORM - ${periodName.toUpperCase()}
-
- ${platformSpendArray.map((item, index) => 
-   `${index + 1}. ${item.platform}: $${(item.spend as number).toLocaleString()}`
- ).join('\n')}
-
- Total Spend: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}
-Data Points: ${filteredData.length} records`
-
-      return {
-        content,
-        data: {
-          type: 'platform_spend_by_period',
-          period: periodName,
-          platformSpend: platformSpendArray,
-          totalSpend: platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0),
-          recordCount: filteredData.length,
-          query: query
-        }
-      }
-    }
-    
-    // Generic time-based response
-    const totalSpend = filteredData.reduce((sum, item) => sum + item.metrics.spend, 0)
-    const totalRevenue = filteredData.reduce((sum, item) => sum + item.metrics.revenue, 0)
-    const totalImpressions = filteredData.reduce((sum, item) => sum + item.metrics.impressions, 0)
-    const totalClicks = filteredData.reduce((sum, item) => sum + item.metrics.clicks, 0)
-    const totalConversions = filteredData.reduce((sum, item) => sum + item.metrics.conversions, 0)
-    
-    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
-    const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-    const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
-    
-    const content = `📅 ${periodName.toUpperCase()} PERFORMANCE SUMMARY
-
-💰 Financial Metrics:
-• Total Spend: $${totalSpend.toLocaleString()}
-• Total Revenue: $${totalRevenue.toLocaleString()}
-• ROAS: ${roas.toFixed(2)}x
-
-📊 Engagement Metrics:
-• Total Impressions: ${totalImpressions.toLocaleString()}
-• Total Clicks: ${totalClicks.toLocaleString()}
-• Total Conversions: ${totalConversions.toLocaleString()}
-• CTR: ${(ctr * 100).toFixed(2)}%
-• CPA: $${cpa.toFixed(2)}
-
-📈 Data Coverage:
-• Records: ${filteredData.length}
-• Date Range: ${startDate} to ${endDate}
-
-What specific aspect of ${periodName} performance would you like to explore further?`
-
-    return {
-      content,
-      data: {
-        type: 'time_period_summary',
-        period: periodName,
-        metrics: {
-          spend: totalSpend,
-          revenue: totalRevenue,
-          impressions: totalImpressions,
-          clicks: totalClicks,
-          conversions: totalConversions,
-          roas,
-          ctr,
-          cpa
-        },
-        recordCount: filteredData.length,
-        dateRange: { start: startDate, end: endDate },
         query: query
       }
     }
@@ -1845,7 +1845,7 @@ What specific aspect of ${periodName} performance would you like to explore furt
         const roas = data.spend > 0 ? data.revenue / data.spend : 0
         const ctr = data.impressions > 0 ? data.clicks / data.impressions : 0
         const cpa = data.conversions > 0 ? data.spend / data.conversions : 0
-        return {
+    return {
           campaign,
           spend: data.spend,
           revenue: data.revenue,

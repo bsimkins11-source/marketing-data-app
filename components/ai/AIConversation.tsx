@@ -169,7 +169,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       }
 
       setMessages(prev => [...prev, aiMessage])
-
+      
       // Auto-speak AI responses for voice interactions
       if (inputMethod === 'voice' && synthesisRef.current) {
         speakResponse(response.content)
@@ -240,7 +240,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         }
       }
     }
-    
+
     return {
       content: "I'm sorry, I'm having trouble processing that request right now. Please try asking about total spend, revenue, or impressions, or check the help guide for more examples."
     }
