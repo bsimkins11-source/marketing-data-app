@@ -122,7 +122,7 @@ export default function QueryBuilder() {
       return filters.every(filter => {
         if (!filter.field || !filter.value) return true
         
-        const fieldValue = getNestedValue(item, filter.field)
+        const fieldValue = item[filter.field]
         const filterValue = filter.value
         
         switch (filter.operator) {
@@ -191,47 +191,46 @@ export default function QueryBuilder() {
     const groups = new Map()
     
     data.forEach((item: any) => {
-      const groupKey = dimensions.map(dim => getNestedValue(item, dim)).join('|')
+      const groupKey = dimensions.map(dim => item[dim]).join('|')
       
       if (!groups.has(groupKey)) {
         groups.set(groupKey, {
-          ...dimensions.reduce((acc, dim) => ({ ...acc, [dim]: getNestedValue(item, dim) }), {}),
+          ...dimensions.reduce((acc, dim) => ({ ...acc, [dim]: item[dim] }), {}),
           count: 0,
           impressions: 0,
           clicks: 0,
           conversions: 0,
           spend: 0,
-          revenue: 0
+          revenue: 0,
+          roas: 0,
+          ctr: 0,
+          cpc: 0,
+          cpa: 0
         })
       }
       
       const group = groups.get(groupKey)
       group.count++
       
-      // Aggregate metrics from nested structure
-      if (item.metrics) {
-        group.impressions += Number(item.metrics.impressions) || 0
-        group.clicks += Number(item.metrics.clicks) || 0
-        group.conversions += Number(item.metrics.conversions) || 0
-        group.spend += Number(item.metrics.spend) || 0
-        group.revenue += Number(item.metrics.revenue) || 0
-      } else {
-        // Fallback for flattened data
-        group.impressions += Number(item.impressions) || 0
-        group.clicks += Number(item.clicks) || 0
-        group.conversions += Number(item.conversions) || 0
-        group.spend += Number(item.spend) || 0
-        group.revenue += Number(item.revenue) || 0
-      }
+      // Aggregate metrics directly from the flat structure
+      group.impressions += Number(item.impressions) || 0
+      group.clicks += Number(item.clicks) || 0
+      group.conversions += Number(item.conversions) || 0
+      group.spend += Number(item.spend) || 0
+      group.revenue += Number(item.revenue) || 0
+      group.roas += Number(item.roas) || 0
+      group.ctr += Number(item.ctr) || 0
+      group.cpc += Number(item.cpc) || 0
+      group.cpa += Number(item.cpa) || 0
     })
     
-    // Calculate derived metrics
+    // Calculate averages for derived metrics
     return Array.from(groups.values()).map(group => ({
       ...group,
-      ctr: group.impressions > 0 ? group.clicks / group.impressions : 0,
-      cpc: group.clicks > 0 ? group.spend / group.clicks : 0,
-      cpa: group.conversions > 0 ? group.spend / group.conversions : 0,
-      roas: group.spend > 0 ? group.revenue / group.spend : 0
+      roas: group.count > 0 ? group.roas / group.count : 0,
+      ctr: group.count > 0 ? group.ctr / group.count : 0,
+      cpc: group.count > 0 ? group.cpc / group.count : 0,
+      cpa: group.count > 0 ? group.cpa / group.count : 0
     }))
   }
 
