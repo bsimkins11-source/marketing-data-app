@@ -178,13 +178,21 @@ export default function DataChart({ data }: DataChartProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" opacity={0.3} />
               <XAxis 
                 dataKey="name" 
-                angle={-60} 
-                textAnchor="end" 
-                height={120}
+                angle={0} 
+                textAnchor="middle" 
+                height={80}
                 tick={{ fontSize: 10 }}
                 interval={0}
-                dy={15}
-                dx={-5}
+                dy={10}
+                tickFormatter={(value) => {
+                  // Split long campaign names into two lines
+                  const words = value.split(' ')
+                  if (words.length > 2) {
+                    const mid = Math.ceil(words.length / 2)
+                    return words.slice(0, mid).join(' ') + '\n' + words.slice(mid).join(' ')
+                  }
+                  return value
+                }}
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
@@ -222,13 +230,21 @@ export default function DataChart({ data }: DataChartProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" opacity={0.3} />
               <XAxis 
                 dataKey="name" 
-                angle={-60} 
-                textAnchor="end" 
-                height={120}
+                angle={0} 
+                textAnchor="middle" 
+                height={80}
                 tick={{ fontSize: 10 }}
                 interval={0}
-                dy={15}
-                dx={-5}
+                dy={10}
+                tickFormatter={(value) => {
+                  // Split long campaign names into two lines
+                  const words = value.split(' ')
+                  if (words.length > 2) {
+                    const mid = Math.ceil(words.length / 2)
+                    return words.slice(0, mid).join(' ') + '\n' + words.slice(mid).join(' ')
+                  }
+                  return value
+                }}
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
