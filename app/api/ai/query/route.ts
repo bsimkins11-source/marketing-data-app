@@ -221,9 +221,9 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
           chartType = 'line'
         }
         
-        const content = `📊 **CHART GENERATED FROM PREVIOUS RESULTS**
+        const content = `📊 CHART GENERATED FROM PREVIOUS RESULTS
 
-## **${chartType.toUpperCase()} CHART: ${chartTitle}**
+## ${chartType.toUpperCase()} CHART: ${chartTitle}
 
 ${chartData.map((item: any, index: number) => 
   `${index + 1}. ${item.campaign}
@@ -386,25 +386,25 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
         }
       })
       
-      const content = `🏷️ **BRANDS USED IN CAMPAIGNS**
+      const content = `🏷️ BRANDS USED IN CAMPAIGNS
 
-## **📋 BRAND OVERVIEW**
-- **Total Brands**: ${uniqueBrands.length}
-- **Total Campaigns**: ${brandCampaigns.reduce((sum, brand) => sum + brand.campaignCount, 0)}
+## 📋 BRAND OVERVIEW
+- Total Brands: ${uniqueBrands.length}
+- Total Campaigns: ${brandCampaigns.reduce((sum, brand) => sum + brand.campaignCount, 0)}
 
-## **🏢 BRAND DETAILS**
+## 🏢 BRAND DETAILS
 
 ${brandCampaigns.map((brand, index) => 
-  `${index + 1}. **${brand.brand}**
-   • **Campaigns**: ${brand.campaignCount} campaigns
-   • **Campaign Names**: ${brand.campaigns.join(', ')}
-   • **Total Spend**: $${brand.totalSpend.toLocaleString()}
-   • **Total Revenue**: $${brand.totalRevenue.toLocaleString()}
-   • **ROAS**: ${brand.roas.toFixed(2)}x`
+  `${index + 1}. ${brand.brand}
+   • Campaigns: ${brand.campaignCount} campaigns
+   • Campaign Names: ${brand.campaigns.join(', ')}
+   • Total Spend: $${brand.totalSpend.toLocaleString()}
+   • Total Revenue: $${brand.totalRevenue.toLocaleString()}
+   • ROAS: ${brand.roas.toFixed(2)}x`
 ).join('\n\n')}
 
-## **📊 SUMMARY**
-The campaigns use **${uniqueBrands.length} brands**:
+## 📊 SUMMARY
+The campaigns use ${uniqueBrands.length} brands:
 ${uniqueBrands.map((brand, index) => `${index + 1}. ${brand}`).join('\n')}
 
 Each brand has its own set of campaigns with different performance metrics and targeting strategies.`
@@ -486,19 +486,19 @@ Each brand has its own set of campaigns with different performance metrics and t
       const topBrand = brandMetrics[0]
       const bottomBrand = brandMetrics[brandMetrics.length - 1]
       
-      const content = `🏢 **BRAND-LEVEL ANALYTICS & PERFORMANCE**
+      const content = `🏢 BRAND-LEVEL ANALYTICS & PERFORMANCE
 
-## **🎯 EXECUTIVE BRAND OVERVIEW**
-- **Total Brands**: ${uniqueBrands.length}
-- **Total Spend**: $${totalSpend.toLocaleString()}
-- **Total Revenue**: $${totalRevenue.toLocaleString()}
-- **Overall ROAS**: ${overallRoas.toFixed(2)}x
-- **Date Range**: ${data[0]?.date} to ${data[data.length - 1]?.date}
+## 🎯 EXECUTIVE BRAND OVERVIEW
+- Total Brands: ${uniqueBrands.length}
+- Total Spend: $${totalSpend.toLocaleString()}
+- Total Revenue: $${totalRevenue.toLocaleString()}
+- Overall ROAS: ${overallRoas.toFixed(2)}x
+- Date Range: ${data[0]?.date} to ${data[data.length - 1]?.date}
 
-## **🏆 BRAND PERFORMANCE RANKING**
+## 🏆 BRAND PERFORMANCE RANKING
 
 ${brandMetrics.map((brand, index) => 
-  `${index + 1}. **${brand.brand}**
+  `${index + 1}. ${brand.brand}
    • ROAS: ${brand.roas.toFixed(2)}x
    • CTR: ${(brand.ctr * 100).toFixed(2)}%
    • CPA: $${brand.cpa.toFixed(2)}
@@ -509,46 +509,46 @@ ${brandMetrics.map((brand, index) =>
    • Audiences: ${brand.audienceCount}`
 ).join('\n\n')}
 
-## **📊 CROSS-BRAND INSIGHTS**
+## 📊 CROSS-BRAND INSIGHTS
 
-### **Performance Leaders:**
-- **Top Performing Brand**: ${topBrand.brand} (ROAS: ${topBrand.roas.toFixed(2)}x)
-- **Revenue Leader**: ${brandMetrics.reduce((max, brand) => brand.revenue > max.revenue ? brand : max).brand} ($${brandMetrics.reduce((max, brand) => brand.revenue > max.revenue ? brand : max).revenue.toLocaleString()})
-- **Efficiency Leader**: ${topBrand.brand} (Best ROAS)
+### Performance Leaders:
+- Top Performing Brand: ${topBrand.brand} (ROAS: ${topBrand.roas.toFixed(2)}x)
+- Revenue Leader: ${brandMetrics.reduce((max, brand) => brand.revenue > max.revenue ? brand : max).brand} ($${brandMetrics.reduce((max, brand) => brand.revenue > max.revenue ? brand : max).revenue.toLocaleString()})
+- Efficiency Leader: ${topBrand.brand} (Best ROAS)
 
-### **Growth Opportunities:**
-- **Underperforming Brand**: ${bottomBrand.brand} (ROAS: ${bottomBrand.roas.toFixed(2)}x)
-- **Budget Reallocation**: Consider shifting budget from ${bottomBrand.brand} to ${topBrand.brand}
+### Growth Opportunities:
+- Underperforming Brand: ${bottomBrand.brand} (ROAS: ${bottomBrand.roas.toFixed(2)}x)
+- Budget Reallocation: Consider shifting budget from ${bottomBrand.brand} to ${topBrand.brand}
 
-## **🎯 STRATEGIC RECOMMENDATIONS**
+## 🎯 STRATEGIC RECOMMENDATIONS
 
-### **Brand Portfolio Strategy:**
-1. **Scale Winners**: Increase investment in ${topBrand.brand} by 40%
-2. **Optimize Underperformers**: Review ${bottomBrand.brand} strategy and creative approach
-3. **Cross-Brand Learning**: Apply successful strategies from ${topBrand.brand} to ${bottomBrand.brand}
-4. **Audience Expansion**: Leverage successful audiences across brands
+### Brand Portfolio Strategy:
+1. Scale Winners: Increase investment in ${topBrand.brand} by 40%
+2. Optimize Underperformers: Review ${bottomBrand.brand} strategy and creative approach
+3. Cross-Brand Learning: Apply successful strategies from ${topBrand.brand} to ${bottomBrand.brand}
+4. Audience Expansion: Leverage successful audiences across brands
 
-### **Platform Strategy by Brand:**
+### Platform Strategy by Brand:
 ${brandMetrics.map(brand => 
-  `**${brand.brand}**: Focus on ${brand.platforms.slice(0, 2).join(', ')} (highest performing platforms)`
+  `${brand.brand}: Focus on ${brand.platforms.slice(0, 2).join(', ')} (highest performing platforms)`
 ).join('\n')}
 
-### **Campaign Strategy by Brand:**
+### Campaign Strategy by Brand:
 ${brandMetrics.map(brand => 
-  `**${brand.brand}**: Scale ${brand.campaigns[0]} (top campaign), optimize ${brand.campaigns[brand.campaigns.length - 1]} (bottom campaign)`
+  `${brand.brand}: Scale ${brand.campaigns[0]} (top campaign), optimize ${brand.campaigns[brand.campaigns.length - 1]} (bottom campaign)`
 ).join('\n')}
 
-## **📈 NEXT STEPS**
+## 📈 NEXT STEPS
 
-1. **Immediate Actions (Week 1):**
+1. Immediate Actions (Week 1):
    - Reallocate 30% budget from ${bottomBrand.brand} to ${topBrand.brand}
    - Review creative strategy for ${bottomBrand.brand}
 
-2. **Short-term Actions (Month 1):**
+2. Short-term Actions (Month 1):
    - Implement cross-brand audience testing
    - Develop brand-specific optimization strategies
 
-3. **Long-term Strategy (Quarter 1):**
+3. Long-term Strategy (Quarter 1):
    - Build brand-specific creative guidelines
    - Establish cross-brand performance benchmarks`
 
@@ -673,22 +673,22 @@ ${brandMetrics.map(brand =>
       const topPlatform = platformPerformance[0]
       const bottomPlatform = platformPerformance[platformPerformance.length - 1]
       
-             const content = `📊 **OVERALL CAMPAIGN SUMMARY - ${uniqueCampaigns.length} CAMPAIGNS**
+             const content = `📊 OVERALL CAMPAIGN SUMMARY - ${uniqueCampaigns.length} CAMPAIGNS
 
-## **🎯 EXECUTIVE OVERVIEW**
-- **Total Campaigns**: ${uniqueCampaigns.length}
-- **Total Brands**: ${Array.from(new Set(data.map(item => item.dimensions.brand))).length}
-- **Total Spend**: $${totalSpend.toLocaleString()}
-- **Total Revenue**: $${totalRevenue.toLocaleString()}
-- **Overall ROAS**: ${overallRoas.toFixed(2)}x
-- **Overall CTR**: ${(overallCtr * 100).toFixed(2)}%
-- **Overall CPA**: $${overallCpa.toFixed(2)}
-- **Date Range**: ${data[0]?.date} to ${data[data.length - 1]?.date}
+## 🎯 EXECUTIVE OVERVIEW
+- Total Campaigns: ${uniqueCampaigns.length}
+- Total Brands: ${Array.from(new Set(data.map(item => item.dimensions.brand))).length}
+- Total Spend: $${totalSpend.toLocaleString()}
+- Total Revenue: $${totalRevenue.toLocaleString()}
+- Overall ROAS: ${overallRoas.toFixed(2)}x
+- Overall CTR: ${(overallCtr * 100).toFixed(2)}%
+- Overall CPA: $${overallCpa.toFixed(2)}
+- Date Range: ${data[0]?.date} to ${data[data.length - 1]?.date}
 
-## **🏆 CAMPAIGN PERFORMANCE RANKING**
+## 🏆 CAMPAIGN PERFORMANCE RANKING
 
 ${campaignMetrics.map((campaign, index) => 
-  `${index + 1}. **${campaign.campaign}** (${campaign.brand})
+  `${index + 1}. ${campaign.campaign} (${campaign.brand})
    • ROAS: ${campaign.roas.toFixed(2)}x
    • CTR: ${(campaign.ctr * 100).toFixed(2)}%
    • CPA: $${campaign.cpa.toFixed(2)}
@@ -697,10 +697,10 @@ ${campaignMetrics.map((campaign, index) =>
    • Platforms: ${campaign.platforms.join(', ')}`
 ).join('\n\n')}
 
-## **🌐 PLATFORM PERFORMANCE**
+## 🌐 PLATFORM PERFORMANCE
 
 ${platformPerformance.map((platform, index) => 
-  `${index + 1}. **${platform.platform}**
+  `${index + 1}. ${platform.platform}
    • ROAS: ${platform.roas.toFixed(2)}x
    • CTR: ${(platform.ctr * 100).toFixed(2)}%
    • CPA: $${platform.cpa.toFixed(2)}
@@ -709,27 +709,27 @@ ${platformPerformance.map((platform, index) =>
    • Campaigns: ${platform.campaignCount}`
 ).join('\n\n')}
 
-## **📈 KEY INSIGHTS**
+## 📈 KEY INSIGHTS
 
-### **Top Performers:**
-- **Best Campaign**: ${topCampaign.campaign} (ROAS: ${topCampaign.roas.toFixed(2)}x)
-- **Best Platform**: ${topPlatform.platform} (ROAS: ${topPlatform.roas.toFixed(2)}x)
+### Top Performers:
+- Best Campaign: ${topCampaign.campaign} (ROAS: ${topCampaign.roas.toFixed(2)}x)
+- Best Platform: ${topPlatform.platform} (ROAS: ${topPlatform.roas.toFixed(2)}x)
 
-### **Areas for Improvement:**
-- **Lowest Campaign**: ${bottomCampaign.campaign} (ROAS: ${bottomCampaign.roas.toFixed(2)}x)
-- **Lowest Platform**: ${bottomPlatform.platform} (ROAS: ${bottomPlatform.roas.toFixed(2)}x)
+### Areas for Improvement:
+- Lowest Campaign: ${bottomCampaign.campaign} (ROAS: ${bottomCampaign.roas.toFixed(2)}x)
+- Lowest Platform: ${bottomPlatform.platform} (ROAS: ${bottomPlatform.roas.toFixed(2)}x)
 
-### **Performance Distribution:**
-- **High Performers** (ROAS > 3.0x): ${campaignMetrics.filter(c => c.roas > 3.0).length} campaigns
-- **Medium Performers** (ROAS 2.0-3.0x): ${campaignMetrics.filter(c => c.roas >= 2.0 && c.roas <= 3.0).length} campaigns
-- **Low Performers** (ROAS < 2.0x): ${campaignMetrics.filter(c => c.roas < 2.0).length} campaigns
+### Performance Distribution:
+- High Performers (ROAS > 3.0x): ${campaignMetrics.filter(c => c.roas > 3.0).length} campaigns
+- Medium Performers (ROAS 2.0-3.0x): ${campaignMetrics.filter(c => c.roas >= 2.0 && c.roas <= 3.0).length} campaigns
+- Low Performers (ROAS < 2.0x): ${campaignMetrics.filter(c => c.roas < 2.0).length} campaigns
 
-## **🎯 STRATEGIC RECOMMENDATIONS**
+## 🎯 STRATEGIC RECOMMENDATIONS
 
-1. **Scale Winners**: Increase budget allocation to ${topCampaign.campaign} by 40%
-2. **Optimize Underperformers**: Review and optimize ${bottomCampaign.campaign} strategy
-3. **Platform Focus**: Prioritize ${topPlatform.platform} for future campaigns
-4. **Cross-Platform Learning**: Apply successful strategies from ${topCampaign.campaign} to other campaigns`
+1. Scale Winners: Increase budget allocation to ${topCampaign.campaign} by 40%
+2. Optimize Underperformers: Review and optimize ${bottomCampaign.campaign} strategy
+3. Platform Focus: Prioritize ${topPlatform.platform} for future campaigns
+4. Cross-Platform Learning: Apply successful strategies from ${topCampaign.campaign} to other campaigns`
 
       updateConversationContext(sessionId, query, { content, data: { type: 'campaign_summary', campaigns: campaignMetrics, platforms: platformPerformance, overallMetrics: { totalSpend, totalRevenue, overallRoas, overallCtr, overallCpa }, query: query } })
       return {
@@ -914,91 +914,91 @@ ${platformPerformance.map((platform, index) =>
       
       const scope = isCampaignSpecific ? `CAMPAIGN-SPECIFIC: ${campaignName}` : "UNIVERSAL ACROSS ALL CAMPAIGNS"
       
-      const content = `🎯 **OPTIMIZATION RECOMMENDATIONS - ${scope}**
+      const content = `🎯 OPTIMIZATION RECOMMENDATIONS - ${scope}
       
-      ## **📊 Performance Summary**
-      - **Scope**: ${isCampaignSpecific ? `Campaign: ${campaignName}` : 'All Campaigns'}
-      - **Total Spend**: $${totalSpend.toLocaleString()}
-      - **Total Revenue**: $${totalRevenue.toLocaleString()}
-      - **Overall ROAS**: ${overallRoas.toFixed(2)}x
-      - **Platforms Analyzed**: ${platformPerformance.length}
+      ## 📊 Performance Summary
+      - Scope: ${isCampaignSpecific ? `Campaign: ${campaignName}` : 'All Campaigns'}
+      - Total Spend: $${totalSpend.toLocaleString()}
+      - Total Revenue: $${totalRevenue.toLocaleString()}
+      - Overall ROAS: ${overallRoas.toFixed(2)}x
+      - Platforms Analyzed: ${platformPerformance.length}
       
-      ## **💰 SPEND OPTIMIZATION RECOMMENDATIONS**
+      ## 💰 SPEND OPTIMIZATION RECOMMENDATIONS
       
-      ### **Budget Reallocation Strategy:**
-      1. **Increase Investment**: ${topPlatforms[0]?.platform} (ROAS: ${topPlatforms[0]?.roas.toFixed(2)}x) - Increase budget by 40%
-      2. **Maintain Current**: ${topPlatforms[1]?.platform} (ROAS: ${topPlatforms[1]?.roas.toFixed(2)}x) - Keep current allocation
-      3. **Reduce Investment**: ${bottomPlatforms[0]?.platform} (ROAS: ${bottomPlatforms[0]?.roas.toFixed(2)}x) - Decrease by 30%
-      4. **Optimize or Pause**: ${bottomPlatforms[1]?.platform} (ROAS: ${bottomPlatforms[1]?.roas.toFixed(2)}x) - Consider pausing if ROAS < 2.0x
+      ### Budget Reallocation Strategy:
+      1. Increase Investment: ${topPlatforms[0]?.platform} (ROAS: ${topPlatforms[0]?.roas.toFixed(2)}x) - Increase budget by 40%
+      2. Maintain Current: ${topPlatforms[1]?.platform} (ROAS: ${topPlatforms[1]?.roas.toFixed(2)}x) - Keep current allocation
+      3. Reduce Investment: ${bottomPlatforms[0]?.platform} (ROAS: ${bottomPlatforms[0]?.roas.toFixed(2)}x) - Decrease by 30%
+      4. Optimize or Pause: ${bottomPlatforms[1]?.platform} (ROAS: ${bottomPlatforms[1]?.roas.toFixed(2)}x) - Consider pausing if ROAS < 2.0x
       
-      ## **🌐 PLATFORM OPTIMIZATION RECOMMENDATIONS**
+      ## 🌐 PLATFORM OPTIMIZATION RECOMMENDATIONS
       
-      ### **Top Performing Platforms:**
+      ### Top Performing Platforms:
       ${topPlatforms.map((platform, index) => 
-        `${index + 1}. **${platform.platform}** - ROAS: ${platform.roas.toFixed(2)}x, CTR: ${(platform.ctr * 100).toFixed(2)}%
+        `${index + 1}. ${platform.platform} - ROAS: ${platform.roas.toFixed(2)}x, CTR: ${(platform.ctr * 100).toFixed(2)}%
          • Scale campaigns by 40%
          • Expand creative testing
          • Target high-value audiences`
       ).join('\n\n')}
       
-      ### **Underperforming Platforms:**
+      ### Underperforming Platforms:
       ${bottomPlatforms.map((platform, index) => 
-        `${index + 1}. **${platform.platform}** - ROAS: ${platform.roas.toFixed(2)}x, CTR: ${(platform.ctr * 100).toFixed(2)}%
+        `${index + 1}. ${platform.platform} - ROAS: ${platform.roas.toFixed(2)}x, CTR: ${(platform.ctr * 100).toFixed(2)}%
          • Optimize bidding strategy
          • Test new creative formats
          • Refine audience targeting`
       ).join('\n\n')}
       
-      ## **🎯 AUDIENCE OPTIMIZATION RECOMMENDATIONS**
+      ## 🎯 AUDIENCE OPTIMIZATION RECOMMENDATIONS
       
-      ### **${isCampaignSpecific ? 'Campaign-Specific' : 'Universal'} Audience Strategy:**
-      1. **Scale Top Audiences**: Focus on audiences with ROAS > 3.0x
-      2. **Exclude Poor Performers**: Remove audiences with ROAS < 1.5x
-      3. **Create Lookalikes**: Build lookalike audiences from top 20% performers
-      4. **Cross-Platform Testing**: Test successful audiences across different platforms
+      ### ${isCampaignSpecific ? 'Campaign-Specific' : 'Universal'} Audience Strategy:
+      1. Scale Top Audiences: Focus on audiences with ROAS > 3.0x
+      2. Exclude Poor Performers: Remove audiences with ROAS < 1.5x
+      3. Create Lookalikes: Build lookalike audiences from top 20% performers
+      4. Cross-Platform Testing: Test successful audiences across different platforms
       
-      ### **Platform-Specific Audience Insights:**
+      ### Platform-Specific Audience Insights:
       ${platformPerformance.slice(0, 3).map(platform => 
-        `**${platform.platform}**: ${platform.audiencePerformance[0]?.audience} (ROAS: ${platform.audiencePerformance[0]?.roas.toFixed(2)}x)`
+        `${platform.platform}: ${platform.audiencePerformance[0]?.audience} (ROAS: ${platform.audiencePerformance[0]?.roas.toFixed(2)}x)`
       ).join('\n')}
       
-      ## **🎨 CREATIVE OPTIMIZATION RECOMMENDATIONS**
+      ## 🎨 CREATIVE OPTIMIZATION RECOMMENDATIONS
       
-      ### **${isCampaignSpecific ? 'Campaign-Specific' : 'Universal'} Creative Strategy:**
-      1. **Scale Winners**: Increase spend on creatives with ROAS > 4.0x by 50%
-      2. **Test Variations**: Create A/B tests for top-performing creative formats
-      3. **Platform-Specific**: Adapt creative messaging for each platform's audience
-      4. **Performance Monitoring**: Track creative fatigue and refresh every 2-3 weeks
+      ### ${isCampaignSpecific ? 'Campaign-Specific' : 'Universal'} Creative Strategy:
+      1. Scale Winners: Increase spend on creatives with ROAS > 4.0x by 50%
+      2. Test Variations: Create A/B tests for top-performing creative formats
+      3. Platform-Specific: Adapt creative messaging for each platform's audience
+      4. Performance Monitoring: Track creative fatigue and refresh every 2-3 weeks
       
-      ### **Top Creative Formats by Platform:**
+      ### Top Creative Formats by Platform:
       ${platformPerformance.slice(0, 3).map(platform => 
-        `**${platform.platform}**: ${platform.creativePerformance[0]?.creativeFormat} (ROAS: ${platform.creativePerformance[0]?.roas.toFixed(2)}x)`
+        `${platform.platform}: ${platform.creativePerformance[0]?.creativeFormat} (ROAS: ${platform.creativePerformance[0]?.roas.toFixed(2)}x)`
       ).join('\n')}
       
-      ## **📈 STRATEGIC NEXT STEPS**
+      ## 📈 STRATEGIC NEXT STEPS
       
-      ### **Immediate Actions (Week 1):**
+      ### Immediate Actions (Week 1):
       1. Reallocate 40% of budget from ${bottomPlatforms[0]?.platform} to ${topPlatforms[0]?.platform}
       2. Pause creatives with ROAS < 2.0x
       3. Scale top 3 audiences by 30%
       
-      ### **Short-term Actions (Month 1):**
+      ### Short-term Actions (Month 1):
       1. Launch A/B tests for creative variations on ${topPlatforms[0]?.platform}
       2. Create lookalike audiences from top performers
       3. Implement platform-specific bidding strategies
       
-      ### **Long-term Strategy (Quarter 1):**
+      ### Long-term Strategy (Quarter 1):
       1. Develop platform-specific creative strategies
       2. Build audience personas based on performance data
       3. Implement automated optimization rules
       
-      ## **🎯 KEY PERFORMANCE INDICATORS TO TRACK:**
-      - **ROAS by Platform**: Target > 3.0x
-      - **CTR by Creative**: Target > 2.0%
-      - **Audience Efficiency**: Target CPA < $50
-      - **Creative Performance**: Refresh when CTR drops > 20%
+      ## 🎯 KEY PERFORMANCE INDICATORS TO TRACK:
+      - ROAS by Platform: Target > 3.0x
+      - CTR by Creative: Target > 2.0%
+      - Audience Efficiency: Target CPA < $50
+      - Creative Performance: Refresh when CTR drops > 20%
       
-      ${isCampaignSpecific ? `\n## **📋 CAMPAIGN-SPECIFIC NOTES:**
+      ${isCampaignSpecific ? `\n## 📋 CAMPAIGN-SPECIFIC NOTES:
       This analysis is focused on "${campaignName}" campaign. Consider these insights in the context of your overall marketing strategy and cross-campaign performance.` : ''}`
     
     return {
@@ -1254,9 +1254,9 @@ ${platformPerformance.map((platform, index) =>
         chartType = 'line'
       }
       
-      const content = `📊 **CHART DATA GENERATED**
+      const content = `📊 CHART DATA GENERATED
 
-## **${chartType.toUpperCase()} CHART: ${query}**
+## ${chartType.toUpperCase()} CHART: ${query}
 
 ${topCampaigns.map((campaign, index) => 
   `${index + 1}. ${campaign.campaign}
@@ -1554,14 +1554,14 @@ ${topCampaigns.map((campaign, index) =>
          .map(([platform, spend]) => ({ platform, spend: spend as number }))
          .sort((a, b) => (b.spend as number) - (a.spend as number))
       
-      const content = `📊 **SPEND BY PLATFORM - ${periodName.toUpperCase()}**
+      const content = `📊 SPEND BY PLATFORM - ${periodName.toUpperCase()}
 
  ${platformSpendArray.map((item, index) => 
-   `${index + 1}. **${item.platform}**: $${(item.spend as number).toLocaleString()}`
+   `${index + 1}. ${item.platform}: $${(item.spend as number).toLocaleString()}`
  ).join('\n')}
 
- **Total Spend**: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}
-**Data Points**: ${filteredData.length} records`
+ Total Spend: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}
+Data Points: ${filteredData.length} records`
 
       return {
         content,
@@ -1587,21 +1587,21 @@ ${topCampaigns.map((campaign, index) =>
     const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
     const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
     
-    const content = `📅 **${periodName.toUpperCase()} PERFORMANCE SUMMARY**
+    const content = `📅 ${periodName.toUpperCase()} PERFORMANCE SUMMARY
 
-**💰 Financial Metrics:**
+💰 Financial Metrics:
 • Total Spend: $${totalSpend.toLocaleString()}
 • Total Revenue: $${totalRevenue.toLocaleString()}
 • ROAS: ${roas.toFixed(2)}x
 
-**📊 Engagement Metrics:**
+📊 Engagement Metrics:
 • Total Impressions: ${totalImpressions.toLocaleString()}
 • Total Clicks: ${totalClicks.toLocaleString()}
 • Total Conversions: ${totalConversions.toLocaleString()}
 • CTR: ${(ctr * 100).toFixed(2)}%
 • CPA: $${cpa.toFixed(2)}
 
-**📈 Data Coverage:**
+📈 Data Coverage:
 • Records: ${filteredData.length}
 • Date Range: ${startDate} to ${endDate}
 
