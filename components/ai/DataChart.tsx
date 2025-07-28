@@ -1,6 +1,9 @@
 'use client'
 
+import { useState, useRef } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts'
+import html2canvas from 'html2canvas'
+import { saveAs } from 'file-saver'
 
 interface ChartData {
   type: string
@@ -25,6 +28,9 @@ interface DataChartProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
 export default function DataChart({ data }: DataChartProps) {
+  const [isDownloading, setIsDownloading] = useState(false)
+  const chartRef = useRef<HTMLDivElement>(null)
+  
   console.log('DataChart component rendered with data:', data)
   
   if (!data || !data.campaigns) {
@@ -40,6 +46,53 @@ export default function DataChart({ data }: DataChartProps) {
   }
 
   console.log('DataChart: Rendering chart with', data.campaigns.length, 'campaigns')
+
+  // Download chart as PNG
+  const downloadChartAsPNG = async () => {
+    if (!chartRef.current) return
+    
+    setIsDownloading(true)
+    try {
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      })
+      
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const fileName = `chart_${data.chartType || 'bar'}_${new Date().toISOString().split('T')[0]}.png`
+          saveAs(blob, fileName)
+        }
+      })
+    } catch (error) {
+      console.error('Error downloading chart:', error)
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
+  // Download data as CSV
+  const downloadDataAsCSV = () => {
+    const headers = ['Campaign', 'Platform', 'Revenue', 'Spend', 'ROAS', 'CTR', 'Conversions']
+    const csvContent = [
+      headers.join(','),
+      ...(data.campaigns || []).map(campaign => [
+        `"${campaign.campaign}"`,
+        `"${campaign.platform}"`,
+        campaign.revenue.toFixed(2),
+        campaign.spend.toFixed(2),
+        campaign.roas.toFixed(2),
+        (campaign.ctr * 100).toFixed(2),
+        campaign.conversions.toFixed(2)
+      ].join(','))
+    ].join('\n')
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const fileName = `chart_data_${data.chartType || 'bar'}_${new Date().toISOString().split('T')[0]}.csv`
+    saveAs(blob, fileName)
+  }
 
   // Prepare data for different chart types
   const barChartData = data.campaigns.map(campaign => ({
@@ -147,18 +200,60 @@ export default function DataChart({ data }: DataChartProps) {
 
   return (
     <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">
-        📊 {chartType.toUpperCase()} Chart Visualization
-      </h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">
+          📊 {chartType.toUpperCase()} Chart Visualization
+        </h3>
+        
+        {/* Download Buttons */}
+        <div className="flex space-x-2">
+          <button
+            onClick={downloadChartAsPNG}
+            disabled={isDownloading}
+            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+            title="Download chart as PNG image"
+          >
+            {isDownloading ? (
+              <>
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <span>📷</span>
+                <span>PNG</span>
+              </>
+            )}
+          </button>
+          
+          <button
+            onClick={downloadDataAsCSV}
+            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 flex items-center space-x-1"
+            title="Download data as CSV file"
+          >
+            <span>📊</span>
+            <span>CSV</span>
+          </button>
+        </div>
+      </div>
       
       {/* Chart Container */}
-      <div className="mb-4" style={{ height: '300px' }}>
+      <div ref={chartRef} className="mb-4" style={{ height: '300px' }}>
         {renderChart()}
       </div>
       
       {/* Fallback simple chart if Recharts fails */}
       <div className="mt-4 p-4 bg-blue-50 rounded border border-blue-200">
-        <h4 className="text-md font-medium text-blue-800 mb-3">📊 Simple Chart View</h4>
+        <div className="flex justify-between items-center mb-3">
+          <h4 className="text-md font-medium text-blue-800">📊 Simple Chart View</h4>
+          <button
+            onClick={downloadDataAsCSV}
+            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+            title="Download data as CSV"
+          >
+            📊 CSV
+          </button>
+        </div>
         <div className="space-y-2">
           {data.campaigns?.map((campaign, index) => {
             const revenuePercent = (campaign.revenue / (data.campaigns?.reduce((sum, c) => sum + c.revenue, 0) || 1)) * 100
