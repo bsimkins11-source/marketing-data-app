@@ -5,7 +5,7 @@ import path from 'path'
 // Load CSV data from the backend
 export async function loadCampaignData(): Promise<MarketingData[]> {
   try {
-    const csvPath = path.join(process.cwd(), 'realistic-campaign-data.csv')
+    const csvPath = path.join(process.cwd(), 'sample-campaign-data.csv')
     const csvContent = fs.readFileSync(csvPath, 'utf-8')
     
     const lines = csvContent.split('\n').filter(line => line.trim())
@@ -36,7 +36,7 @@ export async function loadCampaignData(): Promise<MarketingData[]> {
           roas: parseFloat(row.roas || '0')
         },
         dimensions: {
-          brand: row.brand || 'Unknown Brand',
+          brand: row.brand || 'FreshNest', // Default brand for sample data
           campaign: row.campaign_name || row.canonical_campaign || 'Unknown Campaign',
           campaignId: row.campaign_id || '',
           adGroup: row.ad_group_name || 'Unknown Ad Group',
@@ -46,7 +46,7 @@ export async function loadCampaignData(): Promise<MarketingData[]> {
           keyword: row.placement_name || '',
           platform: row.platform || 'Unknown',
           location: 'Unknown', // Not in your CSV
-          audience: row.audience || 'Unknown',
+          audience: row.audience || 'General', // Default audience for sample data
           creativeId: row.creative_id || '',
           creativeName: row.creative_name || '',
           creative_name: row.creative_name || '',
