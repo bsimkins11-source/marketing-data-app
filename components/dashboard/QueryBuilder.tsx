@@ -579,7 +579,7 @@ export default function QueryBuilder() {
                           key={key}
                           className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
                         >
-                          {formatValue(value, key)}
+                          {selectedMetrics.includes(key) ? formatValue(value, key) : (value ? String(value) : 'N/A')}
                         </td>
                       ))}
                     </tr>
