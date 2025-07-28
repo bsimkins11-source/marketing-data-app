@@ -161,7 +161,7 @@ export default function QueryBuilder() {
     })
   }
 
-  // Helper function to get nested values (same as API)
+  // Helper function to get nested values (same as API) - Updated for direct access
   const getNestedValue = (obj: any, path: string) => {
     // Handle nested properties like 'dimensions.campaign_name'
     if (path.includes('.')) {
