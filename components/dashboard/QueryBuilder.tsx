@@ -122,7 +122,7 @@ export default function QueryBuilder() {
       return filters.every(filter => {
         if (!filter.field || !filter.value) return true
         
-        const fieldValue = item[filter.field]
+        const fieldValue = getNestedValue(item, filter.field)
         const filterValue = filter.value
         
         switch (filter.operator) {
@@ -161,17 +161,41 @@ export default function QueryBuilder() {
     })
   }
 
+  // Helper function to get nested values (same as API)
+  const getNestedValue = (obj: any, path: string) => {
+    // Handle nested properties like 'dimensions.campaign_name'
+    if (path.includes('.')) {
+      const parts = path.split('.')
+      let value = obj
+      for (const part of parts) {
+        value = value?.[part]
+      }
+      return value
+    }
+    
+    // Handle direct properties
+    if (obj.dimensions && obj.dimensions[path] !== undefined) {
+      return obj.dimensions[path]
+    }
+    
+    if (obj.metrics && obj.metrics[path] !== undefined) {
+      return obj.metrics[path]
+    }
+    
+    return obj[path]
+  }
+
   const groupData = (data: any[], dimensions: string[]) => {
     if (dimensions.length === 0) return data
     
     const groups = new Map()
     
     data.forEach((item: any) => {
-      const groupKey = dimensions.map(dim => item[dim]).join('|')
+      const groupKey = dimensions.map(dim => getNestedValue(item, dim)).join('|')
       
       if (!groups.has(groupKey)) {
         groups.set(groupKey, {
-          ...dimensions.reduce((acc, dim) => ({ ...acc, [dim]: item[dim] }), {}),
+          ...dimensions.reduce((acc, dim) => ({ ...acc, [dim]: getNestedValue(item, dim) }), {}),
           count: 0,
           impressions: 0,
           clicks: 0,
@@ -183,11 +207,22 @@ export default function QueryBuilder() {
       
       const group = groups.get(groupKey)
       group.count++
-      group.impressions += Number(item.impressions) || 0
-      group.clicks += Number(item.clicks) || 0
-      group.conversions += Number(item.conversions) || 0
-      group.spend += Number(item.spend) || 0
-      group.revenue += Number(item.revenue) || 0
+      
+      // Aggregate metrics from nested structure
+      if (item.metrics) {
+        group.impressions += Number(item.metrics.impressions) || 0
+        group.clicks += Number(item.metrics.clicks) || 0
+        group.conversions += Number(item.metrics.conversions) || 0
+        group.spend += Number(item.metrics.spend) || 0
+        group.revenue += Number(item.metrics.revenue) || 0
+      } else {
+        // Fallback for flattened data
+        group.impressions += Number(item.impressions) || 0
+        group.clicks += Number(item.clicks) || 0
+        group.conversions += Number(item.conversions) || 0
+        group.spend += Number(item.spend) || 0
+        group.revenue += Number(item.revenue) || 0
+      }
     })
     
     // Calculate derived metrics
