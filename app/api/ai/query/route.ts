@@ -942,10 +942,9 @@ ${platformPerformance.map((platform, index) =>
   }
 
   // Chart and Graph Handler
-  if ((lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('pie') || 
-       lowerQuery.includes('bar') || lowerQuery.includes('line') || lowerQuery.includes('visualization')) &&
-      (lowerQuery.includes('campaign') || lowerQuery.includes('revenue') || lowerQuery.includes('spend') || 
-       lowerQuery.includes('roas') || lowerQuery.includes('ctr') || lowerQuery.includes('platform'))) {
+  if (lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('pie') || 
+      lowerQuery.includes('bar') || lowerQuery.includes('line') || lowerQuery.includes('visualization') ||
+      lowerQuery.includes('download') && lowerQuery.includes('chart')) {
     
     try {
       // Group data by campaign and calculate metrics
