@@ -522,8 +522,7 @@ ${platformSpendArray.map((item, index) =>
   `${index + 1}. ${item.platform}: $${(item.spend as number).toLocaleString()}`
 ).join('\n')}
 
-Total Spend: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}
-Data Points: ${filteredData.length} records`
+Total Spend: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}`
 
         const result = {
           content,
@@ -532,7 +531,6 @@ Data Points: ${filteredData.length} records`
             period: periodName,
             platformSpend: platformSpendArray,
             totalSpend: platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0),
-            recordCount: filteredData.length,
             query: fullQuery
           }
         }
@@ -566,9 +564,7 @@ Data Points: ${filteredData.length} records`
 • CTR: ${(ctr * 100).toFixed(2)}%
 • CPA: $${cpa.toFixed(2)}
 
-📈 Data Coverage:
-• Records: ${filteredData.length}
-• Date Range: ${startDate} to ${endDate}
+📈 Date Range: ${startDate} to ${endDate}
 
 What specific aspect of ${periodName} performance would you like to explore further?`
 
@@ -587,7 +583,6 @@ What specific aspect of ${periodName} performance would you like to explore furt
             ctr,
             cpa
           },
-          recordCount: filteredData.length,
           dateRange: { start: startDate, end: endDate },
           query: fullQuery
         }
@@ -694,8 +689,7 @@ ${platformSpendArray.map((item, index) =>
   `${index + 1}. ${item.platform}: $${(item.spend as number).toLocaleString()}`
 ).join('\n')}
 
-Total Spend: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}
-Data Points: ${filteredData.length} records`
+Total Spend: $${platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0).toLocaleString()}`
 
       return {
         content,
@@ -704,7 +698,6 @@ Data Points: ${filteredData.length} records`
           period: periodName,
           platformSpend: platformSpendArray,
           totalSpend: platformSpendArray.reduce((sum, item) => sum + (item.spend as number), 0),
-          recordCount: filteredData.length,
           query: query
         }
       }
@@ -735,9 +728,7 @@ Data Points: ${filteredData.length} records`
 • CTR: ${(ctr * 100).toFixed(2)}%
 • CPA: $${cpa.toFixed(2)}
 
-📈 Data Coverage:
-• Records: ${filteredData.length}
-• Date Range: ${startDate} to ${endDate}
+📈 Date Range: ${startDate} to ${endDate}
 
 What specific aspect of ${periodName} performance would you like to explore further?`
 
@@ -756,7 +747,6 @@ What specific aspect of ${periodName} performance would you like to explore furt
           ctr,
           cpa
         },
-        recordCount: filteredData.length,
         dateRange: { start: startDate, end: endDate },
         query: query
       }
