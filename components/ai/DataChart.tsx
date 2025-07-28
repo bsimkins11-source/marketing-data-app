@@ -25,9 +25,21 @@ interface DataChartProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
 export default function DataChart({ data }: DataChartProps) {
+  console.log('DataChart component rendered with data:', data)
+  
   if (!data || !data.campaigns) {
+    console.log('DataChart: No data or campaigns found')
     return null
   }
+
+  // Handle different data types
+  const isChartData = data.type === 'chart_data' || data.type === 'top_performing'
+  if (!isChartData) {
+    console.log('DataChart: Not chart data type:', data.type)
+    return null
+  }
+
+  console.log('DataChart: Rendering chart with', data.campaigns.length, 'campaigns')
 
   // Prepare data for different chart types
   const barChartData = data.campaigns.map(campaign => ({
@@ -136,38 +148,64 @@ export default function DataChart({ data }: DataChartProps) {
   return (
     <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">
-        📊 Data Visualization
+        📊 {chartType.toUpperCase()} Chart Visualization
       </h3>
-      {renderChart()}
       
-      {/* Additional metrics table */}
-      <div className="mt-4">
-        <h4 className="text-md font-medium text-gray-700 mb-2">Detailed Metrics</h4>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-3 py-2 text-left">Campaign</th>
-                <th className="px-3 py-2 text-right">Revenue</th>
-                <th className="px-3 py-2 text-right">Spend</th>
-                <th className="px-3 py-2 text-right">ROAS</th>
-                <th className="px-3 py-2 text-right">CTR</th>
-                <th className="px-3 py-2 text-right">Conversions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.campaigns.map((campaign, index) => (
-                <tr key={index} className="border-b border-gray-100">
-                  <td className="px-3 py-2 font-medium">{campaign.campaign}</td>
-                  <td className="px-3 py-2 text-right">${campaign.revenue.toLocaleString()}</td>
-                  <td className="px-3 py-2 text-right">${campaign.spend.toLocaleString()}</td>
-                  <td className="px-3 py-2 text-right">{campaign.roas.toFixed(2)}x</td>
-                  <td className="px-3 py-2 text-right">{(campaign.ctr * 100).toFixed(2)}%</td>
-                  <td className="px-3 py-2 text-right">{campaign.conversions.toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Chart Container */}
+      <div className="mb-4" style={{ height: '300px' }}>
+        {renderChart()}
+      </div>
+      
+      {/* Fallback simple chart if Recharts fails */}
+      <div className="mt-4 p-4 bg-blue-50 rounded border border-blue-200">
+        <h4 className="text-md font-medium text-blue-800 mb-3">📊 Simple Chart View</h4>
+        <div className="space-y-2">
+          {data.campaigns?.map((campaign, index) => {
+            const revenuePercent = (campaign.revenue / (data.campaigns?.reduce((sum, c) => sum + c.revenue, 0) || 1)) * 100
+            return (
+              <div key={index} className="flex items-center space-x-3">
+                <div className="w-32 text-sm font-medium truncate">{campaign.campaign}</div>
+                <div className="flex-1 bg-gray-200 rounded-full h-4">
+                  <div 
+                    className="bg-blue-500 h-4 rounded-full" 
+                    style={{ width: `${revenuePercent}%` }}
+                  ></div>
+                </div>
+                <div className="w-24 text-sm text-right">${campaign.revenue.toLocaleString()}</div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      
+      {/* Simple metrics summary */}
+      <div className="mt-4 p-3 bg-gray-50 rounded">
+        <h4 className="text-md font-medium text-gray-700 mb-2">📈 Performance Summary</h4>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <span className="font-medium">Total Revenue:</span>
+            <div className="text-green-600 font-bold">
+              ${data.campaigns.reduce((sum, c) => sum + c.revenue, 0).toLocaleString()}
+            </div>
+          </div>
+          <div>
+            <span className="font-medium">Total Spend:</span>
+            <div className="text-blue-600 font-bold">
+              ${data.campaigns.reduce((sum, c) => sum + c.spend, 0).toLocaleString()}
+            </div>
+          </div>
+          <div>
+            <span className="font-medium">Avg ROAS:</span>
+            <div className="text-purple-600 font-bold">
+              {(data.campaigns.reduce((sum, c) => sum + c.roas, 0) / data.campaigns.length).toFixed(2)}x
+            </div>
+          </div>
+          <div>
+            <span className="font-medium">Top Campaign:</span>
+            <div className="text-orange-600 font-bold">
+              {data.campaigns[0]?.campaign}
+            </div>
+          </div>
         </div>
       </div>
     </div>
