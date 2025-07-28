@@ -48,7 +48,7 @@ export async function loadCampaignData(): Promise<MarketingData[]> {
           roas: parseFloat(row.roas || '0')
         },
         dimensions: {
-          brand: extractBrandFromCampaign(row.campaign_name || row.canonical_campaign || 'Unknown Campaign'),
+          brand: row.brand || extractBrandFromCampaign(row.campaign_name || row.canonical_campaign || 'Unknown Campaign'),
           campaign: row.campaign_name || row.canonical_campaign || 'Unknown Campaign',
           campaignId: row.campaign_id || '',
           adGroup: row.ad_group_name || 'Unknown Ad Group',
@@ -58,7 +58,7 @@ export async function loadCampaignData(): Promise<MarketingData[]> {
           keyword: row.placement_name || '',
           platform: row.platform || 'Unknown',
           location: 'Unknown', // Not in your CSV
-          audience: row.audience || 'General', // Default audience for sample data
+          audience: row.audience || 'General', // Use audience from CSV
           creativeId: row.creative_id || '',
           creativeName: row.creative_name || '',
           creative_name: row.creative_name || '',
