@@ -62,7 +62,7 @@ export async function loadCampaignData(): Promise<MarketingData[]> {
           creativeId: row.creative_id || '',
           creativeName: row.creative_name || '',
           creative_name: row.creative_name || '',
-          creative_format: row.creative_format || 'Unknown Format'
+          creative_format: row.creative_format || 'Unknown Format',
         }
       }
     }).filter(item => item.metrics.impressions > 0)
