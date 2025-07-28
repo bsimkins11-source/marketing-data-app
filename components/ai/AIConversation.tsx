@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, RefreshCw, MessageSquare, Sparkles, Mic, MicOff } from 'lucide-react'
 import { MarketingData } from '@/types'
+import DataChart from './DataChart'
 
 interface Message {
   id: string
@@ -356,9 +357,8 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
                 </div>
                 
                 {message.data && (
-                  <div className="mt-2 p-2 bg-white bg-opacity-20 rounded text-xs">
-                    <Sparkles className="w-3 h-3 inline mr-1" />
-                    Data available for visualization
+                  <div className="mt-2">
+                    <DataChart data={message.data} />
                   </div>
                 )}
                 

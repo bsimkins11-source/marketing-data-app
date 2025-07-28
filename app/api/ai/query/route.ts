@@ -941,6 +941,101 @@ ${platformPerformance.map((platform, index) =>
     }
   }
 
+  // Chart and Graph Handler
+  if ((lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('pie') || 
+       lowerQuery.includes('bar') || lowerQuery.includes('line') || lowerQuery.includes('visualization')) &&
+      (lowerQuery.includes('campaign') || lowerQuery.includes('revenue') || lowerQuery.includes('spend') || 
+       lowerQuery.includes('roas') || lowerQuery.includes('ctr') || lowerQuery.includes('platform'))) {
+    
+    try {
+      // Group data by campaign and calculate metrics
+      const campaignMetrics = data.reduce((acc, item) => {
+        const campaign = item.dimensions.campaign
+        if (!acc[campaign]) {
+          acc[campaign] = {
+            spend: 0,
+            revenue: 0,
+            impressions: 0,
+            clicks: 0,
+            conversions: 0,
+            platform: item.dimensions.platform
+          }
+        }
+        acc[campaign].spend += item.metrics.spend
+        acc[campaign].revenue += item.metrics.revenue
+        acc[campaign].impressions += item.metrics.impressions
+        acc[campaign].clicks += item.metrics.clicks
+        acc[campaign].conversions += item.metrics.conversions
+        return acc
+      }, {} as Record<string, any>)
+      
+      // Calculate metrics for each campaign
+      const campaignPerformance = Object.entries(campaignMetrics).map(([campaign, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const calculatedConversions = roas > 0 ? metrics.revenue / (roas * 100) : 0
+        const cpa = calculatedConversions > 0 ? metrics.spend / calculatedConversions : 0
+        
+        const firstCampaignItem = data.find(item => item.dimensions.campaign === campaign)
+        const ctr = firstCampaignItem?.metrics.ctr || 0
+        
+        return {
+          campaign,
+          platform: metrics.platform,
+          roas,
+          ctr,
+          cpa,
+          spend: metrics.spend,
+          revenue: metrics.revenue,
+          conversions: calculatedConversions
+        }
+      }).sort((a, b) => b.revenue - a.revenue) // Sort by revenue for chart display
+      
+      // Get top campaigns for chart
+      const topCampaigns = campaignPerformance.slice(0, 5)
+      
+      // Determine chart type based on query
+      let chartType = 'bar'
+      if (lowerQuery.includes('pie')) {
+        chartType = 'pie'
+      } else if (lowerQuery.includes('line')) {
+        chartType = 'line'
+      }
+      
+      const content = `📊 **CHART DATA GENERATED**
+
+## **${chartType.toUpperCase()} CHART: ${query}**
+
+${topCampaigns.map((campaign, index) => 
+  `${index + 1}. ${campaign.campaign}
+   • Revenue: $${campaign.revenue.toLocaleString()}
+   • Spend: $${campaign.spend.toLocaleString()}
+   • ROAS: ${campaign.roas.toFixed(2)}x
+   • CTR: ${(campaign.ctr * 100).toFixed(2)}%
+   • Platform: ${campaign.platform}`
+).join('\n\n')}
+
+*Chart visualization will be displayed below with interactive elements.*`
+
+      return {
+        content,
+        data: {
+          type: 'chart_data',
+          campaigns: topCampaigns,
+          chartType: chartType,
+          query: query
+        }
+      }
+    } catch (error) {
+      return {
+        content: "Error generating chart data. Please try again.",
+        data: {
+          type: 'error',
+          query: query
+        }
+      }
+    }
+  }
+
   // Top Performing Campaigns Handler
   if (KEYWORDS.TOP.some(keyword => lowerQuery.includes(keyword)) && 
       (lowerQuery.includes('campaign') || lowerQuery.includes('campaigns'))) {
