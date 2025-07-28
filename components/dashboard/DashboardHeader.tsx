@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   BarChart3, 
   Settings, 
@@ -31,10 +32,13 @@ export default function DashboardHeader() {
             
             {/* Transparent Partners Logo */}
             <div className="flex items-center space-x-2 border-l border-gray-300 pl-6">
-              <img 
+              <Image 
                 src="/images/transparent-partners-logo.png" 
                 alt="Transparent Partners" 
+                width={120}
+                height={32}
                 className="h-8 w-auto object-contain"
+                priority
               />
               <span className="text-sm text-gray-500 font-medium">
                 Powered by Transparent Partners

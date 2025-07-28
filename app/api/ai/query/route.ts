@@ -2,21 +2,70 @@ import { NextRequest, NextResponse } from 'next/server'
 import { loadCampaignData } from '@/lib/server-data-service'
 import { KEYWORDS, PLATFORM_MAP } from '@/lib/constants'
 
-// In-memory conversation context storage
-const conversationContexts = new Map<string, { lastContext: any, messages: any[] }>()
+// Define proper types for conversation context
+interface ConversationContext {
+  lastContext: any
+  messages: any[]
+  lastAccess: number
+}
 
-function getConversationContext(sessionId?: string) {
-  if (!sessionId) return { lastContext: null, messages: [] }
-  return conversationContexts.get(sessionId) || { lastContext: null, messages: [] }
+// In-memory conversation context storage with cleanup
+const conversationContexts = new Map<string, ConversationContext>()
+const sessionCleanup = new Map<string, NodeJS.Timeout>()
+const SESSION_TIMEOUT = 60 * 60 * 1000 // 1 hour
+
+function cleanupSession(sessionId: string) {
+  conversationContexts.delete(sessionId)
+  sessionCleanup.delete(sessionId)
+  console.log(`🧹 Cleaned up session: ${sessionId}`)
+}
+
+function getConversationContext(sessionId?: string): ConversationContext {
+  if (!sessionId) return { lastContext: null, messages: [], lastAccess: Date.now() }
+  
+  const context = conversationContexts.get(sessionId)
+  if (context) {
+    // Update last access time
+    context.lastAccess = Date.now()
+    conversationContexts.set(sessionId, context)
+  }
+  
+  return context || { lastContext: null, messages: [], lastAccess: Date.now() }
 }
 
 function updateConversationContext(sessionId: string | undefined, query: string, result: any) {
   if (!sessionId) return
+  
+  // Clear existing timeout
+  if (sessionCleanup.has(sessionId)) {
+    clearTimeout(sessionCleanup.get(sessionId)!)
+  }
+  
+  // Set new timeout for cleanup
+  const timeout = setTimeout(() => cleanupSession(sessionId), SESSION_TIMEOUT)
+  sessionCleanup.set(sessionId, timeout)
+  
+  // Update context
   const context = getConversationContext(sessionId)
   context.lastContext = { query, result }
   context.messages.push({ query, result })
+  context.lastAccess = Date.now()
   conversationContexts.set(sessionId, context)
 }
+
+// Periodic cleanup of expired sessions
+setInterval(() => {
+  const now = Date.now()
+  const expiredSessions = Array.from(conversationContexts.entries())
+    .filter(([_, context]) => now - context.lastAccess > SESSION_TIMEOUT)
+    .map(([sessionId, _]) => sessionId)
+  
+  expiredSessions.forEach(sessionId => cleanupSession(sessionId))
+  
+  if (expiredSessions.length > 0) {
+    console.log(`🧹 Cleaned up ${expiredSessions.length} expired sessions`)
+  }
+}, 5 * 60 * 1000) // Check every 5 minutes
 
 function handleDrillDownQuery(query: string, data: any[], context: any) {
   const lowerQuery = query.toLowerCase()
@@ -255,8 +304,21 @@ export async function POST(request: NextRequest) {
   try {
     const { query, sessionId } = await request.json()
     
-    if (!query) {
-      return NextResponse.json({ error: 'Query is required' }, { status: 400 })
+    // Enhanced input validation
+    if (!query?.trim()) {
+      return NextResponse.json({ 
+        error: 'Query is required and cannot be empty',
+        code: 'INVALID_QUERY',
+        statusCode: 400
+      }, { status: 400 })
+    }
+    
+    if (query.length > 1000) {
+      return NextResponse.json({ 
+        error: 'Query too long (max 1000 characters)',
+        code: 'QUERY_TOO_LONG',
+        statusCode: 400
+      }, { status: 400 })
     }
     
     const data = await loadCampaignData()
@@ -264,9 +326,20 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error processing query:', error)
+    // Enhanced error logging
+    console.error('API Error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    })
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        code: 'INTERNAL_ERROR',
+        statusCode: 500,
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     )
   }
