@@ -25,9 +25,36 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
   if (context.lastContext) {
     const lastResult = context.lastContext.result
     
-    // Handle chart requests for previous results
-    if ((lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('download')) &&
-        (lowerQuery.includes('this') || lowerQuery.includes('that') || lowerQuery.includes('it'))) {
+    // Handle chart requests for previous results - expanded to cover many natural language variations
+    const chartKeywords = [
+      'chart', 'graph', 'visualization', 'visualize', 'visual', 'plot', 'diagram', 'figure',
+      'download', 'export', 'save', 'get', 'show', 'display', 'present', 'create', 'generate',
+      'make', 'build', 'render', 'draw', 'illustrate', 'depict', 'represent'
+    ]
+    
+    const contextKeywords = [
+      'this', 'that', 'it', 'these', 'those', 'the data', 'the results', 'the information',
+      'what you showed', 'what you found', 'the analysis', 'the performance', 'the metrics'
+    ]
+    
+    const hasChartKeyword = chartKeywords.some(keyword => lowerQuery.includes(keyword))
+    const hasContextKeyword = contextKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    // Additional patterns for natural language variations
+    const additionalPatterns = [
+      'can you show me', 'could you show me', 'would you show me',
+      'can you create', 'could you create', 'would you create',
+      'can you make', 'could you make', 'would you make',
+      'i would like', 'i want', 'i need',
+      'please show', 'please create', 'please make',
+      'show me a', 'create a', 'make a',
+      'turn this into', 'convert this to', 'transform this into',
+      'put this in', 'put that in', 'put it in'
+    ]
+    
+    const hasAdditionalPattern = additionalPatterns.some(pattern => lowerQuery.includes(pattern))
+    
+    if ((hasChartKeyword && hasContextKeyword) || hasAdditionalPattern) {
       
       // Generate chart data from any previous result
       let chartData = null
