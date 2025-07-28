@@ -29,8 +29,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [error, setError] = useState('')
   const [isSupported, setIsSupported] = useState(false)
-  const [showHelpModal, setShowHelpModal] = useState(false)
-  const [showDownloadModal, setShowDownloadModal] = useState(false)
+  const [showHelpGuideModal, setShowHelpGuideModal] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<any>(null)
@@ -477,7 +476,7 @@ I can handle complex queries, maintain conversation context, and provide detaile
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    setShowDownloadModal(false)
+    setShowHelpGuideModal(false)
   }
 
   return (
@@ -491,20 +490,12 @@ I can handle complex queries, maintain conversation context, and provide detaile
         <div className="flex items-center space-x-2">
           <span className="text-xs text-gray-500">Session: {sessionId.slice(-8)}</span>
           <button
-            onClick={() => setShowHelpModal(true)}
+            onClick={() => setShowHelpGuideModal(true)}
             className="btn-secondary flex items-center space-x-1 text-xs"
-            title="Show prompt guide"
+            title="Help Guide"
           >
             <HelpCircle className="w-3 h-3" />
-            <span>Help</span>
-          </button>
-          <button
-            onClick={() => setShowDownloadModal(true)}
-            className="btn-secondary flex items-center space-x-1 text-xs"
-            title="Download prompt guide"
-          >
-            <Download className="w-3 h-3" />
-            <span>Download</span>
+            <span>Help Guide</span>
           </button>
           <button
             onClick={startNewSession}
@@ -658,84 +649,219 @@ I can handle complex queries, maintain conversation context, and provide detaile
         </div>
       </div>
 
-      {/* Help Modal */}
-      {showHelpModal && (
+      {/* Help Guide Modal */}
+      {showHelpGuideModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-4xl max-h-[80vh] overflow-hidden">
+          <div className="bg-white rounded-lg max-w-6xl max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">AI Prompt Guide</h2>
+              <h2 className="text-xl font-semibold text-gray-900">AI Marketing Data Query Guide</h2>
               <button
-                onClick={() => setShowHelpModal(false)}
+                onClick={() => setShowHelpGuideModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              <div className="prose prose-sm max-w-none">
-                <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono bg-gray-50 p-4 rounded-lg overflow-x-auto">
-                  {getPromptGuide()}
-                </pre>
-              </div>
-            </div>
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <p className="text-sm text-gray-600">
-                You can also ask me directly: help, what can you do, show me examples, or prompt guide
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Download Modal */}
-      {showDownloadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-md overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Download Prompt Guide</h2>
-              <button
-                onClick={() => setShowDownloadModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <Download className="w-8 h-8 text-blue-600" />
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">AI Marketing Data Query Guide</h3>
-                  <p className="text-sm text-gray-600">Comprehensive guide with all query categories and examples</p>
+            
+            <div className="p-6 overflow-y-auto max-h-[70vh]">
+              {/* Executive Overview */}
+              <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                <div className="flex items-center space-x-3 mb-4">
+                  <HelpCircle className="w-8 h-8 text-blue-600" />
+                  <h3 className="text-xl font-semibold text-gray-900">Executive Overview</h3>
+                </div>
+                <p className="text-gray-700 mb-4">
+                  I am your AI marketing data assistant, designed to help you analyze campaign performance, 
+                  optimize budgets, and generate actionable insights. I can handle complex queries, maintain 
+                  conversation context, and provide detailed analysis with charts and actionable recommendations.
+                </p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Key Capabilities:</h4>
+                    <ul className="text-gray-600 space-y-1">
+                      <li>• Campaign Performance Analysis</li>
+                      <li>• Brand & Platform Analytics</li>
+                      <li>• Time-based Data Queries</li>
+                      <li>• Budget Optimization</li>
+                      <li>• Chart & Visualization</li>
+                      <li>• Strategic Recommendations</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Best Practices:</h4>
+                    <ul className="text-gray-600 space-y-1">
+                      <li>• Be specific with time periods</li>
+                      <li>• Ask follow-up questions</li>
+                      <li>• Request actionable insights</li>
+                      <li>• Use natural language</li>
+                      <li>• Ask for comparisons</li>
+                      <li>• Request visualizations</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                <h4 className="font-medium text-gray-900 mb-2">What is included:</h4>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Campaign Performance Queries</li>
-                  <li>• Brand Analytics</li>
-                  <li>• Platform Analysis</li>
-                  <li>• Time-based Analysis</li>
-                  <li>• Budget Optimization</li>
-                  <li>• Chart & Visualization</li>
-                  <li>• Strategic Insights</li>
-                  <li>• Creative & Audience Analysis</li>
-                  <li>• Advanced Queries</li>
-                  <li>• Query Templates</li>
-                </ul>
+
+              {/* Query Categories */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Campaign Performance */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                    Campaign Performance
+                  </h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• What were the top performing campaigns?</li>
+                    <li>• Show me the best campaigns by ROAS</li>
+                    <li>• Which campaigns had the highest CTR?</li>
+                    <li>• List campaigns ranked by performance</li>
+                    <li>• What is the average ROAS across all campaigns?</li>
+                  </ul>
+                </div>
+
+                {/* Brand Analytics */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    Brand Analytics
+                  </h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Brand analytics</li>
+                    <li>• How are my brands performing?</li>
+                    <li>• Show me brand-level metrics</li>
+                    <li>• Which brand has the best ROAS?</li>
+                    <li>• Compare brand performance</li>
+                  </ul>
+                </div>
+
+                {/* Platform Analysis */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                    Platform Analysis
+                  </h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Which platform performed best?</li>
+                    <li>• Show me platform spend breakdown</li>
+                    <li>• What is the ROAS by platform?</li>
+                    <li>• Platform performance comparison</li>
+                    <li>• Which platform had the highest CTR?</li>
+                  </ul>
+                </div>
+
+                {/* Time-based Analysis */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                    Time-based Analysis
+                  </h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Show me spend by platform in Q2 2024</li>
+                    <li>• What was performance in June 2024?</li>
+                    <li>• Q1 vs Q2 performance comparison</li>
+                    <li>• Monthly performance breakdown</li>
+                    <li>• Year-over-year analysis</li>
+                  </ul>
+                </div>
+
+                {/* Budget Optimization */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                    Budget Optimization
+                  </h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• How should I allocate my budget?</li>
+                    <li>• Spend optimization recommendations</li>
+                    <li>• Budget reallocation strategy</li>
+                    <li>• ROI and ROAS analysis</li>
+                    <li>• Cost per acquisition analysis</li>
+                  </ul>
+                </div>
+
+                {/* Chart & Visualization */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>
+                    Chart & Visualization
+                  </h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Can I get a chart of this for download?</li>
+                    <li>• Produce a graph of this information</li>
+                    <li>• Show me a chart of campaign performance</li>
+                    <li>• Generate a visualization of platform spend</li>
+                    <li>• Create a chart of ROAS trends</li>
+                  </ul>
+                </div>
+
+                {/* Strategic Insights */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                    Strategic Insights
+                  </h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• What can we learn from these campaigns?</li>
+                    <li>• Optimization recommendations</li>
+                    <li>• How can I improve performance?</li>
+                    <li>• Universal optimization recommendations</li>
+                    <li>• Strategic insights and analysis</li>
+                  </ul>
+                </div>
+
+                {/* Creative & Audience */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
+                    Creative & Audience
+                  </h4>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• How did my creatives perform?</li>
+                    <li>• Which creative formats worked best?</li>
+                    <li>• Audience performance breakdown</li>
+                    <li>• Creative optimization recommendations</li>
+                    <li>• Audience targeting analysis</li>
+                  </ul>
+                </div>
               </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowDownloadModal(false)}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
-                >
-                  Cancel
-                </button>
+
+              {/* Quick Start Examples */}
+              <div className="mt-8 bg-gray-50 p-6 rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-4">Quick Start Examples</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Basic Queries:</h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• What were the top performing campaigns?</li>
+                      <li>• Show me platform spend for Q2 2024</li>
+                      <li>• Can I get a chart of this for download?</li>
+                      <li>• What can we learn from these campaigns?</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Advanced Queries:</h5>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• What anomalies should I be aware of?</li>
+                      <li>• Show me performance by audience segment</li>
+                      <li>• Which campaigns should I scale or pause?</li>
+                      <li>• How does my performance compare to benchmarks?</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer with Download Option */}
+            <div className="p-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  You can also ask me directly: help, what can you do, show me examples, or prompt guide
+                </p>
                 <button
                   onClick={downloadPromptGuide}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition-colors flex items-center space-x-2"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Download Guide</span>
+                  <span>Download Full Guide</span>
                 </button>
               </div>
             </div>
