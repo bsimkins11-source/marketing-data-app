@@ -32,6 +32,34 @@ export default function QueryBuilder() {
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Helper function to ensure date format is YYYY-MM-DD
+  const formatDateForInput = (dateString: string): string => {
+    if (!dateString) return ''
+    
+    // If already in YYYY-MM-DD format, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString
+    }
+    
+    // Try to parse various date formats and convert to YYYY-MM-DD
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) {
+      return ''
+    }
+    
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    
+    return `${year}-${month}-${day}`
+  }
+
+  // Handle date input changes with format conversion
+  const handleDateChange = (field: 'start' | 'end', value: string) => {
+    const formattedDate = formatDateForInput(value)
+    setDateRange(prev => ({ ...prev, [field]: formattedDate }))
+  }
+
   const availableMetrics = [
     { id: 'impressions', name: 'Impressions', category: 'Reach' },
     { id: 'clicks', name: 'Clicks', category: 'Engagement' },
@@ -318,28 +346,34 @@ export default function QueryBuilder() {
       {/* Date Range */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Date Range (YYYY-MM-DD format)
+          Date Range
         </label>
         <div className="grid grid-cols-2 gap-2">
-          <input
-            type="date"
-            value={dateRange.start}
-            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-            className="input-field"
-            placeholder="Start date"
-          />
-          <input
-            type="date"
-            value={dateRange.end}
-            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-            className="input-field"
-            placeholder="End date"
-          />
+          <div>
+            <input
+              type="date"
+              value={dateRange.start}
+              onChange={(e) => handleDateChange('start', e.target.value)}
+              className="input-field"
+              placeholder="Start date"
+            />
+            <p className="text-xs text-gray-500 mt-1">Or type: MM/DD/YYYY, YYYY-MM-DD</p>
+          </div>
+          <div>
+            <input
+              type="date"
+              value={dateRange.end}
+              onChange={(e) => handleDateChange('end', e.target.value)}
+              className="input-field"
+              placeholder="End date"
+            />
+            <p className="text-xs text-gray-500 mt-1">Or type: MM/DD/YYYY, YYYY-MM-DD</p>
+          </div>
         </div>
-        <div className="flex items-center justify-between mt-1">
-          <p className="text-xs text-gray-500">
-            Use YYYY-MM-DD format (e.g., 2024-06-01 to 2024-06-30)
-          </p>
+        <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-gray-500">
+              Date picker or type in any format - we&apos;ll convert it automatically
+            </p>
           <button
             type="button"
             onClick={() => setDateRange({ start: '2024-06-01', end: '2024-06-30' })}
