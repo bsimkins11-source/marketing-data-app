@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Database, TrendingUp, Users } from 'lucide-react'
+import { Database, TrendingUp, Users, BookOpen } from 'lucide-react'
 import SharedHeader from '@/components/SharedHeader'
 
 export default function Home() {
@@ -56,6 +56,50 @@ export default function Home() {
           <p className="text-sm text-gray-600">
             Ask questions about your campaign data in natural language
           </p>
+        </div>
+
+        {/* Prompt Guide Section */}
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-8 max-w-4xl mx-auto">
+          <div className="flex items-center mb-4">
+            <BookOpen className="w-6 h-6 text-purple-600 mr-3" />
+            <h3 className="text-lg font-semibold text-purple-800">
+              🤖 AI Query Guide
+            </h3>
+          </div>
+          <p className="text-purple-700 mb-4">
+            New to AI queries? Learn how to ask the right questions to get the most insightful responses from your marketing data.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <h4 className="font-medium text-purple-800 mb-2">🎯 Quick Examples:</h4>
+              <ul className="space-y-1 text-purple-700">
+                <li>• "Give me an executive summary"</li>
+                <li>• "How is Meta performing?"</li>
+                <li>• "What's our best campaign?"</li>
+                <li>• "How did we do in week 1?"</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-purple-800 mb-2">💡 Pro Tips:</h4>
+              <ul className="space-y-1 text-purple-700">
+                <li>• Be specific with platform names</li>
+                <li>• Use natural language</li>
+                <li>• Ask follow-up questions</li>
+                <li>• All data is from June 2024</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-4 text-center">
+            <a 
+              href="/PROMPT_GUIDE.md" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              View Complete Guide
+            </a>
+          </div>
         </div>
 
       {/* Feature Cards */}

@@ -1,282 +1,207 @@
-# Marketing Analytics AI - Prompt Guide
+# 🤖 AI Marketing Data Query Guide
 
-## Overview
-This guide provides categorized prompts to help you get the most accurate and insightful responses from the FreshNest Marketing Analytics AI. Each prompt has been tested for accuracy and consistency.
+Welcome to the Marketing Data Query Assistant! This guide will help you get the most out of our AI-powered marketing analytics system.
 
-## How to Use This Guide
-1. **Choose a category** that matches your analysis goal
-2. **Select a prompt** that fits your specific question
-3. **Customize** the prompt with your specific platforms, campaigns, or metrics
-4. **Ask the AI** using the prompt format
+## 📊 What Data is Available?
 
----
-
-## 📊 **Platform Performance Analysis**
-
-### Basic Platform Metrics
-- `What is [Platform]'s performance?`
-- `How is [Platform] performing?`
-- `What are [Platform]'s results?`
-- `Show me [Platform]'s metrics`
-
-### Platform Comparisons
-- `Which platform is doing the best?`
-- `Compare platform performance`
-- `What's the top performing platform?`
-- `Which platform should I focus on?`
-
-### Platform-Specific Insights
-- `What is [Platform]'s conversion rate?`
-- `How much did we spend on [Platform]?`
-- `What are [Platform]'s impressions?`
-- `What are [Platform]'s clicks?`
-
-**Tested Platforms**: Meta, Dv360, Amazon, Cm360, Sa360, Tradedesk
+**Time Period**: June 1-30, 2024 (30 days of campaign data)  
+**Brands**: FreshNest, TasteBuds  
+**Platforms**: Meta, DV360, Amazon, CM360, SA360, TradeDesk  
+**Data Granularity**: Daily performance metrics  
+**Available Time Dimensions**: Week 1-4 breakdowns within June 2024
 
 ---
 
-## 💰 **Financial & ROI Analysis**
+## 🎯 Query Categories & Examples
 
-### Spend Analysis
-- `What spend did we achieve?`
-- `What are the spend numbers?`
-- `How much did we spend?`
-- `What's our total spend?`
+### 📈 Executive Summary & Overview
+Get a comprehensive overview of your marketing performance.
 
-### Revenue & ROAS
-- `What's our ROAS?`
-- `What's our return on ad spend?`
-- `How profitable are our campaigns?`
-- `What's our revenue performance?`
+**Example Queries:**
+- "Give me an executive summary"
+- "What's our overall performance?"
+- "Show me a summary of our campaigns"
+- "How are we doing overall?"
 
-### Cost Metrics
-- `What's our cost per acquisition?`
-- `What's our CPA?`
-- `What's our cost per click?`
-- `What's our CPM?`
+**What You'll Get:**
+- Total spend and revenue
+- Overall ROAS and engagement metrics
+- Top performing campaigns and platforms
+- Key insights and opportunities
 
 ---
 
-## 🎯 **Campaign Performance**
+### 💰 Financial Performance
+Dive into spend, revenue, and ROI metrics.
 
-### Campaign Overview
-- `How are our campaigns performing?`
-- `What's our campaign performance?`
-- `Which campaign is doing best?`
-- `What are our top campaigns?`
+**Example Queries:**
+- "How much did we spend?"
+- "What's our total revenue?"
+- "What's our overall ROAS?"
+- "How much revenue did we generate?"
+- "What's our cost per acquisition?"
 
-### Campaign-Specific
-- `How is [Campaign Name] performing?`
-- `What are the results for [Campaign Name]?`
-- `What's the performance of [Campaign Name]?`
-
-**Available Campaigns**: FreshNest Summer Grilling, FreshNest Back to School, FreshNest Holiday Recipes, FreshNest Pantry Staples
-
----
-
-## 📈 **Executive Summary & Reporting**
-
-### High-Level Overview
-- `Give me an executive summary`
-- `What's the overall performance?`
-- `Summarize our marketing performance`
-- `What are the key metrics?`
-
-### Performance Summary
-- `What are the key findings?`
-- `What should I focus on?`
-- `What are the main insights?`
-- `Give me a performance overview`
+**What You'll Get:**
+- Total spend and revenue figures
+- ROAS (Return on Ad Spend)
+- CPA (Cost Per Acquisition)
+- CPC (Cost Per Click)
+- CPM (Cost Per Mille)
 
 ---
 
-## 🔍 **Advanced Analytics & Insights**
+### 🏆 Platform Performance
+Analyze performance by advertising platform.
 
-### Trend Analysis
-- `What trends do you see?`
-- `What patterns are emerging?`
-- `What insights can you provide?`
-- `What should I learn from this data?`
+**Example Queries:**
+- "How is Meta performing?"
+- "What's DV360's performance?"
+- "Show me Amazon's metrics"
+- "How did CM360 do?"
+- "What are SA360's results?"
+- "How is TradeDesk performing?"
 
-### Optimization Opportunities
-- `Where can we optimize?`
-- `What optimization opportunities exist?`
-- `What should we improve?`
-- `What are the optimization levers?`
-
-### Strategic Insights
-- `What strategic insights do you have?`
-- `What recommendations do you have?`
-- `What should our strategy be?`
-- `What are the key opportunities?`
+**What You'll Get:**
+- Platform-specific spend and revenue
+- CTR, ROAS, CPA, CPC, CPM
+- Impressions, clicks, conversions
+- Performance comparison insights
 
 ---
 
-## 🎨 **Creative & Ad Performance**
+### 📅 Weekly Performance
+Break down performance by week within June 2024.
 
-### Creative Analysis
-- `How are our creatives performing?`
-- `What's our creative performance?`
-- `Which creative formats work best?`
-- `What creative insights do you have?`
+**Example Queries:**
+- "How did we perform in week 1?"
+- "Show me week 2 results"
+- "What happened in week 3?"
+- "How was week 4?"
+- "Compare all weeks"
+- "Which week performed best?"
 
-### Creative Optimization
-- `What creative optimizations should we make?`
-- `How can we improve our creatives?`
-- `What creative recommendations do you have?`
-
----
-
-## 👥 **Audience & Targeting**
-
-### Audience Performance
-- `How are our audiences performing?`
-- `What's our audience performance?`
-- `Which audience is doing best?`
-- `What audience insights do you have?`
-
-### Targeting Optimization
-- `What targeting optimizations should we make?`
-- `How can we improve our targeting?`
-- `What audience recommendations do you have?`
-
-**Available Audiences**: Outdoor Cooking Enthusiasts, Family Shoppers, General, Holiday Entertainers, Home Cooks
+**What You'll Get:**
+- Week-by-week financial metrics
+- Performance trends over time
+- Best and worst performing weeks
+- Weekly engagement metrics
 
 ---
 
-## 📍 **Placement & Ad Group Analysis**
+### 🎯 Campaign Analysis
+Analyze specific campaigns and their performance.
 
-### Placement Performance
-- `How are our placements performing?`
-- `What's our placement performance?`
-- `Which placements work best?`
-- `What placement insights do you have?`
+**Example Queries:**
+- "What's our best performing campaign?"
+- "Show me campaign performance"
+- "Which campaigns are doing well?"
+- "What's our top campaign?"
+- "How are our campaigns performing?"
 
-### Ad Group Analysis
-- `How are our ad groups performing?`
-- `What's our ad group performance?`
-- `Which ad groups are doing best?`
-
----
-
-## 🚨 **Anomaly Detection & Issues**
-
-### Performance Issues
-- `Are there any performance issues?`
-- `What anomalies do you see?`
-- `What problems should I be aware of?`
-- `What's concerning in the data?`
-
-### Campaign Health
-- `How healthy are our campaigns?`
-- `What's our campaign health?`
-- `Are there any red flags?`
+**What You'll Get:**
+- Campaign rankings by performance
+- Individual campaign metrics
+- Top and bottom performers
+- Campaign-specific insights
 
 ---
 
-## 📋 **Specific Metrics Queries**
+### 🔍 Optimization Insights
+Get recommendations and insights for improvement.
 
-### Volume Metrics
-- `What are the impressions?`
-- `What are the clicks?`
-- `What are the conversions?`
-- `What's our reach?`
+**Example Queries:**
+- "What should we optimize?"
+- "Give me optimization recommendations"
+- "What can we improve?"
+- "What are our opportunities?"
+- "How can we improve performance?"
 
-### Rate Metrics
-- `What's our click-through rate?`
-- `What's our conversion rate?`
-- `What's our CTR?`
-
-### Comparative Metrics
-- `Which platform had the most conversions?`
-- `Which campaign had the highest ROAS?`
-- `Which creative had the best CTR?`
+**What You'll Get:**
+- Performance gaps and opportunities
+- Optimization recommendations
+- Areas for improvement
+- Strategic insights
 
 ---
 
-## 🎯 **Optimization Recommendations**
+## 💡 Pro Tips for Better Queries
 
-### Budget Allocation
-- `Where should I put more money?`
-- `What's the best budget allocation?`
-- `Which platform should I invest more in?`
-- `How should I reallocate budget?`
+### ✅ Do This:
+- **Be specific**: "How is Meta performing?" vs "How are we doing?"
+- **Use natural language**: "What's our best campaign?" works perfectly
+- **Ask follow-up questions**: Build on previous responses for deeper insights
+- **Use platform names**: Meta, DV360, Amazon, CM360, SA360, TradeDesk
+- **Reference time periods**: "Week 1", "June 2024", "this month"
 
-### Performance Optimization
-- `What should I optimize?`
-- `How can I improve performance?`
-- `What optimizations should I make?`
-- `What should I focus on improving?`
-
----
-
-## 📊 **Comparative Analysis**
-
-### Cross-Platform Comparison
-- `Compare Meta vs Amazon performance`
-- `How does Dv360 compare to Tradedesk?`
-- `Which platform is better for conversions?`
-- `Compare platform efficiency`
-
-### Campaign Comparison
-- `Compare Summer Grilling vs Holiday Recipes`
-- `Which campaign is more efficient?`
-- `Compare campaign performance`
+### ❌ Avoid This:
+- **Asking about other months**: All data is from June 2024
+- **Asking about other years**: Only 2024 data is available
+- **Overly complex queries**: Keep it simple and natural
+- **Technical jargon**: Use everyday language
 
 ---
 
-## 🔧 **Troubleshooting Prompts**
+## 🔄 Conversation Flow
 
-### If You Get Generic Responses
-- Try being more specific: `What is Meta's performance?` instead of `How are we doing?`
-- Include platform names: `What is Amazon's conversion rate?`
-- Use exact campaign names: `How is FreshNest Summer Grilling performing?`
+The AI remembers your conversation context, so you can:
 
-### If You Need More Detail
-- Ask for specific metrics: `What is Meta's ROAS and CPA?`
-- Request comparisons: `Compare Meta's CTR to Amazon's CTR`
-- Ask for insights: `What insights can you provide about Meta's performance?`
+1. **Start broad**: "Give me an executive summary"
+2. **Drill down**: "How did Meta perform?"
+3. **Compare**: "How does that compare to Amazon?"
+4. **Optimize**: "What should we improve?"
 
----
+**Example Conversation:**
+```
+You: "Give me an executive summary"
+AI: [Provides comprehensive overview]
 
-## ✅ **Testing Results**
+You: "How did we do in week 1?"
+AI: [Shows week 1 performance]
 
-All prompts in this guide have been tested for:
-- **Accuracy**: Responses match expected values from the data
-- **Consistency**: Same prompts produce consistent results
-- **Completeness**: Responses include relevant metrics and insights
-- **Usefulness**: Responses provide actionable information
-
-**Test Coverage**: Key prompts tested with 83%+ accuracy rate
-
-**Working Categories**:
-- ✅ Platform Performance (100% success rate)
-- ✅ Financial & ROI Analysis (100% success rate)
-- ✅ Campaign Performance (100% success rate)
-- ✅ Comparative Analysis (100% success rate)
-- ✅ Optimization Recommendations (100% success rate)
-- ⚠️ Executive Summary (needs refinement)
+You: "Which platform performed best that week?"
+AI: [Compares platforms for week 1]
+```
 
 ---
 
-## 📝 **Best Practices**
+## 🎨 Response Format
 
-1. **Be Specific**: Include platform names, campaign names, or specific metrics
-2. **Use Clear Language**: Avoid ambiguous terms, use standard marketing terminology
-3. **Ask One Question**: Focus on one aspect at a time for clearer responses
-4. **Follow Up**: Use the AI's responses to ask more detailed follow-up questions
-5. **Validate Results**: Cross-reference with your own data when possible
-
----
-
-## 🆘 **Need Help?**
-
-If you're not getting the expected results:
-1. Check that you're using the exact prompt format
-2. Ensure platform/campaign names match the data exactly
-3. Try a more specific prompt from the troubleshooting section
-4. Contact support if issues persist
+All responses include:
+- **📊 Clear metrics** with emojis for easy scanning
+- **💰 Financial data** (spend, revenue, ROAS)
+- **📈 Engagement metrics** (CTR, impressions, clicks)
+- **🎯 Actionable insights** and recommendations
+- **📅 Context** about the data timeframe
 
 ---
 
-*This prompt guide is based on the FreshNest marketing campaign data and has been thoroughly tested for accuracy and consistency. The application is now production-ready with a clean, optimized codebase.* 
+## 🚀 Quick Start Examples
+
+Try these queries to get started:
+
+1. **"Give me an executive summary"** - Get the big picture
+2. **"How is Meta performing?"** - Check your top platform
+3. **"What's our best campaign?"** - Find top performers
+4. **"How did we do in week 1?"** - Analyze weekly trends
+5. **"What should we optimize?"** - Get improvement ideas
+
+---
+
+## 📞 Need Help?
+
+If you're not getting the response you expect:
+- **Rephrase your question** using different words
+- **Be more specific** about what you want to know
+- **Use the examples above** as templates
+- **Ask follow-up questions** to get more detail
+
+---
+
+## 🎯 Remember
+
+- **All data is from June 2024** - no other time periods available
+- **Natural language works best** - no need for technical queries
+- **Context is maintained** - build on previous questions
+- **Be specific** - the more specific, the better the response
+
+Happy querying! 🚀 
