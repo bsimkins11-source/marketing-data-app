@@ -141,11 +141,11 @@ export default function AIGuide() {
             <div>
               <h3 className="font-medium text-purple-800 mb-2">✅ Do This:</h3>
               <ul className="space-y-1 text-purple-700 text-sm">
-                <li>• Be specific: "How is Meta performing?" vs "How are we doing?"</li>
-                <li>• Use natural language: "What's our best campaign?" works perfectly</li>
+                <li>• Be specific: &ldquo;How is Meta performing?&rdquo; vs &ldquo;How are we doing?&rdquo;</li>
+                <li>• Use natural language: &ldquo;What&apos;s our best campaign?&rdquo; works perfectly</li>
                 <li>• Ask follow-up questions: Build on previous responses</li>
                 <li>• Use platform names: Meta, DV360, Amazon, CM360, SA360, TradeDesk</li>
-                <li>• Reference time periods: "Week 1", "June 2024"</li>
+                <li>• Reference time periods: &ldquo;Week 1&rdquo;, &ldquo;June 2024&rdquo;</li>
               </ul>
             </div>
             <div>
