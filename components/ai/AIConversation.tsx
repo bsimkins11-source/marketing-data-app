@@ -41,10 +41,11 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
   const [showPromptGuide, setShowPromptGuide] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const chatSectionRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<any>(null)
   const synthesisRef = useRef<any>(null)
 
-  // Comprehensive prompt categories
+  // Comprehensive prompt categories (pre-tested for accuracy)
   const promptCategories: PromptCategory[] = [
     {
       title: "📈 Executive Summary & Overview",
@@ -53,11 +54,9 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       color: "blue",
       examples: [
         "Give me an executive summary",
-        "What's our overall performance?",
-        "Show me a summary of our campaigns",
-        "How are we doing overall?",
+        "What is our overall performance?",
         "What are the key metrics?",
-        "Summarize our marketing performance",
+        "How are we doing overall?",
         "What's the big picture of our campaigns?",
         "Give me a high-level overview"
       ]
@@ -69,16 +68,16 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       color: "green",
       examples: [
         "How much did we spend?",
-        "What's our total revenue?",
-        "What's our overall ROAS?",
+        "What is our total revenue?",
+        "What is our ROAS?",
         "How much revenue did we generate?",
-        "What's our cost per acquisition?",
-        "What's our CPA?",
-        "What's our cost per click?",
-        "What's our CPM?",
-        "What's our return on investment?",
+        "What is our cost per acquisition?",
+        "What is our CPA?",
+        "What is our cost per click?",
+        "What is our CPM?",
+        "What is our return on investment?",
         "How profitable are our campaigns?",
-        "What's our profit margin?",
+        "What is our profit margin?",
         "Show me our financial performance"
       ]
     },
@@ -89,17 +88,17 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       color: "purple",
       examples: [
         "How is Meta performing?",
-        "What's DV360's performance?",
+        "What is DV360's performance?",
         "Show me Amazon's metrics",
         "How did CM360 do?",
         "What are SA360's results?",
         "How is TradeDesk performing?",
         "Which platform is doing the best?",
         "Compare platform performance",
-        "What's the top performing platform?",
+        "What is the top performing platform?",
         "Which platform should I focus on?",
         "Show me platform comparison",
-        "What's each platform's ROAS?"
+        "What is each platform's ROAS?"
       ]
     },
     {
@@ -114,7 +113,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "How was week 4?",
         "Compare all weeks",
         "Which week performed best?",
-        "What's our weekly trend?",
+        "What is our weekly trend?",
         "Show me week-by-week performance",
         "Which week had the highest ROAS?",
         "What was our best week?",
@@ -128,16 +127,16 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <TrendingUp className="w-5 h-5" />,
       color: "red",
       examples: [
-        "What's our best performing campaign?",
+        "What is our best performing campaign?",
         "Show me campaign performance",
         "Which campaigns are doing well?",
-        "What's our top campaign?",
+        "What is our top campaign?",
         "How are our campaigns performing?",
         "Which campaign has the highest ROAS?",
-        "What's our worst performing campaign?",
+        "What is our worst performing campaign?",
         "Which campaigns should I pause?",
         "Show me campaign rankings",
-        "What's the performance of each campaign?",
+        "What is the performance of each campaign?",
         "Which campaigns are most efficient?",
         "Compare campaign performance"
       ]
@@ -168,18 +167,18 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <BarChart3 className="w-5 h-5" />,
       color: "teal",
       examples: [
-        "What's our click-through rate?",
+        "What is our click-through rate?",
         "Show me conversion rates by platform",
-        "What's our impression share?",
+        "What is our impression share?",
         "How many conversions did we get?",
-        "What's our average order value?",
+        "What is our average order value?",
         "Show me audience performance",
-        "What's our reach and frequency?",
+        "What is our reach and frequency?",
         "How are our creatives performing?",
         "Show me demographic breakdown",
-        "What's our engagement rate?",
+        "What is our engagement rate?",
         "How many unique users did we reach?",
-        "What's our bounce rate?"
+        "What is our bounce rate?"
       ]
     },
     {
@@ -655,9 +654,9 @@ I can handle complex queries, maintain conversation context, and provide detaile
     // Submit the prompt automatically
     await handleSendMessage('text')
     
-    // Scroll to the top of the chat
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    // Scroll to the chat section to show the response
+    if (chatSectionRef.current) {
+      chatSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
@@ -678,7 +677,7 @@ I can handle complex queries, maintain conversation context, and provide detaile
   return (
     <div className="space-y-8">
       {/* AI Chat Section */}
-      <div className="flex flex-col h-[600px] bg-white rounded-lg border border-gray-200">
+      <div ref={chatSectionRef} className="flex flex-col h-[600px] bg-white rounded-lg border border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center space-x-2">
