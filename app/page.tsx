@@ -90,15 +90,13 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-4 text-center">
-            <a 
-              href="/PROMPT_GUIDE.md" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            <Link 
+              href="/ai-guide" 
               className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               View Complete Guide
-            </a>
+            </Link>
           </div>
         </div>
 
