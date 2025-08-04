@@ -192,17 +192,31 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
 async function processAIQuery(query: string, data: any[], sessionId?: string) {
   const lowerQuery = query.toLowerCase()
 
-  // UNIVERSAL TIME CONTEXT HANDLER (HIGHEST PRIORITY)
-  // If query mentions any month except June, or any year except 2024, respond with June 2024 disclaimer
-  const months = [
-    'january', 'february', 'march', 'april', 'may', 'july', 'august', 'september', 'october', 'november', 'december',
-    'jan', 'feb', 'mar', 'apr', 'may', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+  // TARGETED TIME CONTEXT HANDLER (only for specific time queries)
+  // Only trigger for queries that are explicitly about time/date/period, not for queries containing "mar" or "week"
+  const explicitTimeQueries = [
+    'when was this data collected',
+    'what time period',
+    'what timeframe',
+    'what dates',
+    'what month is this',
+    'what year is this',
+    'tell me about the time period',
+    'what period is this',
+    'how long is this data'
   ]
-  const years = ['2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015']
-  const mentionsOtherMonth = months.some(m => lowerQuery.includes(m))
-  const mentionsOtherYear = years.some(y => lowerQuery.includes(y))
-  if (mentionsOtherMonth || mentionsOtherYear) {
-    const content = 'This demo is built on campaigns that ran in June 2024. No data is available for other months.'
+  
+  if (explicitTimeQueries.some(timeQuery => lowerQuery.includes(timeQuery))) {
+    const content = `📅 **Data Timeframe**:\n\n` +
+      `• **Period**: June 1-30, 2024\n` +
+      `• **Duration**: 30 days of campaign data\n` +
+      `• **Data Granularity**: Daily performance metrics\n\n` +
+      `📊 **Available Time Dimensions**:\n` +
+      `• Week 1: June 1-7, 2024\n` +
+      `• Week 2: June 8-14, 2024\n` +
+      `• Week 3: June 15-21, 2024\n` +
+      `• Week 4: June 22-30, 2024\n\n` +
+      `💡 **Note**: All data in this application is from June 2024. You can ask about weekly performance or specific dates within this period.`
     const result = {
       content,
       data: {
@@ -226,21 +240,19 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     return result
   }
 
-  // If query mentions June, 2024, or any time/period/week-related keyword, respond with June 2024 context and week breakdown
-  const timeKeywords = [
-    'when', 'time', 'date', 'period', 'timeframe', 'duration', 'june', '2024', 'month', 'year', 'quarter', 'week', 'weekly'
-  ]
-  if (timeKeywords.some(k => lowerQuery.includes(k))) {
-    const content = `📅 **Data Timeframe**:\n\n` +
-      `• **Period**: June 1-30, 2024\n` +
-      `• **Duration**: 30 days of campaign data\n` +
-      `• **Data Granularity**: Daily performance metrics\n\n` +
-      `📊 **Available Time Dimensions**:\n` +
-      `• Week 1: June 1-7, 2024\n` +
-      `• Week 2: June 8-14, 2024\n` +
-      `• Week 3: June 15-21, 2024\n` +
-      `• Week 4: June 22-30, 2024\n\n` +
-      `💡 **Note**: All data in this application is from June 2024. You can ask about weekly performance or specific dates within this period.`
+  // OTHER MONTH/YEAR HANDLER (for queries about other months/years)
+  const otherMonths = ['january', 'february', 'march', 'april', 'may', 'july', 'august', 'september', 'october', 'november', 'december']
+  const otherYears = ['2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015']
+  
+  // Only trigger if the query explicitly mentions other months/years (not just contains "mar")
+  const mentionsOtherMonth = otherMonths.some(month => {
+    const monthPattern = new RegExp(`\\b${month}\\b`, 'i')
+    return monthPattern.test(query)
+  })
+  const mentionsOtherYear = otherYears.some(year => query.includes(year))
+  
+  if (mentionsOtherMonth || mentionsOtherYear) {
+    const content = 'This demo is built on campaigns that ran in June 2024. No data is available for other months.'
     const result = {
       content,
       data: {
