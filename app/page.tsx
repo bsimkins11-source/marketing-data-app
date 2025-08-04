@@ -91,11 +91,11 @@ export default function Home() {
           </div>
           <div className="mt-4 text-center">
             <Link 
-              href="/ai-guide" 
+              href="/ai-analysis" 
               className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
             >
               <BookOpen className="w-4 h-4 mr-2" />
-              View Complete Guide
+              Try AI Analysis
             </Link>
           </div>
         </div>

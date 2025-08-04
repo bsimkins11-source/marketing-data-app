@@ -676,7 +676,9 @@ I can handle complex queries, maintain conversation context, and provide detaile
   }
 
   return (
-    <div className="flex flex-col h-[600px] bg-white rounded-lg border border-gray-200">
+    <div className="space-y-8">
+      {/* AI Chat Section */}
+      <div className="flex flex-col h-[600px] bg-white rounded-lg border border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center space-x-2">
@@ -843,6 +845,7 @@ I can handle complex queries, maintain conversation context, and provide detaile
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Help Guide Modal */}
@@ -1066,7 +1069,7 @@ I can handle complex queries, maintain conversation context, and provide detaile
       )}
 
       {/* Comprehensive Prompt Guide Section */}
-      <div className="mt-8 bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="text-center mb-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             🤖 Clickable Prompt Library
