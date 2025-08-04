@@ -358,8 +358,31 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
+  // CPA HANDLER (HIGH PRIORITY)
+  if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
+    const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
+    const totalConversions = data.reduce((sum, row) => sum + row.metrics.conversions, 0)
+    const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    const content = `💸 Overall CPA: $${cpa.toFixed(2)}\n` +
+      `💰 Total Spend: $${totalSpend.toLocaleString()}\n` +
+      `🎯 Total Conversions: ${totalConversions.toLocaleString()}`
+    
+    const result = {
+      content,
+      data: {
+        type: 'cpa_summary',
+        metrics: { spend: totalSpend, conversions: totalConversions, cpa },
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
   // SPEND & FINANCIAL METRICS HANDLERS
-  if (lowerQuery.includes('spend') || lowerQuery.includes('roas') || lowerQuery.includes('cpa') || lowerQuery.includes('cpm') || lowerQuery.includes('cpc')) {
+  if (lowerQuery.includes('spend') || lowerQuery.includes('roas') || lowerQuery.includes('cpm') || lowerQuery.includes('cpc')) {
     if (lowerQuery.includes('spend') && (lowerQuery.includes('achieve') || lowerQuery.includes('numbers') || lowerQuery.includes('total'))) {
       const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
       const totalRevenue = data.reduce((sum, row) => sum + row.metrics.revenue, 0)
@@ -396,28 +419,6 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
         data: {
           type: 'roas_summary',
           metrics: { spend: totalSpend, revenue: totalRevenue, roas },
-          query: query
-        }
-      }
-      
-      updateConversationContext(sessionId, query, result)
-      return result
-    }
-    
-    if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
-      const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
-      const totalConversions = data.reduce((sum, row) => sum + row.metrics.conversions, 0)
-      const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
-      
-      const content = `💸 Overall CPA: $${cpa.toFixed(2)}\n` +
-        `💰 Total Spend: $${totalSpend.toLocaleString()}\n` +
-        `🎯 Total Conversions: ${totalConversions.toLocaleString()}`
-      
-      const result = {
-        content,
-        data: {
-          type: 'cpa_summary',
-          metrics: { spend: totalSpend, conversions: totalConversions, cpa },
           query: query
         }
       }
