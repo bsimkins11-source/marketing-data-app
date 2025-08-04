@@ -56,9 +56,9 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "Give me an executive summary",
         "What is our overall performance?",
         "What are the key metrics?",
-        "How are we doing overall?",
-        "What's the big picture of our campaigns?",
-        "Give me a high-level overview"
+        "What is our performance overview?",
+        "What is our big picture performance?",
+        "What is our high-level overview?"
       ]
     },
     {
@@ -67,18 +67,18 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <DollarSign className="w-5 h-5" />,
       color: "green",
       examples: [
-        "How much did we spend?",
+        "What is our total spend?",
         "What is our total revenue?",
         "What is our ROAS?",
-        "How much revenue did we generate?",
+        "What is our revenue?",
         "What is our cost per acquisition?",
         "What is our CPA?",
         "What is our cost per click?",
         "What is our CPM?",
         "What is our return on investment?",
-        "How profitable are our campaigns?",
+        "What is our ROI?",
         "What is our profit margin?",
-        "Show me our financial performance"
+        "What is our financial performance?"
       ]
     },
     {
@@ -127,18 +127,18 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <TrendingUp className="w-5 h-5" />,
       color: "red",
       examples: [
-        "What is our best performing campaign?",
-        "Show me campaign performance",
-        "Which campaigns are doing well?",
+        "What is our best campaign?",
         "What is our top campaign?",
-        "How are our campaigns performing?",
+        "What is our worst campaign?",
         "Which campaign has the highest ROAS?",
-        "What is our worst performing campaign?",
         "Which campaigns should I pause?",
         "Show me campaign rankings",
-        "What is the performance of each campaign?",
         "Which campaigns are most efficient?",
-        "Compare campaign performance"
+        "Compare campaign performance",
+        "What is FreshNest Summer Grilling performance?",
+        "What is FreshNest Back to School performance?",
+        "What is FreshNest Holiday Recipes performance?",
+        "What is FreshNest Pantry Staples performance?"
       ]
     },
     {
@@ -150,15 +150,15 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "What should we optimize?",
         "Give me optimization recommendations",
         "What can we improve?",
-        "What are our opportunities?",
         "How can we improve performance?",
-        "Where should we put more money?",
-        "What optimization opportunities exist?",
-        "What should I focus on improving?",
         "Give me strategic recommendations",
-        "What are the biggest opportunities?",
         "How can we increase ROAS?",
-        "What should we change in our strategy?"
+        "What should we optimize?",
+        "What optimization recommendations do you have?",
+        "What can we improve?",
+        "How can we improve performance?",
+        "What strategic recommendations do you have?",
+        "How can we increase ROAS?"
       ]
     },
     {
@@ -168,17 +168,17 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       color: "teal",
       examples: [
         "What is our click-through rate?",
-        "Show me conversion rates by platform",
-        "What is our impression share?",
         "How many conversions did we get?",
-        "What is our average order value?",
         "Show me audience performance",
-        "What is our reach and frequency?",
         "How are our creatives performing?",
-        "Show me demographic breakdown",
-        "What is our engagement rate?",
-        "How many unique users did we reach?",
-        "What is our bounce rate?"
+        "What is our CTR?",
+        "What is our conversion rate?",
+        "What is our audience performance?",
+        "What is our creative performance?",
+        "What is our click-through rate?",
+        "How many conversions did we get?",
+        "Show me audience performance",
+        "How are our creatives performing?"
       ]
     },
     {
