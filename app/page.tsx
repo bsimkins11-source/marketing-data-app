@@ -73,10 +73,10 @@ export default function Home() {
             <div>
               <h4 className="font-medium text-purple-800 mb-2">🎯 Quick Examples:</h4>
               <ul className="space-y-1 text-purple-700">
-                <li>• "Give me an executive summary"</li>
-                <li>• "How is Meta performing?"</li>
-                <li>• "What's our best campaign?"</li>
-                <li>• "How did we do in week 1?"</li>
+                <li>• &ldquo;Give me an executive summary&rdquo;</li>
+                <li>• &ldquo;How is Meta performing?&rdquo;</li>
+                <li>• &ldquo;What&apos;s our best campaign?&rdquo;</li>
+                <li>• &ldquo;How did we do in week 1?&rdquo;</li>
               </ul>
             </div>
             <div>
