@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, Bot, User, RefreshCw, MessageSquare, Sparkles, Mic, MicOff, HelpCircle, X, Download } from 'lucide-react'
+import { Send, Bot, User, RefreshCw, MessageSquare, Sparkles, Mic, MicOff, HelpCircle, X, Download, BarChart3, DollarSign, Target, Calendar, TrendingUp, Lightbulb, Users } from 'lucide-react'
 import { MarketingData } from '@/types'
 import DataChart from './DataChart'
 
@@ -20,6 +20,14 @@ interface AIConversationProps {
   onSessionEnd: () => void
 }
 
+interface PromptCategory {
+  title: string
+  description: string
+  icon: React.ReactNode
+  examples: string[]
+  color: string
+}
+
 export default function AIConversation({ campaignData, onSessionStart, onSessionEnd }: AIConversationProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -30,10 +38,171 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
   const [error, setError] = useState('')
   const [isSupported, setIsSupported] = useState(false)
   const [showHelpGuideModal, setShowHelpGuideModal] = useState(false)
+  const [showPromptGuide, setShowPromptGuide] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<any>(null)
   const synthesisRef = useRef<any>(null)
+
+  // Comprehensive prompt categories
+  const promptCategories: PromptCategory[] = [
+    {
+      title: "📈 Executive Summary & Overview",
+      description: "Get a comprehensive overview of your marketing performance",
+      icon: <BarChart3 className="w-5 h-5" />,
+      color: "blue",
+      examples: [
+        "Give me an executive summary",
+        "What's our overall performance?",
+        "Show me a summary of our campaigns",
+        "How are we doing overall?",
+        "What are the key metrics?",
+        "Summarize our marketing performance",
+        "What's the big picture of our campaigns?",
+        "Give me a high-level overview"
+      ]
+    },
+    {
+      title: "💰 Financial Performance",
+      description: "Dive into spend, revenue, and ROI metrics",
+      icon: <DollarSign className="w-5 h-5" />,
+      color: "green",
+      examples: [
+        "How much did we spend?",
+        "What's our total revenue?",
+        "What's our overall ROAS?",
+        "How much revenue did we generate?",
+        "What's our cost per acquisition?",
+        "What's our CPA?",
+        "What's our cost per click?",
+        "What's our CPM?",
+        "What's our return on investment?",
+        "How profitable are our campaigns?",
+        "What's our profit margin?",
+        "Show me our financial performance"
+      ]
+    },
+    {
+      title: "🏆 Platform Performance",
+      description: "Analyze performance by advertising platform",
+      icon: <Target className="w-5 h-5" />,
+      color: "purple",
+      examples: [
+        "How is Meta performing?",
+        "What's DV360's performance?",
+        "Show me Amazon's metrics",
+        "How did CM360 do?",
+        "What are SA360's results?",
+        "How is TradeDesk performing?",
+        "Which platform is doing the best?",
+        "Compare platform performance",
+        "What's the top performing platform?",
+        "Which platform should I focus on?",
+        "Show me platform comparison",
+        "What's each platform's ROAS?"
+      ]
+    },
+    {
+      title: "📅 Weekly Performance",
+      description: "Break down performance by week within June 2024",
+      icon: <Calendar className="w-5 h-5" />,
+      color: "orange",
+      examples: [
+        "How did we perform in week 1?",
+        "Show me week 2 results",
+        "What happened in week 3?",
+        "How was week 4?",
+        "Compare all weeks",
+        "Which week performed best?",
+        "What's our weekly trend?",
+        "Show me week-by-week performance",
+        "Which week had the highest ROAS?",
+        "What was our best week?",
+        "Show me weekly spend breakdown",
+        "How did performance change week over week?"
+      ]
+    },
+    {
+      title: "🎯 Campaign Analysis",
+      description: "Analyze specific campaigns and their performance",
+      icon: <TrendingUp className="w-5 h-5" />,
+      color: "red",
+      examples: [
+        "What's our best performing campaign?",
+        "Show me campaign performance",
+        "Which campaigns are doing well?",
+        "What's our top campaign?",
+        "How are our campaigns performing?",
+        "Which campaign has the highest ROAS?",
+        "What's our worst performing campaign?",
+        "Which campaigns should I pause?",
+        "Show me campaign rankings",
+        "What's the performance of each campaign?",
+        "Which campaigns are most efficient?",
+        "Compare campaign performance"
+      ]
+    },
+    {
+      title: "🔍 Optimization Insights",
+      description: "Get recommendations and insights for improvement",
+      icon: <Lightbulb className="w-5 h-5" />,
+      color: "yellow",
+      examples: [
+        "What should we optimize?",
+        "Give me optimization recommendations",
+        "What can we improve?",
+        "What are our opportunities?",
+        "How can we improve performance?",
+        "Where should we put more money?",
+        "What optimization opportunities exist?",
+        "What should I focus on improving?",
+        "Give me strategic recommendations",
+        "What are the biggest opportunities?",
+        "How can we increase ROAS?",
+        "What should we change in our strategy?"
+      ]
+    },
+    {
+      title: "📊 Detailed Analytics",
+      description: "Deep dive into specific metrics and trends",
+      icon: <BarChart3 className="w-5 h-5" />,
+      color: "teal",
+      examples: [
+        "What's our click-through rate?",
+        "Show me conversion rates by platform",
+        "What's our impression share?",
+        "How many conversions did we get?",
+        "What's our average order value?",
+        "Show me audience performance",
+        "What's our reach and frequency?",
+        "How are our creatives performing?",
+        "Show me demographic breakdown",
+        "What's our engagement rate?",
+        "How many unique users did we reach?",
+        "What's our bounce rate?"
+      ]
+    },
+    {
+      title: "🎨 Creative & Audience",
+      description: "Analyze creative performance and audience insights",
+      icon: <Users className="w-5 h-5" />,
+      color: "pink",
+      examples: [
+        "How did our creatives perform?",
+        "Which creative formats worked best?",
+        "Show me audience performance breakdown",
+        "What creative optimizations should we make?",
+        "Which audience segments performed best?",
+        "How did different ad formats perform?",
+        "What audience insights do you have?",
+        "Which creative elements drove the most conversions?",
+        "Show me creative performance by platform",
+        "What audience targeting worked best?",
+        "How did video vs static ads perform?",
+        "What creative recommendations do you have?"
+      ]
+    }
+  ]
 
   // Auto-scroll to bottom when new messages arrive (only if user is near bottom)
   useEffect(() => {
@@ -479,6 +648,33 @@ I can handle complex queries, maintain conversation context, and provide detaile
     setShowHelpGuideModal(false)
   }
 
+  const handlePromptClick = async (prompt: string) => {
+    // Set the input value to the clicked prompt
+    setInputValue(prompt)
+    
+    // Submit the prompt automatically
+    await handleSendMessage('text')
+    
+    // Scroll to the top of the chat
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const getColorClasses = (color: string) => {
+    const colorMap: { [key: string]: string } = {
+      blue: 'bg-blue-50 border-blue-200 text-blue-800',
+      green: 'bg-green-50 border-green-200 text-green-800',
+      purple: 'bg-purple-50 border-purple-200 text-purple-800',
+      orange: 'bg-orange-50 border-orange-200 text-orange-800',
+      red: 'bg-red-50 border-red-200 text-red-800',
+      yellow: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+      teal: 'bg-teal-50 border-teal-200 text-teal-800',
+      pink: 'bg-pink-50 border-pink-200 text-pink-800'
+    }
+    return colorMap[color] || 'bg-gray-50 border-gray-200 text-gray-800'
+  }
+
   return (
     <div className="flex flex-col h-[600px] bg-white rounded-lg border border-gray-200">
       {/* Header */}
@@ -868,6 +1064,60 @@ I can handle complex queries, maintain conversation context, and provide detaile
           </div>
         </div>
       )}
+
+      {/* Comprehensive Prompt Guide Section */}
+      <div className="mt-8 bg-white rounded-lg border border-gray-200 p-6">
+        <div className="text-center mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            🤖 Clickable Prompt Library
+          </h3>
+          <p className="text-gray-600">
+            Not sure what to ask? Click any question below to get an immediate answer!
+          </p>
+        </div>
+
+        {/* Prompt Categories */}
+        <div className="space-y-6">
+          {promptCategories.map((category, index) => (
+            <div key={index} className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-center mb-3">
+                <div className={`p-2 rounded-lg ${getColorClasses(category.color)}`}>
+                  {category.icon}
+                </div>
+                <div className="ml-3">
+                  <h4 className="font-semibold text-gray-900">{category.title}</h4>
+                  <p className="text-sm text-gray-600">{category.description}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {category.examples.map((example, exampleIndex) => (
+                  <button
+                    key={exampleIndex}
+                    onClick={() => handlePromptClick(example)}
+                    disabled={isLoading}
+                    className="text-left p-3 bg-white rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-sm text-gray-700 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={`Click to ask: ${example}`}
+                  >
+                    &ldquo;{example}&rdquo;
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Tips */}
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 className="font-medium text-blue-800 mb-2">💡 Quick Tips:</h4>
+          <ul className="text-sm text-blue-700 space-y-1">
+            <li>• Click any question above to get an immediate answer</li>
+            <li>• The AI will automatically scroll you back to the chat</li>
+            <li>• You can ask follow-up questions after any response</li>
+            <li>• All data is from June 2024 - no other time periods available</li>
+          </ul>
+        </div>
+      </div>
     </div>
   )
 } 
