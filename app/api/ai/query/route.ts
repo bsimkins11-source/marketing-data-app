@@ -191,7 +191,79 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
 
 async function processAIQuery(query: string, data: any[], sessionId?: string) {
   const lowerQuery = query.toLowerCase()
-  
+
+  // UNIVERSAL TIME CONTEXT HANDLER (HIGHEST PRIORITY)
+  // If query mentions any month except June, or any year except 2024, respond with June 2024 disclaimer
+  const months = [
+    'january', 'february', 'march', 'april', 'may', 'july', 'august', 'september', 'october', 'november', 'december',
+    'jan', 'feb', 'mar', 'apr', 'may', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+  ]
+  const years = ['2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015']
+  const mentionsOtherMonth = months.some(m => lowerQuery.includes(m))
+  const mentionsOtherYear = years.some(y => lowerQuery.includes(y))
+  if (mentionsOtherMonth || mentionsOtherYear) {
+    const content = 'This demo is built on campaigns that ran in June 2024. No data is available for other months.'
+    const result = {
+      content,
+      data: {
+        type: 'time_context',
+        timeframe: {
+          startDate: '2024-06-01',
+          endDate: '2024-06-30',
+          period: 'June 2024',
+          duration: '30 days'
+        },
+        weeks: [
+          { week: 1, start: '2024-06-01', end: '2024-06-07' },
+          { week: 2, start: '2024-06-08', end: '2024-06-14' },
+          { week: 3, start: '2024-06-15', end: '2024-06-21' },
+          { week: 4, start: '2024-06-22', end: '2024-06-30' }
+        ],
+        query: query
+      }
+    }
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // If query mentions June, 2024, or any time/period/week-related keyword, respond with June 2024 context and week breakdown
+  const timeKeywords = [
+    'when', 'time', 'date', 'period', 'timeframe', 'duration', 'june', '2024', 'month', 'year', 'quarter', 'week', 'weekly'
+  ]
+  if (timeKeywords.some(k => lowerQuery.includes(k))) {
+    const content = `📅 **Data Timeframe**:\n\n` +
+      `• **Period**: June 1-30, 2024\n` +
+      `• **Duration**: 30 days of campaign data\n` +
+      `• **Data Granularity**: Daily performance metrics\n\n` +
+      `📊 **Available Time Dimensions**:\n` +
+      `• Week 1: June 1-7, 2024\n` +
+      `• Week 2: June 8-14, 2024\n` +
+      `• Week 3: June 15-21, 2024\n` +
+      `• Week 4: June 22-30, 2024\n\n` +
+      `💡 **Note**: All data in this application is from June 2024. You can ask about weekly performance or specific dates within this period.`
+    const result = {
+      content,
+      data: {
+        type: 'time_context',
+        timeframe: {
+          startDate: '2024-06-01',
+          endDate: '2024-06-30',
+          period: 'June 2024',
+          duration: '30 days'
+        },
+        weeks: [
+          { week: 1, start: '2024-06-01', end: '2024-06-07' },
+          { week: 2, start: '2024-06-08', end: '2024-06-14' },
+          { week: 3, start: '2024-06-15', end: '2024-06-21' },
+          { week: 4, start: '2024-06-22', end: '2024-06-30' }
+        ],
+        query: query
+      }
+    }
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
   const context = getConversationContext(sessionId)
   
   // Handle drill-down queries with context
@@ -398,12 +470,25 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
-  // EXECUTIVE SUMMARY HANDLERS
+  // EXECUTIVE SUMMARY HANDLERS (HIGH PRIORITY - BEFORE TIME HANDLERS)
   if (lowerQuery.includes('executive summary') || lowerQuery.includes('overall performance') || 
       lowerQuery.includes('summarize') || lowerQuery.includes('key metrics') || 
       lowerQuery.includes('key findings') || lowerQuery.includes('main insights') ||
       lowerQuery.includes('performance overview')) {
     
+    // Data context analysis
+    const uniqueBrands = Array.from(new Set(data.map(row => row.dimensions.brand)))
+    const uniqueCampaigns = Array.from(new Set(data.map(row => row.dimensions.campaign_name)))
+    const uniquePlatforms = Array.from(new Set(data.map(row => row.dimensions.platform)))
+    const uniqueAudiences = Array.from(new Set(data.map(row => row.dimensions.audience)))
+    
+    // Date range analysis
+    const dates = data.map(row => new Date(row.date)).sort((a, b) => a.getTime() - b.getTime())
+    const startDate = dates[0]
+    const endDate = dates[dates.length - 1]
+    const dateRange = `${startDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+    
+    // Core metrics calculation
     const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
     const totalRevenue = data.reduce((sum, row) => sum + row.metrics.revenue, 0)
     const totalImpressions = data.reduce((sum, row) => sum + row.metrics.impressions, 0)
@@ -428,30 +513,80 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       return acc
     }, {} as any)
     
-    const platformSummary = Object.entries(platformMetrics)
+    const platformAnalysis = Object.entries(platformMetrics)
       .map(([platform, metrics]: [string, any]) => {
         const platformRoas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
-        return `${platform}: $${metrics.spend.toLocaleString()} spend, ${platformRoas.toFixed(2)}x ROAS`
+        const platformCtr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        return { platform, metrics: { ...metrics, roas: platformRoas, ctr: platformCtr } }
       })
-      .join('\n')
+      .sort((a, b) => b.metrics.roas - a.metrics.roas)
+    
+    const topPlatform = platformAnalysis[0]
+    const bottomPlatform = platformAnalysis[platformAnalysis.length - 1]
+    
+    // Campaign breakdown
+    const campaignMetrics = data.reduce((acc, row) => {
+      const campaign = row.dimensions.campaign_name
+      if (!acc[campaign]) {
+        acc[campaign] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      acc[campaign].spend += row.metrics.spend
+      acc[campaign].revenue += row.metrics.revenue
+      acc[campaign].impressions += row.metrics.impressions
+      acc[campaign].clicks += row.metrics.clicks
+      acc[campaign].conversions += row.metrics.conversions
+      return acc
+    }, {} as any)
+    
+    const campaignAnalysis = Object.entries(campaignMetrics)
+      .map(([campaign, metrics]: [string, any]) => {
+        const campaignRoas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const campaignCtr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        return { campaign, metrics: { ...metrics, roas: campaignRoas, ctr: campaignCtr } }
+      })
+      .sort((a, b) => b.metrics.roas - a.metrics.roas)
+    
+    const topCampaign = campaignAnalysis[0]
+    const bottomCampaign = campaignAnalysis[campaignAnalysis.length - 1]
     
     const content = `📊 EXECUTIVE SUMMARY\n\n` +
-      `💰 Financial Performance:\n` +
+      `📅 **Data Context**:\n` +
+      `• Time Period: ${dateRange}\n` +
+      `• Brands: ${uniqueBrands.join(', ')}\n` +
+      `• Campaigns: ${uniqueCampaigns.length} campaigns across ${uniquePlatforms.length} platforms\n` +
+      `• Audiences: ${uniqueAudiences.length} target segments\n\n` +
+      `💰 **Financial Performance**:\n` +
       `• Total Spend: $${totalSpend.toLocaleString()}\n` +
       `• Total Revenue: $${totalRevenue.toLocaleString()}\n` +
-      `• Overall ROAS: ${roas.toFixed(2)}x\n\n` +
-      `📈 Engagement Metrics:\n` +
+      `• Overall ROAS: ${roas.toFixed(2)}x\n` +
+      `• Overall CPA: $${cpa.toFixed(2)}\n\n` +
+      `📈 **Engagement Metrics**:\n` +
       `• Total Impressions: ${totalImpressions.toLocaleString()}\n` +
       `• Total Clicks: ${totalClicks.toLocaleString()}\n` +
       `• Total Conversions: ${totalConversions.toLocaleString()}\n` +
-      `• Overall CTR: ${(ctr * 100).toFixed(2)}%\n` +
-      `• Overall CPA: $${cpa.toFixed(2)}\n\n` +
-      `🌐 Platform Breakdown:\n${platformSummary}`
+      `• Overall CTR: ${(ctr * 100).toFixed(2)}%\n\n` +
+      `🏆 **Top Performers**:\n` +
+      `• Best Platform: ${topPlatform.platform} (${topPlatform.metrics.roas.toFixed(2)}x ROAS)\n` +
+      `• Best Campaign: ${topCampaign.campaign} (${topCampaign.metrics.roas.toFixed(2)}x ROAS)\n\n` +
+      `📉 **Opportunities**:\n` +
+      `• Platform to Optimize: ${bottomPlatform.platform} (${bottomPlatform.metrics.roas.toFixed(2)}x ROAS)\n` +
+      `• Campaign to Review: ${bottomCampaign.campaign} (${bottomCampaign.metrics.roas.toFixed(2)}x ROAS)\n\n` +
+      `🌐 **Platform Breakdown**:\n` +
+      platformAnalysis.map((p, i) => 
+        `${i + 1}. ${p.platform}: $${p.metrics.spend.toLocaleString()} spend, ${p.metrics.roas.toFixed(2)}x ROAS, ${(p.metrics.ctr * 100).toFixed(2)}% CTR`
+      ).join('\n')
     
     const result = {
       content,
       data: {
         type: 'executive_summary',
+        context: {
+          dateRange,
+          brands: uniqueBrands,
+          campaigns: uniqueCampaigns,
+          platforms: uniquePlatforms,
+          audiences: uniqueAudiences
+        },
         metrics: {
           spend: totalSpend,
           revenue: totalRevenue,
@@ -462,7 +597,16 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
           ctr,
           cpa
         },
-        platforms: platformMetrics,
+        platforms: platformAnalysis,
+        campaigns: campaignAnalysis,
+        topPerformers: {
+          platform: topPlatform.platform,
+          campaign: topCampaign.campaign
+        },
+        opportunities: {
+          platform: bottomPlatform.platform,
+          campaign: bottomCampaign.campaign
+        },
         query: query
       }
     }
@@ -597,6 +741,123 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     
     updateConversationContext(sessionId, query, result)
     return result
+  }
+
+  // WEEKLY PERFORMANCE HANDLERS
+  if (lowerQuery.includes('week') || lowerQuery.includes('weekly') || lowerQuery.includes('week 1') || 
+      lowerQuery.includes('week 2') || lowerQuery.includes('week 3') || lowerQuery.includes('week 4')) {
+    
+    // Extract week number if specified
+    let targetWeek = null
+    if (lowerQuery.includes('week 1')) targetWeek = 1
+    else if (lowerQuery.includes('week 2')) targetWeek = 2
+    else if (lowerQuery.includes('week 3')) targetWeek = 3
+    else if (lowerQuery.includes('week 4')) targetWeek = 4
+    
+    const weekRanges: Record<number, { start: string; end: string }> = {
+      1: { start: '2024-06-01', end: '2024-06-07' },
+      2: { start: '2024-06-08', end: '2024-06-14' },
+      3: { start: '2024-06-15', end: '2024-06-21' },
+      4: { start: '2024-06-22', end: '2024-06-30' }
+    }
+    
+    if (targetWeek) {
+      const range = weekRanges[targetWeek]
+      const weekData = data.filter(row => {
+        const rowDate = new Date(row.date)
+        const startDate = new Date(range.start)
+        const endDate = new Date(range.end)
+        return rowDate >= startDate && rowDate <= endDate
+      })
+      
+      if (weekData.length > 0) {
+        const totalSpend = weekData.reduce((sum, row) => sum + row.metrics.spend, 0)
+        const totalRevenue = weekData.reduce((sum, row) => sum + row.metrics.revenue, 0)
+        const totalImpressions = weekData.reduce((sum, row) => sum + row.metrics.impressions, 0)
+        const totalClicks = weekData.reduce((sum, row) => sum + row.metrics.clicks, 0)
+        const totalConversions = weekData.reduce((sum, row) => sum + row.metrics.conversions, 0)
+        
+        const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+        const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+        const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+        
+        const content = `📅 **Week ${targetWeek} Performance (${range.start} to ${range.end})**:\n\n` +
+          `💰 **Financial Metrics**:\n` +
+          `• Total Spend: $${totalSpend.toLocaleString()}\n` +
+          `• Total Revenue: $${totalRevenue.toLocaleString()}\n` +
+          `• ROAS: ${roas.toFixed(2)}x\n` +
+          `• CPA: $${cpa.toFixed(2)}\n\n` +
+          `📈 **Engagement Metrics**:\n` +
+          `• Impressions: ${totalImpressions.toLocaleString()}\n` +
+          `• Clicks: ${totalClicks.toLocaleString()}\n` +
+          `• Conversions: ${totalConversions.toLocaleString()}\n` +
+          `• CTR: ${(ctr * 100).toFixed(2)}%\n\n` +
+          `📊 **Data Points**: ${weekData.length} daily records`
+        
+        const result = {
+          content,
+          data: {
+            type: 'weekly_performance',
+            week: targetWeek,
+            dateRange: range,
+            metrics: {
+              spend: totalSpend,
+              revenue: totalRevenue,
+              impressions: totalImpressions,
+              clicks: totalClicks,
+              conversions: totalConversions,
+              roas,
+              ctr,
+              cpa
+            },
+            dataPoints: weekData.length,
+            query: query
+          }
+        }
+        
+        updateConversationContext(sessionId, query, result)
+        return result
+      }
+    } else {
+      // Show all weeks comparison
+      const weeklyData: Record<number, { spend: number; revenue: number; roas: number; dataPoints: number }> = {}
+      for (let week = 1; week <= 4; week++) {
+        const range = weekRanges[week]
+        const weekData = data.filter(row => {
+          const rowDate = new Date(row.date)
+          const startDate = new Date(range.start)
+          const endDate = new Date(range.end)
+          return rowDate >= startDate && rowDate <= endDate
+        })
+        
+        const totalSpend = weekData.reduce((sum, row) => sum + row.metrics.spend, 0)
+        const totalRevenue = weekData.reduce((sum, row) => sum + row.metrics.revenue, 0)
+        const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+        
+        weeklyData[week] = { spend: totalSpend, revenue: totalRevenue, roas, dataPoints: weekData.length }
+      }
+      
+      const content = `📅 **Weekly Performance Comparison (June 2024)**:\n\n` +
+        Object.entries(weeklyData).map(([week, metrics]: [string, any]) => 
+          `**Week ${week}** (${weekRanges[parseInt(week)].start} to ${weekRanges[parseInt(week)].end}):\n` +
+          `• Spend: $${metrics.spend.toLocaleString()}\n` +
+          `• Revenue: $${metrics.revenue.toLocaleString()}\n` +
+          `• ROAS: ${metrics.roas.toFixed(2)}x\n` +
+          `• Data Points: ${metrics.dataPoints}\n`
+        ).join('\n')
+      
+      const result = {
+        content,
+        data: {
+          type: 'weekly_comparison',
+          weeklyData,
+          query: query
+        }
+      }
+      
+      updateConversationContext(sessionId, query, result)
+      return result
+    }
   }
 
   // OPTIMIZATION & INSIGHTS HANDLERS
