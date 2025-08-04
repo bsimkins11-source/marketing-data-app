@@ -648,16 +648,23 @@ I can handle complex queries, maintain conversation context, and provide detaile
   }
 
   const handlePromptClick = async (prompt: string) => {
+    // Scroll to the chat section immediately when clicked
+    if (chatSectionRef.current) {
+      chatSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+    
     // Set the input value to the clicked prompt
     setInputValue(prompt)
     
     // Submit the prompt automatically
     await handleSendMessage('text')
     
-    // Scroll to the chat section to show the response
-    if (chatSectionRef.current) {
-      chatSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    // Ensure we scroll to the bottom to see the new message as it populates
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      }
+    }, 100)
   }
 
   const getColorClasses = (color: string) => {
