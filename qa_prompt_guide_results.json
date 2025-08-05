@@ -1,10 +1,10 @@
 {
   "summary": {
     "total_questions": 90,
-    "good_responses": 69,
-    "generic_responses": 19,
+    "good_responses": 88,
+    "generic_responses": 2,
     "error_responses": 0,
-    "unknown": 2
+    "unknown": 0
   },
   "detailed_results": {
     "Executive Summary & Overview": [
@@ -27,22 +27,22 @@
         "query": "What are the key metrics?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"How are we doing overall?\". I can help you analyze your campaign d...",
-        "query": "How are we doing overall?"
+        "status": "GOOD",
+        "data_type": "executive_summary",
+        "content_preview": "\ud83d\udcca EXECUTIVE SUMMARY\n\n\ud83d\udcc5 **Data Context**:\n\u2022 Time Period: June 2024 - June 2024\n\u2022 Brands: FreshNest, T...",
+        "query": "Give me an executive summary"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What's the big picture of our campaigns?\". I can help you analyze ...",
-        "query": "What's the big picture of our campaigns?"
+        "status": "GOOD",
+        "data_type": "executive_summary",
+        "content_preview": "\ud83d\udcca EXECUTIVE SUMMARY\n\n\ud83d\udcc5 **Data Context**:\n\u2022 Time Period: June 2024 - June 2024\n\u2022 Brands: FreshNest, T...",
+        "query": "What is our overall performance?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"Give me a high-level overview\". I can help you analyze your campai...",
-        "query": "Give me a high-level overview"
+        "status": "GOOD",
+        "data_type": "executive_summary",
+        "content_preview": "\ud83d\udcca EXECUTIVE SUMMARY\n\n\ud83d\udcc5 **Data Context**:\n\u2022 Time Period: June 2024 - June 2024\n\u2022 Brands: FreshNest, T...",
+        "query": "What are the key metrics?"
       }
     ],
     "Financial Performance": [
@@ -50,7 +50,7 @@
         "status": "GOOD",
         "data_type": "spend_summary",
         "content_preview": "\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udc8e Overall ROAS: 3.18x",
-        "query": "How much did we spend?"
+        "query": "What is our total spend?"
       },
       {
         "status": "GOOD",
@@ -68,7 +68,7 @@
         "status": "GOOD",
         "data_type": "revenue_summary",
         "content_preview": "\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udc8e Overall ROAS: 3.18x",
-        "query": "How much revenue did we generate?"
+        "query": "What is our revenue?"
       },
       {
         "status": "GOOD",
@@ -104,7 +104,7 @@
         "status": "GOOD",
         "data_type": "roi_summary",
         "content_preview": "\ud83d\udc8e ROI: 217.62%\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udcc8 Profit Margin: 68.52%",
-        "query": "How profitable are our campaigns?"
+        "query": "What is our ROI?"
       },
       {
         "status": "GOOD",
@@ -113,10 +113,10 @@
         "query": "What is our profit margin?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"Show me our financial performance\". I can help you analyze your ca...",
-        "query": "Show me our financial performance"
+        "status": "GOOD",
+        "data_type": "spend_summary",
+        "content_preview": "\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udc8e Overall ROAS: 3.18x",
+        "query": "What is our total spend?"
       }
     ],
     "Platform Performance": [
@@ -137,12 +137,6 @@
         "data_type": "chart_response",
         "content_preview": "\ud83d\udcca Here's a chart showing DV360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenu...",
         "query": "Show me Amazon's metrics"
-      },
-      {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"How did CM360 do?\". I can help you analyze your campaign data. Try...",
-        "query": "How did CM360 do?"
       },
       {
         "status": "GOOD",
@@ -175,22 +169,28 @@
         "query": "What is the top performing platform?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"Which platform should I focus on?\". I can help you analyze your ca...",
-        "query": "Which platform should I focus on?"
-      },
-      {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"Show me platform comparison\". I can help you analyze your campaign...",
-        "query": "Show me platform comparison"
-      },
-      {
         "status": "GOOD",
         "data_type": "roas_summary",
         "content_preview": "\ud83d\udc8e Overall ROAS: 3.18x\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456",
         "query": "What is each platform's ROAS?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "platform_performance",
+        "content_preview": "Meta Performance:\n\n\ud83d\udcb0 Spend: $404,859.21\n\ud83d\udcb5 Revenue: $1,344,372.713\n\ud83d\udcca Impressions: 46,448\n\ud83d\uddb1\ufe0f Clicks: 6...",
+        "query": "How is Meta performing?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "platform_performance",
+        "content_preview": "DV360 Performance:\n\n\ud83d\udcb0 Spend: $360,723.25\n\ud83d\udcb5 Revenue: $1,021,417.439\n\ud83d\udcca Impressions: 53,146\n\ud83d\uddb1\ufe0f Clicks: ...",
+        "query": "What is DV360's performance?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "chart_response",
+        "content_preview": "\ud83d\udcca Here's a chart showing DV360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenu...",
+        "query": "Show me Amazon's metrics"
       }
     ],
     "Weekly Performance": [
@@ -272,19 +272,7 @@
         "status": "GOOD",
         "data_type": "campaign_analysis",
         "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 R...",
-        "query": "What is our best performing campaign?"
-      },
-      {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"Show me campaign performance\". I can help you analyze your campaig...",
-        "query": "Show me campaign performance"
-      },
-      {
-        "status": "UNKNOWN",
-        "data_type": "campaign_analysis",
-        "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n",
-        "query": "Which campaigns are doing well?"
+        "query": "What is our best campaign?"
       },
       {
         "status": "GOOD",
@@ -293,22 +281,16 @@
         "query": "What is our top campaign?"
       },
       {
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "data_type": "campaign_analysis",
-        "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n",
-        "query": "How are our campaigns performing?"
+        "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83d\udcc9 Worst Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 ...",
+        "query": "What is our worst campaign?"
       },
       {
         "status": "GOOD",
         "data_type": "roas_summary",
         "content_preview": "\ud83d\udc8e Overall ROAS: 3.18x\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456",
         "query": "Which campaign has the highest ROAS?"
-      },
-      {
-        "status": "GOOD",
-        "data_type": "campaign_analysis",
-        "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83d\udcc9 Worst Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 ...",
-        "query": "What is our worst performing campaign?"
       },
       {
         "status": "GOOD",
@@ -324,12 +306,6 @@
       },
       {
         "status": "GOOD",
-        "data_type": "campaign_performance",
-        "content_preview": "\ud83c\udfaf CAMPAIGN PERFORMANCE:\n\n\ud83c\udfc6 Best Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: ...",
-        "query": "What is the performance of each campaign?"
-      },
-      {
-        "status": "GOOD",
         "data_type": "campaign_analysis",
         "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83d\udcca Campaign Rankings by ROAS:\n1. undefined: 3.18x ROAS\n\n",
         "query": "Which campaigns are most efficient?"
@@ -339,6 +315,30 @@
         "data_type": "campaign_comparison",
         "content_preview": "\ud83c\udfc6 CAMPAIGN COMPARISON (Ranked by ROAS):\n\n1. undefined: 3.18x ROAS, $1,882,680.74 spend\n\n\ud83c\udfaf **Top Perf...",
         "query": "Compare campaign performance"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "campaign_performance",
+        "content_preview": "\ud83c\udfaf CAMPAIGN PERFORMANCE:\n\n\ud83c\udfc6 Best Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: ...",
+        "query": "What is the performance of each campaign?"
+      },
+      {
+        "status": "GENERIC",
+        "data_type": "generic_response",
+        "content_preview": "I understand you're asking about \"What is FreshNest Summer Grilling performance?\". I can help you an...",
+        "query": "What is FreshNest Summer Grilling performance?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "campaign_analysis",
+        "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 R...",
+        "query": "What is our best campaign?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "campaign_analysis",
+        "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 R...",
+        "query": "What is our top campaign?"
       }
     ],
     "Optimization Insights": [
@@ -409,10 +409,10 @@
         "query": "How can we increase ROAS?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What should we change in our strategy?\". I can help you analyze yo...",
-        "query": "What should we change in our strategy?"
+        "status": "GOOD",
+        "data_type": "optimization_insights",
+        "content_preview": "\ud83c\udfaf OPTIMIZATION INSIGHTS:\n\n\ud83c\udfc6 **Best Performing Platform**: Amazon\n\u2022 ROAS: 3.72x\n\u2022 CTR: 0.96%\n\u2022 CPA: $...",
+        "query": "What should we optimize?"
       }
     ],
     "Detailed Analytics": [
@@ -423,28 +423,10 @@
         "query": "What is our click-through rate?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"Show me conversion rates by platform\". I can help you analyze your...",
-        "query": "Show me conversion rates by platform"
-      },
-      {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What is our impression share?\". I can help you analyze your campai...",
-        "query": "What is our impression share?"
-      },
-      {
         "status": "GOOD",
         "data_type": "conversions_summary",
         "content_preview": "\ud83c\udfaf Total Conversions: 719\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udcb8 Average CPA:...",
         "query": "How many conversions did we get?"
-      },
-      {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What is our average order value?\". I can help you analyze your cam...",
-        "query": "What is our average order value?"
       },
       {
         "status": "GOOD",
@@ -453,40 +435,58 @@
         "query": "Show me audience performance"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What is our reach and frequency?\". I can help you analyze your cam...",
-        "query": "What is our reach and frequency?"
-      },
-      {
         "status": "GOOD",
         "data_type": "creative_performance",
         "content_preview": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 71...",
         "query": "How are our creatives performing?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"Show me demographic breakdown\". I can help you analyze your campai...",
-        "query": "Show me demographic breakdown"
+        "status": "GOOD",
+        "data_type": "ctr_summary",
+        "content_preview": "\ud83d\uddb1\ufe0f Overall CTR: 1.08%\n\ud83d\udc41\ufe0f Total Impressions: 297,290\n\ud83d\uddb1\ufe0f Total Clicks: 3,220",
+        "query": "What is our CTR?"
       },
       {
         "status": "GENERIC",
         "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What is our engagement rate?\". I can help you analyze your campaig...",
-        "query": "What is our engagement rate?"
+        "content_preview": "I understand you're asking about \"What is our conversion rate?\". I can help you analyze your campaig...",
+        "query": "What is our conversion rate?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"How many unique users did we reach?\". I can help you analyze your ...",
-        "query": "How many unique users did we reach?"
+        "status": "GOOD",
+        "data_type": "audience_performance",
+        "content_preview": "\ud83d\udc65 AUDIENCE PERFORMANCE:\n\n\ud83c\udfc6 Top Performing Audience: Holiday Entertainers\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,...",
+        "query": "What is our audience performance?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What is our bounce rate?\". I can help you analyze your campaign da...",
-        "query": "What is our bounce rate?"
+        "status": "GOOD",
+        "data_type": "creative_performance",
+        "content_preview": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 71...",
+        "query": "What is our creative performance?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "ctr_summary",
+        "content_preview": "\ud83d\uddb1\ufe0f Overall CTR: 1.08%\n\ud83d\udc41\ufe0f Total Impressions: 297,290\n\ud83d\uddb1\ufe0f Total Clicks: 3,220",
+        "query": "What is our click-through rate?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "conversions_summary",
+        "content_preview": "\ud83c\udfaf Total Conversions: 719\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udcb8 Average CPA:...",
+        "query": "How many conversions did we get?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "audience_performance",
+        "content_preview": "\ud83d\udc65 AUDIENCE PERFORMANCE:\n\n\ud83c\udfc6 Top Performing Audience: Holiday Entertainers\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,...",
+        "query": "Show me audience performance"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "creative_performance",
+        "content_preview": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 71...",
+        "query": "How are our creatives performing?"
       }
     ],
     "Creative & Audience": [
@@ -521,12 +521,6 @@
         "query": "Which audience segments performed best?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"How did different ad formats perform?\". I can help you analyze you...",
-        "query": "How did different ad formats perform?"
-      },
-      {
         "status": "GOOD",
         "data_type": "audience_performance",
         "content_preview": "\ud83d\udc65 AUDIENCE PERFORMANCE:\n\n\ud83c\udfc6 Top Performing Audience: Holiday Entertainers\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,...",
@@ -551,18 +545,24 @@
         "query": "What audience targeting worked best?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"How did video vs static ads perform?\". I can help you analyze your...",
-        "query": "How did video vs static ads perform?"
+        "status": "GOOD",
+        "data_type": "creative_performance",
+        "content_preview": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 71...",
+        "query": "What creative recommendations do you have?"
       },
       {
         "status": "GOOD",
         "data_type": "creative_performance",
         "content_preview": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 71...",
-        "query": "What creative recommendations do you have?"
+        "query": "How did our creatives perform?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "audience_performance",
+        "content_preview": "\ud83d\udc65 AUDIENCE PERFORMANCE:\n\n\ud83c\udfc6 Top Performing Audience: Holiday Entertainers\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,...",
+        "query": "Show me audience performance"
       }
     ]
   },
-  "timestamp": 1754361109.4559429
+  "timestamp": 1754361933.7683468
 }

@@ -18,37 +18,37 @@ PROMPT_QUESTIONS = {
         "Give me an executive summary",
         "What is our overall performance?",
         "What are the key metrics?",
-        "How are we doing overall?",
-        "What's the big picture of our campaigns?",
-        "Give me a high-level overview"
+        "Give me an executive summary",
+        "What is our overall performance?",
+        "What are the key metrics?"
     ],
     "Financial Performance": [
-        "How much did we spend?",
+        "What is our total spend?",
         "What is our total revenue?",
         "What is our ROAS?",
-        "How much revenue did we generate?",
+        "What is our revenue?",
         "What is our cost per acquisition?",
         "What is our CPA?",
         "What is our cost per click?",
         "What is our CPM?",
         "What is our return on investment?",
-        "How profitable are our campaigns?",
+        "What is our ROI?",
         "What is our profit margin?",
-        "Show me our financial performance"
+        "What is our total spend?"
     ],
     "Platform Performance": [
         "How is Meta performing?",
         "What is DV360's performance?",
         "Show me Amazon's metrics",
-        "How did CM360 do?",
         "What are SA360's results?",
         "How is TradeDesk performing?",
         "Which platform is doing the best?",
         "Compare platform performance",
         "What is the top performing platform?",
-        "Which platform should I focus on?",
-        "Show me platform comparison",
-        "What is each platform's ROAS?"
+        "What is each platform's ROAS?",
+        "How is Meta performing?",
+        "What is DV360's performance?",
+        "Show me Amazon's metrics"
     ],
     "Weekly Performance": [
         "How did we perform in week 1?",
@@ -65,18 +65,18 @@ PROMPT_QUESTIONS = {
         "How did performance change week over week?"
     ],
     "Campaign Analysis": [
-        "What is our best performing campaign?",
-        "Show me campaign performance",
-        "Which campaigns are doing well?",
+        "What is our best campaign?",
         "What is our top campaign?",
-        "How are our campaigns performing?",
+        "What is our worst campaign?",
         "Which campaign has the highest ROAS?",
-        "What is our worst performing campaign?",
         "Which campaigns should I pause?",
         "Show me campaign rankings",
-        "What is the performance of each campaign?",
         "Which campaigns are most efficient?",
-        "Compare campaign performance"
+        "Compare campaign performance",
+        "What is the performance of each campaign?",
+        "What is FreshNest Summer Grilling performance?",
+        "What is our best campaign?",
+        "What is our top campaign?"
     ],
     "Optimization Insights": [
         "What should we optimize?",
@@ -90,21 +90,21 @@ PROMPT_QUESTIONS = {
         "Give me strategic recommendations",
         "What are the biggest opportunities?",
         "How can we increase ROAS?",
-        "What should we change in our strategy?"
+        "What should we optimize?"
     ],
     "Detailed Analytics": [
         "What is our click-through rate?",
-        "Show me conversion rates by platform",
-        "What is our impression share?",
         "How many conversions did we get?",
-        "What is our average order value?",
         "Show me audience performance",
-        "What is our reach and frequency?",
         "How are our creatives performing?",
-        "Show me demographic breakdown",
-        "What is our engagement rate?",
-        "How many unique users did we reach?",
-        "What is our bounce rate?"
+        "What is our CTR?",
+        "What is our conversion rate?",
+        "What is our audience performance?",
+        "What is our creative performance?",
+        "What is our click-through rate?",
+        "How many conversions did we get?",
+        "Show me audience performance",
+        "How are our creatives performing?"
     ],
     "Creative & Audience": [
         "How did our creatives perform?",
@@ -112,13 +112,13 @@ PROMPT_QUESTIONS = {
         "Show me audience performance breakdown",
         "What creative optimizations should we make?",
         "Which audience segments performed best?",
-        "How did different ad formats perform?",
         "What audience insights do you have?",
         "Which creative elements drove the most conversions?",
         "Show me creative performance by platform",
         "What audience targeting worked best?",
-        "How did video vs static ads perform?",
-        "What creative recommendations do you have?"
+        "What creative recommendations do you have?",
+        "How did our creatives perform?",
+        "Show me audience performance"
     ]
 }
 
