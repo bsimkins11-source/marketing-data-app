@@ -451,7 +451,13 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       type: 'platform_comparison',
       platforms: analysis,
       top: topPlatform.name,
-      bottom: bottomPlatform.name
+      bottom: bottomPlatform.name,
+      chartData: analysis.map(platform => ({
+        platform: platform.name,
+        spend: platform.metrics.spend,
+        revenue: platform.metrics.revenue,
+        roas: platform.metrics.roas
+      }))
     }, query)
     
     updateConversationContext(sessionId, query, result)
@@ -531,7 +537,13 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       type: 'campaign_analysis',
       campaigns: analysis,
       best: bestCampaign.name,
-      worst: worstCampaign.name
+      worst: worstCampaign.name,
+      chartData: analysis.map(campaign => ({
+        campaign: campaign.name,
+        spend: campaign.metrics.spend,
+        revenue: campaign.metrics.revenue,
+        roas: campaign.metrics.roas
+      }))
     }, query)
     
     updateConversationContext(sessionId, query, result)
@@ -2439,6 +2451,121 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     data: {
       type: 'generic_response',
       query: query
+    }
+  }
+
+  // ============================================================================
+  // CHART REQUEST HANDLERS (HIGH PRIORITY - AFTER ALL OTHER HANDLERS)
+  // ============================================================================
+  
+  // Chart request queries
+  const chartRequestKeywords = [
+    'show me a graph', 'create a chart', 'visualize this data', 'put this in a chart',
+    'show me a bar chart', 'make this into a graph', 'chart this data', 'graph this',
+    'show me a chart', 'visualize', 'graph', 'chart', 'plot this data'
+  ]
+  
+  const isChartRequest = chartRequestKeywords.some(keyword => lowerQuery.includes(keyword))
+  
+  if (isChartRequest) {
+    // Get the previous response context to understand what data to chart
+    const context = getConversationContext(sessionId)
+    const lastResponse = context.lastContext
+    
+    if (lastResponse && lastResponse.type) {
+      let chartData = null
+      let chartType = 'bar'
+      let chartTitle = 'Data Visualization'
+      
+      // Generate appropriate chart data based on the last response type
+      switch (lastResponse.type) {
+        case 'platform_comparison':
+          chartData = data.reduce((acc, row) => {
+            const platform = row.dimensions.platform
+            if (!acc[platform]) {
+              acc[platform] = { platform, spend: 0, revenue: 0, roas: 0 }
+            }
+            acc[platform].spend += row.metrics.spend
+            acc[platform].revenue += row.metrics.revenue
+            acc[platform].roas = acc[platform].spend > 0 ? acc[platform].revenue / acc[platform].spend : 0
+            return acc
+          }, {})
+          chartType = 'bar'
+          chartTitle = 'Platform Performance Comparison'
+          break
+          
+        case 'campaign_analysis':
+          chartData = data.reduce((acc, row) => {
+            const campaign = row.dimensions.campaign
+            if (!acc[campaign]) {
+              acc[campaign] = { campaign, spend: 0, revenue: 0, roas: 0 }
+            }
+            acc[campaign].spend += row.metrics.spend
+            acc[campaign].revenue += row.metrics.revenue
+            acc[campaign].roas = acc[campaign].spend > 0 ? acc[campaign].revenue / acc[campaign].spend : 0
+            return acc
+          }, {})
+          chartType = 'bar'
+          chartTitle = 'Campaign Performance Analysis'
+          break
+          
+        case 'weekly_performance':
+          chartData = data.reduce((acc, row) => {
+            const week = row.dimensions.week
+            if (!acc[week]) {
+              acc[week] = { week, spend: 0, revenue: 0, roas: 0 }
+            }
+            acc[week].spend += row.metrics.spend
+            acc[week].revenue += row.metrics.revenue
+            acc[week].roas = acc[week].spend > 0 ? acc[week].revenue / acc[week].spend : 0
+            return acc
+          }, {})
+          chartType = 'line'
+          chartTitle = 'Weekly Performance Trends'
+          break
+          
+        default:
+          // Default to overall metrics
+          const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
+          const totalRevenue = data.reduce((sum, row) => sum + row.metrics.revenue, 0)
+          const totalImpressions = data.reduce((sum, row) => sum + row.metrics.impressions, 0)
+          const totalClicks = data.reduce((sum, row) => sum + row.metrics.clicks, 0)
+          const totalConversions = data.reduce((sum, row) => sum + row.metrics.conversions, 0)
+          
+          chartData = [
+            { metric: 'Spend', value: totalSpend },
+            { metric: 'Revenue', value: totalRevenue },
+            { metric: 'Impressions', value: totalImpressions },
+            { metric: 'Clicks', value: totalClicks },
+            { metric: 'Conversions', value: totalConversions }
+          ]
+          chartType = 'bar'
+          chartTitle = 'Overall Performance Metrics'
+      }
+      
+      const content = `📊 **${chartTitle}**\n\nI've generated a chart for you based on the previous analysis. The chart will display below with interactive features including hover tooltips and zoom capabilities.`
+      
+      const result = createResponse(content, {
+        type: 'chart_response',
+        chartData: Object.values(chartData),
+        chartType,
+        chartTitle,
+        originalQuery: query
+      }, query)
+      
+      updateConversationContext(sessionId, query, result)
+      return result
+    } else {
+      // No previous context, provide a generic chart response
+      const content = `📊 **Data Visualization**\n\nI'd be happy to create a chart for you! Please ask me a specific question about your data first (like "How is Meta performing?" or "What is our best campaign?"), and then I can generate a chart based on that analysis.`
+      
+      const result = createResponse(content, {
+        type: 'chart_request_no_context',
+        message: 'No previous context available for charting'
+      }, query)
+      
+      updateConversationContext(sessionId, query, result)
+      return result
     }
   }
 }

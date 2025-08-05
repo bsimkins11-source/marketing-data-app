@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, RefreshCw, MessageSquare, Sparkles, Mic, MicOff, HelpCircle, X, Download, BarChart3, DollarSign, Target, Calendar, TrendingUp, Lightbulb, Users } from 'lucide-react'
 import { MarketingData } from '@/types'
 import DataChart from './DataChart'
+import ChartComponent from './ChartComponents'
 
 interface Message {
   id: string
@@ -757,7 +758,17 @@ I can handle complex queries, maintain conversation context, and provide detaile
                   </div>
                 </div>
                 
-                {message.data && (
+                {message.data && message.data.type === 'chart_response' && message.data.chartData && (
+                  <div className="mt-4">
+                    <ChartComponent
+                      chartData={message.data.chartData}
+                      chartType={message.data.chartType}
+                      chartTitle={message.data.chartTitle}
+                    />
+                  </div>
+                )}
+                
+                {message.data && message.data.type !== 'chart_response' && (
                   <div className="mt-2">
                     <DataChart data={message.data} />
                   </div>
