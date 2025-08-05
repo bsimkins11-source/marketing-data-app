@@ -307,13 +307,14 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
     }
   }
 
-  const handleSendMessage = async (inputMethod: 'text' | 'voice' = 'text') => {
-    if (!inputValue.trim() || isLoading) return
+  const handleSendMessage = async (inputMethod: 'text' | 'voice' = 'text', customMessage?: string) => {
+    const messageToSend = customMessage || inputValue
+    if (!messageToSend.trim() || isLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
-      content: inputValue,
+      content: messageToSend,
       timestamp: new Date(),
       inputMethod
     }
@@ -324,7 +325,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
     setError('')
 
     try {
-      const response = await processAIQuery(inputValue, campaignData)
+      const response = await processAIQuery(messageToSend, campaignData)
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -652,21 +653,18 @@ I can handle complex queries, maintain conversation context, and provide detaile
       chatSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
     
-    // Set the input value to the clicked prompt
+    // Set the input value to the clicked prompt (for visual feedback)
     setInputValue(prompt)
     
-    // Small delay to ensure the input value is set before sending
-    setTimeout(async () => {
-      // Submit the prompt automatically
-      await handleSendMessage('text')
-      
-      // Ensure we scroll to the bottom to see the new message as it populates
-      setTimeout(() => {
-        if (messagesEndRef.current) {
-          messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
-        }
-      }, 100)
-    }, 50)
+    // Submit the prompt automatically with the prompt text directly
+    await handleSendMessage('text', prompt)
+    
+    // Ensure we scroll to the bottom to see the new message as it populates
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      }
+    }, 100)
   }
 
   const getColorClasses = (color: string) => {
