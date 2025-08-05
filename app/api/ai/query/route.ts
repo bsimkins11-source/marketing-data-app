@@ -677,7 +677,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     'what should we optimize', 'optimization opportunities', 'strategic recommendations',
     'what are our opportunities', 'how can we improve performance', 'what optimization opportunities exist',
     'what should i focus on improving', 'what are the biggest opportunities', 'improve', 'improvement',
-    'opportunities', 'biggest opportunities', 'focus on improving', 'improve performance'
+    'opportunities', 'biggest opportunities', 'focus on improving', 'improve performance', 'put more money'
   ]
   
   if (optimizationKeywords.some(keyword => lowerQuery.includes(keyword))) {
@@ -1566,10 +1566,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   }
 
   // EXECUTIVE SUMMARY HANDLERS (HIGH PRIORITY - BEFORE TIME HANDLERS)
-  if (lowerQuery.includes('executive summary') || lowerQuery.includes('overall performance') || 
-      lowerQuery.includes('summarize') || lowerQuery.includes('key metrics') || 
-      lowerQuery.includes('key findings') || lowerQuery.includes('main insights') ||
-      lowerQuery.includes('performance overview')) {
+  if (lowerQuery.includes('executive summary') || lowerQuery.includes('comprehensive summary') || lowerQuery.includes('overall performance') || lowerQuery.includes('key metrics') || lowerQuery.includes('summary of our campaigns') || lowerQuery.includes('performance overview')) {
     
     // Data context analysis
     const uniqueBrands = Array.from(new Set(data.map(row => row.dimensions.brand)))

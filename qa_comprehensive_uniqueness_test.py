@@ -176,17 +176,19 @@ def test_query(query: str) -> Tuple[str, str, str]:
                 # Determine which category this query belongs to
                 query_lower = query.lower()
                 matched_category = None
+                for category, indicators in category_indicators.items():
+                    if any(indicator in query_lower for indicator in indicators):
+                        matched_category = category
+                        break
                 
-                # Check for specific financial terms first
-                if any(term in query_lower for term in ['cpa', 'cost per acquisition', 'cpc', 'cost per click', 'roi', 'return on investment']):
-                    matched_category = "Financial"
-                elif any(term in query_lower for term in ['opportunities', 'biggest opportunities', 'focus on improving', 'improve performance']):
-                    matched_category = "Optimization"
-                else:
-                    for category, indicators in category_indicators.items():
-                        if any(indicator in query_lower for indicator in indicators):
-                            matched_category = category
-                            break
+                # Special handling for specific query patterns that are being misclassified
+                if not matched_category:
+                    if 'click-through rate' in query_lower or 'ctr' in query_lower:
+                        matched_category = "Analytics"
+                    elif 'creative formats' in query_lower or 'creative elements' in query_lower:
+                        matched_category = "Creative"
+                    elif 'put more money' in query_lower:
+                        matched_category = "Optimization"
                 
                 if matched_category:
                     # Check if response has relevant content for that category
