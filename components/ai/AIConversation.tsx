@@ -307,7 +307,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
     }
   }
 
-  const handleSendMessage = async (inputMethod: 'text' | 'voice' = 'text', customMessage?: string) => {
+  const handleSendMessage = async (inputMethod: 'text' | 'voice' = 'text', customMessage?: string, keepInput?: boolean) => {
     const messageToSend = customMessage || inputValue
     if (!messageToSend.trim() || isLoading) return
 
@@ -320,7 +320,10 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
     }
 
     setMessages(prev => [...prev, userMessage])
-    setInputValue('')
+    // Only clear input if keepInput is not true
+    if (!keepInput) {
+      setInputValue('')
+    }
     setIsLoading(true)
     setError('')
 
@@ -657,7 +660,7 @@ I can handle complex queries, maintain conversation context, and provide detaile
     setInputValue(prompt)
     
     // Submit the prompt automatically with the prompt text directly
-    await handleSendMessage('text', prompt)
+    await handleSendMessage('text', prompt, true)
     
     // Ensure we scroll to the bottom to see the new message as it populates
     setTimeout(() => {
