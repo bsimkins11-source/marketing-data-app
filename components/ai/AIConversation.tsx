@@ -429,6 +429,86 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       }
     }
     
+    // Handle platform-specific queries
+    const platformKeywords = ['meta', 'facebook', 'instagram', 'amazon', 'dv360', 'display video 360', 'sa360', 'search ads 360', 'tradedesk', 'the trade desk']
+    const isPlatformQuery = platformKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    if (isPlatformQuery) {
+      // Find the specific platform mentioned
+      let targetPlatform = ''
+      for (const keyword of platformKeywords) {
+        if (lowerQuery.includes(keyword)) {
+          targetPlatform = keyword
+          break
+        }
+      }
+      
+      // Map common names to actual platform names in data
+      const platformMap: { [key: string]: string } = {
+        'meta': 'Meta',
+        'facebook': 'Meta',
+        'instagram': 'Meta',
+        'amazon': 'Amazon',
+        'dv360': 'DV360',
+        'display video 360': 'DV360',
+        'sa360': 'SA360',
+        'search ads 360': 'SA360',
+        'tradedesk': 'TradeDesk',
+        'the trade desk': 'TradeDesk'
+      }
+      
+      const actualPlatform = platformMap[targetPlatform] || targetPlatform
+      
+      // Filter data for the specific platform
+      const platformData = data.filter(item => 
+        item.dimensions.platform.toLowerCase() === actualPlatform.toLowerCase()
+      )
+      
+      if (platformData.length > 0) {
+        const totalSpend = platformData.reduce((sum, item) => sum + (item.metrics.spend || 0), 0)
+        const totalRevenue = platformData.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
+        const totalImpressions = platformData.reduce((sum, item) => sum + (item.metrics.impressions || 0), 0)
+        const totalClicks = platformData.reduce((sum, item) => sum + (item.metrics.clicks || 0), 0)
+        const totalConversions = platformData.reduce((sum, item) => sum + (item.metrics.conversions || 0), 0)
+        
+        const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+        const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+        const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+        
+        return {
+          content: `📊 **${actualPlatform} Performance Metrics**\n\n` +
+            `💰 **Spend**: $${totalSpend.toLocaleString()}\n` +
+            `💵 **Revenue**: $${totalRevenue.toLocaleString()}\n` +
+            `📈 **ROAS**: ${roas.toFixed(2)}x\n` +
+            `👁️ **Impressions**: ${totalImpressions.toLocaleString()}\n` +
+            `🖱️ **Clicks**: ${totalClicks.toLocaleString()}\n` +
+            `🎯 **Conversions**: ${totalConversions.toLocaleString()}\n` +
+            `📊 **CTR**: ${(ctr * 100).toFixed(2)}%\n` +
+            `💸 **CPA**: $${cpa.toFixed(2)}`,
+          data: {
+            type: 'platform_analysis',
+            platform: actualPlatform,
+            metrics: {
+              spend: totalSpend,
+              revenue: totalRevenue,
+              roas,
+              impressions: totalImpressions,
+              clicks: totalClicks,
+              conversions: totalConversions,
+              ctr,
+              cpa
+            },
+            chartData: [{
+              platform: actualPlatform,
+              spend: totalSpend,
+              revenue: totalRevenue,
+              roas
+            }]
+          }
+        }
+      }
+    }
+    
     if (lowerQuery.includes('total') || lowerQuery.includes('sum')) {
       const totalSpend = data.reduce((sum, item) => sum + (item.metrics.spend || 0), 0)
       const totalRevenue = data.reduce((sum, item) => sum + (item.metrics.revenue || 0), 0)
