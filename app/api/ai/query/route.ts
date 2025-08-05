@@ -1602,6 +1602,279 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     return result
   }
 
+  // CREATIVE OPTIMIZATION HANDLER (HIGH PRIORITY)
+  if (lowerQuery.includes('creative optimization') || lowerQuery.includes('creative optimizations')) {
+    const creativeMetrics = data.reduce((acc, row) => {
+      const format = row.dimensions.creative_format
+      if (!acc[format]) {
+        acc[format] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      acc[format].spend += row.metrics.spend
+      acc[format].revenue += row.metrics.revenue
+      acc[format].impressions += row.metrics.impressions
+      acc[format].clicks += row.metrics.clicks
+      acc[format].conversions += row.metrics.conversions
+      return acc
+    }, {} as any)
+    
+    const creativeAnalysis = Object.entries(creativeMetrics)
+      .map(([format, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        return { format, metrics: { ...metrics, roas, ctr, cpa } }
+      })
+      .sort((a, b) => b.metrics.roas - a.metrics.roas)
+    
+    const bestFormat = creativeAnalysis[0]
+    const worstFormat = creativeAnalysis[creativeAnalysis.length - 1]
+    
+    const content = `🎨 CREATIVE OPTIMIZATION RECOMMENDATIONS:\n\n` +
+      `🏆 Best Performing Format: ${bestFormat.format}\n` +
+      `• ROAS: ${bestFormat.metrics.roas.toFixed(2)}x\n` +
+      `• CTR: ${(bestFormat.metrics.ctr * 100).toFixed(2)}%\n` +
+      `• CPA: $${bestFormat.metrics.cpa.toFixed(2)}\n\n` +
+      `📉 Format Needing Improvement: ${worstFormat.format}\n` +
+      `• ROAS: ${worstFormat.metrics.roas.toFixed(2)}x\n` +
+      `• CTR: ${(worstFormat.metrics.ctr * 100).toFixed(2)}%\n` +
+      `• CPA: $${worstFormat.metrics.cpa.toFixed(2)}\n\n` +
+      `💡 RECOMMENDATIONS:\n` +
+      `• Scale up ${bestFormat.format} formats\n` +
+      `• Optimize ${worstFormat.format} for better performance\n` +
+      `• Test new creative variations in underperforming formats`
+    
+    const result = {
+      content,
+      data: {
+        type: 'creative_optimization',
+        creatives: creativeAnalysis,
+        best: bestFormat.format,
+        worst: worstFormat.format,
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // CREATIVE CONVERSION ELEMENTS HANDLER (HIGH PRIORITY)
+  if (lowerQuery.includes('creative elements') || lowerQuery.includes('drove the most conversions')) {
+    const creativeMetrics = data.reduce((acc, row) => {
+      const format = row.dimensions.creative_format
+      if (!acc[format]) {
+        acc[format] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      acc[format].spend += row.metrics.spend
+      acc[format].revenue += row.metrics.revenue
+      acc[format].impressions += row.metrics.impressions
+      acc[format].clicks += row.metrics.clicks
+      acc[format].conversions += row.metrics.conversions
+      return acc
+    }, {} as any)
+    
+    const conversionAnalysis = Object.entries(creativeMetrics)
+      .map(([format, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        const conversionRate = metrics.clicks > 0 ? metrics.conversions / metrics.clicks : 0
+        return { format, metrics: { ...metrics, roas, ctr, cpa, conversionRate } }
+      })
+      .sort((a, b) => b.metrics.conversions - a.metrics.conversions)
+    
+    const topConverter = conversionAnalysis[0]
+    
+    let content = `🎯 CREATIVE ELEMENTS CONVERSION ANALYSIS:\n\n` +
+      `🥇 Top Converting Format: ${topConverter.format}\n` +
+      `• Total Conversions: ${topConverter.metrics.conversions.toLocaleString()}\n` +
+      `• Conversion Rate: ${(topConverter.metrics.conversionRate * 100).toFixed(2)}%\n` +
+      `• CPA: $${topConverter.metrics.cpa.toFixed(2)}\n` +
+      `• ROAS: ${topConverter.metrics.roas.toFixed(2)}x\n\n` +
+      `📊 All Formats by Conversions:\n`
+    
+    conversionAnalysis.forEach((format, index) => {
+      content += `${index + 1}. ${format.format}: ${format.metrics.conversions.toLocaleString()} conversions\n`
+    })
+    
+    const result = {
+      content,
+      data: {
+        type: 'creative_conversion_elements',
+        creatives: conversionAnalysis,
+        top_converter: topConverter.format,
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // CREATIVE PERFORMANCE BY PLATFORM HANDLER (HIGH PRIORITY)
+  if (lowerQuery.includes('creative performance by platform') || lowerQuery.includes('creative by platform')) {
+    const platformCreativeMetrics = data.reduce((acc, row) => {
+      const platform = row.dimensions.platform
+      const format = row.dimensions.creative_format
+      const key = `${platform}-${format}`
+      
+      if (!acc[key]) {
+        acc[key] = { platform, format, spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      acc[key].spend += row.metrics.spend
+      acc[key].revenue += row.metrics.revenue
+      acc[key].impressions += row.metrics.impressions
+      acc[key].clicks += row.metrics.clicks
+      acc[key].conversions += row.metrics.conversions
+      return acc
+    }, {} as any)
+    
+    const platformCreativeAnalysis = Object.entries(platformCreativeMetrics)
+      .map(([key, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        return { ...metrics, roas, ctr, cpa }
+      })
+      .sort((a, b) => b.roas - a.roas)
+    
+    let content = `🎨 CREATIVE PERFORMANCE BY PLATFORM:\n\n`
+    
+    // Group by platform
+    const platformGroups = platformCreativeAnalysis.reduce((acc, item) => {
+      if (!acc[item.platform]) {
+        acc[item.platform] = []
+      }
+      acc[item.platform].push(item)
+      return acc
+    }, {} as any)
+    
+    Object.entries(platformGroups).forEach(([platform, items]: [string, any]) => {
+      content += `📱 ${platform}:\n`
+      items.forEach((item: any) => {
+        content += `  • ${item.format}: ${item.roas.toFixed(2)}x ROAS, ${(item.ctr * 100).toFixed(2)}% CTR\n`
+      })
+      content += '\n'
+    })
+    
+    const result = {
+      content,
+      data: {
+        type: 'creative_platform_performance',
+        platform_creatives: platformCreativeAnalysis,
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // CREATIVE RECOMMENDATIONS HANDLER (HIGH PRIORITY)
+  if (lowerQuery.includes('creative recommendations')) {
+    const creativeMetrics = data.reduce((acc, row) => {
+      const format = row.dimensions.creative_format
+      if (!acc[format]) {
+        acc[format] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      acc[format].spend += row.metrics.spend
+      acc[format].revenue += row.metrics.revenue
+      acc[format].impressions += row.metrics.impressions
+      acc[format].clicks += row.metrics.clicks
+      acc[format].conversions += row.metrics.conversions
+      return acc
+    }, {} as any)
+    
+    const creativeAnalysis = Object.entries(creativeMetrics)
+      .map(([format, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        return { format, metrics: { ...metrics, roas, ctr, cpa } }
+      })
+      .sort((a, b) => b.metrics.roas - a.metrics.roas)
+    
+    const bestFormat = creativeAnalysis[0]
+    const worstFormat = creativeAnalysis[creativeAnalysis.length - 1]
+    
+    const content = `💡 CREATIVE RECOMMENDATIONS:\n\n` +
+      `🎯 STRATEGIC RECOMMENDATIONS:\n` +
+      `• Double down on ${bestFormat.format} - it's your best performer\n` +
+      `• A/B test new ${worstFormat.format} variations to improve performance\n` +
+      `• Consider seasonal creative refreshes for all formats\n` +
+      `• Test video vs static formats if not already doing so\n\n` +
+      `📊 PERFORMANCE INSIGHTS:\n` +
+      `• Best Format: ${bestFormat.format} (${bestFormat.metrics.roas.toFixed(2)}x ROAS)\n` +
+      `• Needs Work: ${worstFormat.format} (${worstFormat.metrics.roas.toFixed(2)}x ROAS)\n` +
+      `• Opportunity: Focus on improving ${worstFormat.format} performance`
+    
+    const result = {
+      content,
+      data: {
+        type: 'creative_recommendations',
+        creatives: creativeAnalysis,
+        best: bestFormat.format,
+        worst: worstFormat.format,
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // AUDIENCE TARGETING HANDLER (HIGH PRIORITY)
+  if (lowerQuery.includes('audience targeting') || lowerQuery.includes('targeting worked best')) {
+    const audienceMetrics = data.reduce((acc, row) => {
+      const audience = row.dimensions.audience
+      if (!acc[audience]) {
+        acc[audience] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      acc[audience].spend += row.metrics.spend
+      acc[audience].revenue += row.metrics.revenue
+      acc[audience].impressions += row.metrics.impressions
+      acc[audience].clicks += row.metrics.clicks
+      acc[audience].conversions += row.metrics.conversions
+      return acc
+    }, {} as any)
+    
+    const audienceAnalysis = Object.entries(audienceMetrics)
+      .map(([audience, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        return { audience, metrics: { ...metrics, roas, ctr, cpa } }
+      })
+      .sort((a, b) => b.metrics.roas - a.metrics.roas)
+    
+    const bestAudience = audienceAnalysis[0]
+    
+    let content = `🎯 AUDIENCE TARGETING ANALYSIS:\n\n` +
+      `🏆 Best Performing Audience: ${bestAudience.audience}\n` +
+      `• ROAS: ${bestAudience.metrics.roas.toFixed(2)}x\n` +
+      `• CTR: ${(bestAudience.metrics.ctr * 100).toFixed(2)}%\n` +
+      `• CPA: $${bestAudience.metrics.cpa.toFixed(2)}\n` +
+      `• Spend: $${bestAudience.metrics.spend.toLocaleString()}\n\n` +
+      `📊 All Audiences by ROAS:\n`
+    
+    audienceAnalysis.forEach((audience, index) => {
+      content += `${index + 1}. ${audience.audience}: ${audience.metrics.roas.toFixed(2)}x ROAS\n`
+    })
+    
+    const result = {
+      content,
+      data: {
+        type: 'audience_targeting',
+        audiences: audienceAnalysis,
+        best: bestAudience.audience,
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
   // CREATIVE & AUDIENCE HANDLERS
   if (lowerQuery.includes('creative') || lowerQuery.includes('audience') || lowerQuery.includes('placement') || 
       lowerQuery.includes('ad group')) {

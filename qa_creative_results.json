@@ -1,0 +1,82 @@
+{
+  "summary": {
+    "total_questions": 11,
+    "status_counts": {
+      "ERROR": 11
+    },
+    "uniqueness_analysis": {
+      "total_responses": 11,
+      "unique_responses": 11,
+      "uniqueness_ratio": 1.0,
+      "duplicate_indices": []
+    }
+  },
+  "detailed_results": [
+    {
+      "question": "How did our creatives perform?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1025d2a50>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "Which creative formats worked best?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102597250>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "Show me audience performance breakdown",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102596e90>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "What creative optimizations should we make?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1025a3490>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "Which audience segments performed best?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1025a29e0>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "What audience insights do you have?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10264e210>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "Which creative elements drove the most conversions?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10263e250>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "Show me creative performance by platform",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10263e9c0>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "What audience targeting worked best?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10263ebe0>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "What creative recommendations do you have?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10263ee00>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    },
+    {
+      "question": "How did our creatives perform?",
+      "status": "ERROR",
+      "response": "HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/ai/query (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10263f020>: Failed to establ...",
+      "analysis": "Exception: ConnectionError"
+    }
+  ]
+}
