@@ -457,6 +457,41 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     return result
   }
 
+  // Additional platform-specific queries (catch-all for platform performance)
+  const platformNames = ['meta', 'dv360', 'amazon', 'cm360', 'sa360', 'tradedesk']
+  const platformQueryKeywords = ['performing', 'performance', 'metrics', 'results', 'how is', 'what is']
+  
+  for (const platformName of platformNames) {
+    if (lowerQuery.includes(platformName) && platformQueryKeywords.some(keyword => lowerQuery.includes(keyword))) {
+      const platformData = data.filter(row => row.dimensions.platform.toLowerCase() === platformName.toLowerCase())
+      
+      if (platformData.length > 0) {
+        const aggregated = aggregateByDimension(platformData, 'platform')
+        const analysis = createAnalysisItems(aggregated)
+        const platform = analysis[0]
+        
+        const content = `${platformName.charAt(0).toUpperCase() + platformName.slice(1)} Performance:\n\n` +
+          `💰 Spend: ${formatCurrency(platform.metrics.spend)}\n` +
+          `💵 Revenue: ${formatCurrency(platform.metrics.revenue)}\n` +
+          `📊 Impressions: ${platform.metrics.impressions.toLocaleString()}\n` +
+          `🖱️ Clicks: ${platform.metrics.clicks.toLocaleString()}\n` +
+          `🎯 Conversions: ${platform.metrics.conversions.toLocaleString()}\n` +
+          `📈 CTR: ${formatPercentage(platform.metrics.ctr)}\n` +
+          `💎 ROAS: ${formatROAS(platform.metrics.roas)}\n` +
+          `💸 CPA: ${formatCurrency(platform.metrics.cpa)}`
+        
+        const result = createResponse(content, {
+          type: 'platform_performance',
+          platform: platformName.charAt(0).toUpperCase() + platformName.slice(1),
+          metrics: platform.metrics
+        }, query)
+        
+        updateConversationContext(sessionId, query, result)
+        return result
+      }
+    }
+  }
+
   // ============================================================================
   // CAMPAIGN ANALYSIS HANDLERS (HIGH PRIORITY)
   // ============================================================================
@@ -501,6 +536,46 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     return result
   }
 
+  // Specific campaign performance queries (e.g., "FreshNest Summer Grilling performance")
+  const specificCampaignNames = [
+    'freshnest summer grilling', 'freshnest back to school', 'freshnest holiday recipes', 
+    'freshnest pantry staples'
+  ]
+  
+  for (const campaignName of specificCampaignNames) {
+    if (lowerQuery.includes(campaignName.toLowerCase())) {
+      const campaignData = data.filter(row => 
+        row.dimensions.campaign_name && 
+        row.dimensions.campaign_name.toLowerCase().includes(campaignName.toLowerCase())
+      )
+      
+      if (campaignData.length > 0) {
+        const aggregated = aggregateByDimension(campaignData, 'campaign_name')
+        const analysis = createAnalysisItems(aggregated)
+        const campaign = analysis[0]
+        
+        const content = `${campaign.name} Performance:\n\n` +
+          `💰 Spend: ${formatCurrency(campaign.metrics.spend)}\n` +
+          `💵 Revenue: ${formatCurrency(campaign.metrics.revenue)}\n` +
+          `📊 Impressions: ${campaign.metrics.impressions.toLocaleString()}\n` +
+          `🖱️ Clicks: ${campaign.metrics.clicks.toLocaleString()}\n` +
+          `🎯 Conversions: ${campaign.metrics.conversions.toLocaleString()}\n` +
+          `📈 CTR: ${formatPercentage(campaign.metrics.ctr)}\n` +
+          `💎 ROAS: ${formatROAS(campaign.metrics.roas)}\n` +
+          `💸 CPA: ${formatCurrency(campaign.metrics.cpa)}`
+        
+        const result = createResponse(content, {
+          type: 'specific_campaign_performance',
+          campaign: campaign.name,
+          metrics: campaign.metrics
+        }, query)
+        
+        updateConversationContext(sessionId, query, result)
+        return result
+      }
+    }
+  }
+
   // ============================================================================
   // AUDIENCE ANALYSIS HANDLERS (HIGH PRIORITY)
   // ============================================================================
@@ -509,7 +584,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   const audienceKeywords = [
     'audience', 'audiences', 'audience performance', 'audience breakdown',
     'audience segments', 'audience targeting', 'audience insights',
-    'segments', 'targeting', 'audience recommendations'
+    'segments', 'targeting', 'audience recommendations',
+    'audience segments performed best', 'audience targeting worked best'
   ]
   
   if (audienceKeywords.some(keyword => lowerQuery.includes(keyword))) {
@@ -548,7 +624,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   const creativeKeywords = [
     'creative', 'creatives', 'creative performance', 'creative formats',
     'creative elements', 'creative optimization', 'creative recommendations',
-    'creative by platform', 'creative breakdown', 'creative insights'
+    'creative by platform', 'creative breakdown', 'creative insights',
+    'creative formats worked best', 'creative elements drove', 'creative recommendations do you have'
   ]
   
   if (creativeKeywords.some(keyword => lowerQuery.includes(keyword))) {
@@ -593,7 +670,9 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   const optimizationKeywords = [
     'optimize', 'optimization', 'opportunities', 'recommendations',
     'where should we put more money', 'focus on improving', 'biggest opportunities',
-    'what should we optimize', 'optimization opportunities', 'strategic recommendations'
+    'what should we optimize', 'optimization opportunities', 'strategic recommendations',
+    'what are our opportunities', 'how can we improve performance', 'what optimization opportunities exist',
+    'what should i focus on improving', 'what are the biggest opportunities', 'improve', 'improvement'
   ]
   
   if (optimizationKeywords.some(keyword => lowerQuery.includes(keyword))) {

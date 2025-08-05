@@ -2,14 +2,14 @@
   "summary": {
     "total_questions": 90,
     "overall_status_counts": {
-      "GOOD": 72,
-      "UNKNOWN": 17,
-      "GENERIC": 1
+      "GOOD": 63,
+      "UNKNOWN": 18,
+      "GENERIC": 9
     },
     "uniqueness_analysis": {
       "total_responses": 90,
-      "unique_responses": 34,
-      "uniqueness_ratio": 0.37777777777777777,
+      "unique_responses": 28,
+      "uniqueness_ratio": 0.3111111111111111,
       "duplicate_pairs": [
         [
           0,
@@ -72,6 +72,10 @@
           28
         ],
         [
+          20,
+          29
+        ],
+        [
           34,
           35
         ],
@@ -104,12 +108,32 @@
           43
         ],
         [
-          8,
+          42,
+          44
+        ],
+        [
+          42,
           45
         ],
         [
-          47,
+          42,
+          46
+        ],
+        [
+          42,
+          47
+        ],
+        [
+          42,
           48
+        ],
+        [
+          42,
+          49
+        ],
+        [
+          42,
+          50
         ],
         [
           42,
@@ -125,22 +149,22 @@
         ],
         [
           54,
-          56
+          57
         ],
         [
-          54,
+          56,
           58
         ],
         [
-          57,
+          54,
           59
         ],
         [
-          57,
+          54,
           60
         ],
         [
-          57,
+          54,
           61
         ],
         [
@@ -148,7 +172,7 @@
           62
         ],
         [
-          57,
+          54,
           63
         ],
         [
@@ -212,7 +236,7 @@
           83
         ],
         [
-          67,
+          69,
           84
         ],
         [
@@ -305,13 +329,13 @@
       {
         "question": "What is our cost per acquisition?",
         "status": "UNKNOWN",
-        "response": "\ud83d\udcb8 Overall CPA: $2618.47\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83c\udfaf Total Conversions: 719",
+        "response": "\ud83d\udcb8 Overall CPA: $2,618.471\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83c\udfaf Total Conversions: 719",
         "analysis": "Could not determine category"
       },
       {
         "question": "What is our CPA?",
         "status": "GOOD",
-        "response": "\ud83d\udcb8 Overall CPA: $2618.47\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83c\udfaf Total Conversions: 719",
+        "response": "\ud83d\udcb8 Overall CPA: $2,618.471\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83c\udfaf Total Conversions: 719",
         "analysis": "Specific Financial response"
       },
       {
@@ -354,50 +378,50 @@
     "Platform Performance": [
       {
         "question": "How is Meta performing?",
-        "status": "GOOD",
-        "response": "Meta Performance:\n\n\ud83d\udcb0 Spend: $404,859.21\n\ud83d\udcb5 Revenue: $1,344,372.713\n\ud83d\udcca Impressions: 46,448\n\ud83d\uddb1\ufe0f Clicks: 665\n\ud83c\udfaf Conversions: 181\n\ud83d\udcc8 CTR: 1.43%\n\ud83d\udc8e ROAS: 3.32x\n\ud83d\udcb8 CPA: $2236.79\n\ud83d\uddb1\ufe0f CPC: $608.81\n\ud83d\udcca CPM: $8716.40",
-        "analysis": "Specific Platform response"
+        "status": "GENERIC",
+        "response": "I understand you're asking about \"How is Meta performing?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metric...",
+        "analysis": "Generic response detected"
       },
       {
         "question": "What is DV360's performance?",
-        "status": "GOOD",
-        "response": "DV360 Performance:\n\n\ud83d\udcb0 Spend: $360,723.25\n\ud83d\udcb5 Revenue: $1,021,417.439\n\ud83d\udcca Impressions: 53,146\n\ud83d\uddb1\ufe0f Clicks: 511\n\ud83c\udfaf Conversions: 141\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 2.83x\n\ud83d\udcb8 CPA: $2558.32\n\ud83d\uddb1\ufe0f CPC: $705.92\n\ud83d\udcca CPM: $6787.40",
-        "analysis": "Specific Executive Summary response"
+        "status": "GENERIC",
+        "response": "I understand you're asking about \"What is DV360's performance?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign m...",
+        "analysis": "Generic response detected"
       },
       {
         "question": "Show me Amazon's metrics",
-        "status": "GOOD",
-        "response": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 525\n\ud83c\udfaf Conversions: 104\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 3.72x\n\ud83d\udcb8 CPA: $2528.29\n\ud83d\uddb1\ufe0f CPC: $500.84\n\ud83d\udcca CPM: $4802.69",
-        "analysis": "Specific Platform response"
+        "status": "GENERIC",
+        "response": "I understand you're asking about \"Show me Amazon's metrics\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metri...",
+        "analysis": "Generic response detected"
       },
       {
         "question": "What are SA360's results?",
-        "status": "GOOD",
-        "response": "SA360 Performance:\n\n\ud83d\udcb0 Spend: $275,875.7\n\ud83d\udcb5 Revenue: $834,945.913\n\ud83d\udcca Impressions: 45,260\n\ud83d\uddb1\ufe0f Clicks: 760\n\ud83c\udfaf Conversions: 102\n\ud83d\udcc8 CTR: 1.68%\n\ud83d\udc8e ROAS: 3.03x\n\ud83d\udcb8 CPA: $2704.66\n\ud83d\uddb1\ufe0f CPC: $362.99\n\ud83d\udcca CPM: $6095.35",
-        "analysis": "Specific Platform response"
+        "status": "GENERIC",
+        "response": "I understand you're asking about \"What are SA360's results?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metr...",
+        "analysis": "Generic response detected"
       },
       {
         "question": "How is TradeDesk performing?",
-        "status": "GOOD",
-        "response": "TradeDesk Performance:\n\n\ud83d\udcb0 Spend: $183,671.37\n\ud83d\udcb5 Revenue: $588,144.855\n\ud83d\udcca Impressions: 41,343\n\ud83d\uddb1\ufe0f Clicks: 346\n\ud83c\udfaf Conversions: 72\n\ud83d\udcc8 CTR: 0.84%\n\ud83d\udc8e ROAS: 3.20x\n\ud83d\udcb8 CPA: $2550.99\n\ud83d\uddb1\ufe0f CPC: $530.84\n\ud83d\udcca CPM: $4442.62",
-        "analysis": "Specific Platform response"
+        "status": "GENERIC",
+        "response": "I understand you're asking about \"How is TradeDesk performing?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign m...",
+        "analysis": "Generic response detected"
       },
       {
         "question": "Which platform is doing the best?",
         "status": "GOOD",
-        "response": "\ud83c\udfc6 PLATFORM COMPARISON (Ranked by ROAS):\n\n1. Amazon: 3.72x ROAS, $262,942.42 spend\n2. Meta: 3.32x ROAS, $404,859.21 spend\n3. Tradedesk: 3.20x ROAS, $183,671.37 spend\n4. Cm360: 3.07x ROAS, $394,608.79 s...",
+        "response": "\ud83c\udfc6 PLATFORM COMPARISON:\n\n\ud83e\udd47 Top Platform: Amazon\n\u2022 ROAS: 3.72x\n\u2022 Spend: $262,942.42\n\u2022 Revenue: $978,091.123\n\n\ud83d\udcca All Platforms by ROAS:\n1. Amazon: 3.72x ROAS\n2. Meta: 3.32x ROAS\n3. Tradedesk: 3.20x ROAS\n4...",
         "analysis": "Specific Platform response"
       },
       {
         "question": "Compare platform performance",
         "status": "UNKNOWN",
-        "response": "\ud83c\udfc6 PLATFORM COMPARISON (Ranked by ROAS):\n\n1. Amazon: 3.72x ROAS, $262,942.42 spend\n2. Meta: 3.32x ROAS, $404,859.21 spend\n3. Tradedesk: 3.20x ROAS, $183,671.37 spend\n4. Cm360: 3.07x ROAS, $394,608.79 s...",
+        "response": "\ud83c\udfc6 PLATFORM COMPARISON:\n\n\ud83e\udd47 Top Platform: Amazon\n\u2022 ROAS: 3.72x\n\u2022 Spend: $262,942.42\n\u2022 Revenue: $978,091.123\n\n\ud83d\udcca All Platforms by ROAS:\n1. Amazon: 3.72x ROAS\n2. Meta: 3.32x ROAS\n3. Tradedesk: 3.20x ROAS\n4...",
         "analysis": "Response doesn't match Executive Summary indicators"
       },
       {
         "question": "What is the top performing platform?",
         "status": "GOOD",
-        "response": "\ud83c\udfc6 PLATFORM COMPARISON (Ranked by ROAS):\n\n1. Amazon: 3.72x ROAS, $262,942.42 spend\n2. Meta: 3.32x ROAS, $404,859.21 spend\n3. Tradedesk: 3.20x ROAS, $183,671.37 spend\n4. Cm360: 3.07x ROAS, $394,608.79 s...",
+        "response": "\ud83c\udfc6 PLATFORM COMPARISON:\n\n\ud83e\udd47 Top Platform: Amazon\n\u2022 ROAS: 3.72x\n\u2022 Spend: $262,942.42\n\u2022 Revenue: $978,091.123\n\n\ud83d\udcca All Platforms by ROAS:\n1. Amazon: 3.72x ROAS\n2. Meta: 3.32x ROAS\n3. Tradedesk: 3.20x ROAS\n4...",
         "analysis": "Specific Platform response"
       },
       {
@@ -408,21 +432,21 @@
       },
       {
         "question": "How is Meta performing?",
-        "status": "GOOD",
-        "response": "Meta Performance:\n\n\ud83d\udcb0 Spend: $404,859.21\n\ud83d\udcb5 Revenue: $1,344,372.713\n\ud83d\udcca Impressions: 46,448\n\ud83d\uddb1\ufe0f Clicks: 665\n\ud83c\udfaf Conversions: 181\n\ud83d\udcc8 CTR: 1.43%\n\ud83d\udc8e ROAS: 3.32x\n\ud83d\udcb8 CPA: $2236.79\n\ud83d\uddb1\ufe0f CPC: $608.81\n\ud83d\udcca CPM: $8716.40",
-        "analysis": "Specific Platform response"
+        "status": "GENERIC",
+        "response": "I understand you're asking about \"How is Meta performing?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metric...",
+        "analysis": "Generic response detected"
       },
       {
         "question": "What is DV360's performance?",
-        "status": "GOOD",
-        "response": "DV360 Performance:\n\n\ud83d\udcb0 Spend: $360,723.25\n\ud83d\udcb5 Revenue: $1,021,417.439\n\ud83d\udcca Impressions: 53,146\n\ud83d\uddb1\ufe0f Clicks: 511\n\ud83c\udfaf Conversions: 141\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 2.83x\n\ud83d\udcb8 CPA: $2558.32\n\ud83d\uddb1\ufe0f CPC: $705.92\n\ud83d\udcca CPM: $6787.40",
-        "analysis": "Specific Executive Summary response"
+        "status": "GENERIC",
+        "response": "I understand you're asking about \"What is DV360's performance?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign m...",
+        "analysis": "Generic response detected"
       },
       {
         "question": "Show me Amazon's metrics",
-        "status": "GOOD",
-        "response": "\ud83d\udcca Here's a chart showing DV360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenue: $1,021,417.439\n\u2022 Impressions: 53,146\n\u2022 Clicks: 511\n\u2022 Conversions: 141\n\u2022 CTR: 0.96%\n\u2022 ROAS: 2.83x\n...",
-        "analysis": "Specific Platform response"
+        "status": "GENERIC",
+        "response": "I understand you're asking about \"Show me Amazon's metrics\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metri...",
+        "analysis": "Generic response detected"
       }
     ],
     "Weekly Performance": [
@@ -503,56 +527,56 @@
       {
         "question": "What is our best campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\u2022 Conversions: 719\n\n",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "What is our top campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\u2022 Conversions: 719\n\n",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "What is our worst campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83d\udcc9 Worst Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\u2022 Conversions: 719\n\n",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "Which campaign has the highest ROAS?",
         "status": "GOOD",
-        "response": "\ud83d\udc8e Overall ROAS: 3.18x\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Financial response"
       },
       {
         "question": "Which campaigns should I pause?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\u23f8\ufe0f Campaigns to Consider Pausing:\n\u2022 undefined (3.18x ROAS)\n\n",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "Show me campaign rankings",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83d\udcca Campaign Rankings by ROAS:\n1. undefined: 3.18x ROAS\n\n",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "Which campaigns are most efficient?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83d\udcca Campaign Rankings by ROAS:\n1. undefined: 3.18x ROAS\n\n",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "Compare campaign performance",
         "status": "UNKNOWN",
-        "response": "\ud83c\udfc6 CAMPAIGN COMPARISON (Ranked by ROAS):\n\n1. undefined: 3.18x ROAS, $1,882,680.74 spend\n\n\ud83c\udfaf **Top Performer**: undefined with 3.18x ROAS",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Response doesn't match Executive Summary indicators"
       },
       {
         "question": "What is the performance of each campaign?",
-        "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN PERFORMANCE:\n\n\ud83c\udfc6 Best Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcca All Campaigns by ROAS:\n1. undefined: 3.18x ROAS\n",
-        "analysis": "Specific Executive Summary response"
+        "status": "UNKNOWN",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "analysis": "Response doesn't match Executive Summary indicators"
       },
       {
         "question": "What is FreshNest Summer Grilling performance?",
@@ -563,13 +587,13 @@
       {
         "question": "What is our best campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\u2022 Conversions: 719\n\n",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "What is our top campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\u2022 Conversions: 719\n\n",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
         "analysis": "Specific Campaign response"
       }
     ],
@@ -577,13 +601,13 @@
       {
         "question": "What should we optimize?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf OPTIMIZATION INSIGHTS:\n\n\ud83c\udfc6 **Best Performing Platform**: Amazon\n\u2022 ROAS: 3.72x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2528.29\n\n\ud83d\udcc9 **Opportunity for Improvement**: Dv360\n\u2022 ROAS: 2.83x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2558.32\n\n\ud83d\udca1 **Re...",
+        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
         "analysis": "Specific Optimization response"
       },
       {
         "question": "Give me optimization recommendations",
         "status": "GOOD",
-        "response": "\ud83c\udfaf OPTIMIZATION INSIGHTS:\n\n\ud83c\udfc6 **Best Performing Platform**: Amazon\n\u2022 ROAS: 3.72x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2528.29\n\n\ud83d\udcc9 **Opportunity for Improvement**: Dv360\n\u2022 ROAS: 2.83x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2558.32\n\n\ud83d\udca1 **Re...",
+        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
         "analysis": "Specific Optimization response"
       },
       {
@@ -625,7 +649,7 @@
       {
         "question": "Give me strategic recommendations",
         "status": "GOOD",
-        "response": "\ud83c\udfaf OPTIMIZATION INSIGHTS:\n\n\ud83c\udfc6 **Best Performing Platform**: Amazon\n\u2022 ROAS: 3.72x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2528.29\n\n\ud83d\udcc9 **Opportunity for Improvement**: Dv360\n\u2022 ROAS: 2.83x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2558.32\n\n\ud83d\udca1 **Re...",
+        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
         "analysis": "Specific Optimization response"
       },
       {
@@ -643,7 +667,7 @@
       {
         "question": "What should we optimize?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf OPTIMIZATION INSIGHTS:\n\n\ud83c\udfc6 **Best Performing Platform**: Amazon\n\u2022 ROAS: 3.72x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2528.29\n\n\ud83d\udcc9 **Opportunity for Improvement**: Dv360\n\u2022 ROAS: 2.83x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2558.32\n\n\ud83d\udca1 **Re...",
+        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
         "analysis": "Specific Optimization response"
       }
     ],
@@ -669,7 +693,7 @@
       {
         "question": "How are our creatives performing?",
         "status": "GOOD",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Specific Analytics response"
       },
       {
@@ -693,7 +717,7 @@
       {
         "question": "What is our creative performance?",
         "status": "GOOD",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Specific Executive Summary response"
       },
       {
@@ -717,7 +741,7 @@
       {
         "question": "How are our creatives performing?",
         "status": "GOOD",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Specific Analytics response"
       }
     ],
@@ -725,13 +749,13 @@
       {
         "question": "How did our creatives perform?",
         "status": "GOOD",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Specific Analytics response"
       },
       {
         "question": "Which creative formats worked best?",
         "status": "UNKNOWN",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Response doesn't match Campaign indicators"
       },
       {
@@ -743,7 +767,7 @@
       {
         "question": "What creative optimizations should we make?",
         "status": "GOOD",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Specific Analytics response"
       },
       {
@@ -761,13 +785,13 @@
       {
         "question": "Which creative elements drove the most conversions?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf Total Conversions: 719\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udcb8 Average CPA: $2618.47",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Specific Analytics response"
       },
       {
         "question": "Show me creative performance by platform",
         "status": "GOOD",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Specific Executive Summary response"
       },
       {
@@ -779,13 +803,13 @@
       {
         "question": "What creative recommendations do you have?",
         "status": "UNKNOWN",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Response doesn't match Optimization indicators"
       },
       {
         "question": "How did our creatives perform?",
         "status": "GOOD",
-        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2618.47\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives are ...",
+        "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
         "analysis": "Specific Analytics response"
       },
       {
