@@ -2,6 +2,109 @@ import { NextRequest, NextResponse } from 'next/server'
 import { loadCampaignData } from '@/lib/server-data-service'
 import { KEYWORDS, PLATFORM_MAP } from '@/lib/constants'
 
+// ============================================================================
+// HELPER FUNCTIONS - Clean, reusable data processing utilities
+// ============================================================================
+
+interface Metrics {
+  spend: number
+  revenue: number
+  impressions: number
+  clicks: number
+  conversions: number
+}
+
+interface CalculatedMetrics extends Metrics {
+  roas: number
+  ctr: number
+  cpa: number
+  cpc: number
+  cpm: number
+  roi: number
+  profitMargin: number
+}
+
+interface AnalysisItem {
+  name: string
+  metrics: CalculatedMetrics
+}
+
+// Calculate all metrics from raw data
+function calculateMetrics(metrics: Metrics): CalculatedMetrics {
+  const { spend, revenue, impressions, clicks, conversions } = metrics
+  
+  const roas = spend > 0 ? revenue / spend : 0
+  const ctr = impressions > 0 ? clicks / impressions : 0
+  const cpa = conversions > 0 ? spend / conversions : 0
+  const cpc = clicks > 0 ? spend / clicks : 0
+  const cpm = impressions > 0 ? (spend / impressions) * 1000 : 0
+  const roi = spend > 0 ? ((revenue - spend) / spend) * 100 : 0
+  const profitMargin = revenue > 0 ? ((revenue - spend) / revenue) * 100 : 0
+  
+  return { spend, revenue, impressions, clicks, conversions, roas, ctr, cpa, cpc, cpm, roi, profitMargin }
+}
+
+// Aggregate data by dimension (platform, campaign, audience, etc.)
+function aggregateByDimension(data: any[], dimensionKey: string): Map<string, Metrics> {
+  const aggregated = new Map<string, Metrics>()
+  
+  for (const row of data) {
+    const dimensionValue = row.dimensions[dimensionKey] || 'Unknown'
+    const existing = aggregated.get(dimensionValue) || { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+    
+    aggregated.set(dimensionValue, {
+      spend: existing.spend + row.metrics.spend,
+      revenue: existing.revenue + row.metrics.revenue,
+      impressions: existing.impressions + row.metrics.impressions,
+      clicks: existing.clicks + row.metrics.clicks,
+      conversions: existing.conversions + row.metrics.conversions
+    })
+  }
+  
+  return aggregated
+}
+
+// Convert aggregated data to analysis items with calculated metrics
+function createAnalysisItems(aggregated: Map<string, Metrics>): AnalysisItem[] {
+  return Array.from(aggregated.entries())
+    .map(([name, metrics]) => ({
+      name: name || 'Unknown',
+      metrics: calculateMetrics(metrics)
+    }))
+    .sort((a, b) => b.metrics.roas - a.metrics.roas)
+}
+
+// Format currency with proper locale
+function formatCurrency(amount: number): string {
+  return `$${amount.toLocaleString()}`
+}
+
+// Format percentage with 2 decimal places
+function formatPercentage(value: number): string {
+  return `${(value * 100).toFixed(2)}%`
+}
+
+// Format ROAS with 2 decimal places
+function formatROAS(value: number): string {
+  return `${value.toFixed(2)}x`
+}
+
+// Create consistent response structure
+function createResponse(content: string, data: any, query: string) {
+  return {
+    content,
+    data: {
+      ...data,
+      query,
+      timestamp: new Date().toISOString()
+    }
+  }
+}
+
+// ============================================================================
+// CONVERSATION CONTEXT MANAGEMENT
+// ============================================================================
+
 // Define proper types for conversation context
 interface ConversationContext {
   lastContext: any
@@ -191,22 +294,25 @@ function handleDrillDownQuery(query: string, data: any[], context: any) {
 
 async function processAIQuery(query: string, data: any[], sessionId?: string) {
   const lowerQuery = query.toLowerCase()
+  const context = getConversationContext(sessionId)
 
-  // TARGETED TIME CONTEXT HANDLER (only for specific time queries)
-  // Only trigger for queries that are explicitly about time/date/period, not for queries containing "mar" or "week"
-  const explicitTimeQueries = [
-    'when was this data collected',
-    'what time period',
-    'what timeframe',
-    'what dates',
-    'what month is this',
-    'what year is this',
-    'tell me about the time period',
-    'what period is this',
-    'how long is this data'
-  ]
+  // ============================================================================
+  // TIME CONTEXT HANDLERS (HIGHEST PRIORITY)
+  // ============================================================================
   
-  if (explicitTimeQueries.some(timeQuery => lowerQuery.includes(timeQuery))) {
+  // Handle time-related queries
+  const timeHandlers = {
+    explicitTime: [
+      'when was this data collected', 'what time period', 'what timeframe', 'what dates',
+      'what month is this', 'what year is this', 'tell me about the time period',
+      'what period is this', 'how long is this data'
+    ],
+    otherMonths: ['january', 'february', 'march', 'april', 'may', 'july', 'august', 'september', 'october', 'november', 'december'],
+    otherYears: ['2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015']
+  }
+
+  // Check for explicit time queries
+  if (timeHandlers.explicitTime.some(timeQuery => lowerQuery.includes(timeQuery))) {
     const content = `📅 **Data Timeframe**:\n\n` +
       `• **Period**: June 1-30, 2024\n` +
       `• **Duration**: 30 days of campaign data\n` +
@@ -217,67 +323,50 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       `• Week 3: June 15-21, 2024\n` +
       `• Week 4: June 22-30, 2024\n\n` +
       `💡 **Note**: All data in this application is from June 2024. You can ask about weekly performance or specific dates within this period.`
-    const result = {
-      content,
-      data: {
-        type: 'time_context',
-        timeframe: {
-          startDate: '2024-06-01',
-          endDate: '2024-06-30',
-          period: 'June 2024',
-          duration: '30 days'
-        },
-        weeks: [
-          { week: 1, start: '2024-06-01', end: '2024-06-07' },
-          { week: 2, start: '2024-06-08', end: '2024-06-14' },
-          { week: 3, start: '2024-06-15', end: '2024-06-21' },
-          { week: 4, start: '2024-06-22', end: '2024-06-30' }
-        ],
-        query: query
-      }
-    }
+    
+    const result = createResponse(content, {
+      type: 'time_context',
+      timeframe: {
+        startDate: '2024-06-01',
+        endDate: '2024-06-30',
+        period: 'June 2024',
+        duration: '30 days'
+      },
+      weeks: [
+        { week: 1, start: '2024-06-01', end: '2024-06-07' },
+        { week: 2, start: '2024-06-08', end: '2024-06-14' },
+        { week: 3, start: '2024-06-15', end: '2024-06-21' },
+        { week: 4, start: '2024-06-22', end: '2024-06-30' }
+      ]
+    }, query)
+    
     updateConversationContext(sessionId, query, result)
     return result
   }
 
-  // OTHER MONTH/YEAR HANDLER (for queries about other months/years)
-  const otherMonths = ['january', 'february', 'march', 'april', 'may', 'july', 'august', 'september', 'october', 'november', 'december']
-  const otherYears = ['2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015']
-  
-  // Only trigger if the query explicitly mentions other months/years (not just contains "mar")
-  const mentionsOtherMonth = otherMonths.some(month => {
+  // Check for other months/years
+  const mentionsOtherMonth = timeHandlers.otherMonths.some(month => {
     const monthPattern = new RegExp(`\\b${month}\\b`, 'i')
     return monthPattern.test(query)
   })
-  const mentionsOtherYear = otherYears.some(year => query.includes(year))
+  const mentionsOtherYear = timeHandlers.otherYears.some(year => query.includes(year))
   
   if (mentionsOtherMonth || mentionsOtherYear) {
     const content = 'This demo is built on campaigns that ran in June 2024. No data is available for other months.'
-    const result = {
-      content,
-      data: {
-        type: 'time_context',
-        timeframe: {
-          startDate: '2024-06-01',
-          endDate: '2024-06-30',
-          period: 'June 2024',
-          duration: '30 days'
-        },
-        weeks: [
-          { week: 1, start: '2024-06-01', end: '2024-06-07' },
-          { week: 2, start: '2024-06-08', end: '2024-06-14' },
-          { week: 3, start: '2024-06-15', end: '2024-06-21' },
-          { week: 4, start: '2024-06-22', end: '2024-06-30' }
-        ],
-        query: query
+    const result = createResponse(content, {
+      type: 'time_context',
+      timeframe: {
+        startDate: '2024-06-01',
+        endDate: '2024-06-30',
+        period: 'June 2024',
+        duration: '30 days'
       }
-    }
+    }, query)
+    
     updateConversationContext(sessionId, query, result)
     return result
   }
 
-  const context = getConversationContext(sessionId)
-  
   // Handle drill-down queries with context
   if (context.lastContext) {
     const drillDownResult = handleDrillDownQuery(query, data, context)
@@ -286,71 +375,46 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       return drillDownResult
     }
   }
-
-  // PLATFORM PERFORMANCE & CONVERSIONS HANDLERS (HIGHEST PRIORITY)
+  
+  // ============================================================================
+  // PLATFORM ANALYSIS HANDLERS (HIGH PRIORITY)
+  // ============================================================================
+  
   // Platform-specific performance queries
   const platformPerfPatterns = [
     /what is (meta|dv360|amazon|cm360|sa360|tradedesk)'s performance\?/i,
     /how is (meta|dv360|amazon|cm360|sa360|tradedesk) performing\?/i,
-    /what are (meta|dv360|amazon|cm360|sa360|tradedesk)'s results\?/i,
     /show me (meta|dv360|amazon|cm360|sa360|tradedesk)'s metrics/i,
-    /what is (meta|dv360|amazon|cm360|sa360|tradedesk)'s conversion rate\?/i,
-    /how much did we spend on (meta|dv360|amazon|cm360|sa360|tradedesk)\?/i,
-    /what are (meta|dv360|amazon|cm360|sa360|tradedesk)'s impressions\?/i,
-    /what are (meta|dv360|amazon|cm360|sa360|tradedesk)'s clicks\?/i
+    /what are (meta|dv360|amazon|cm360|sa360|tradedesk)'s results\?/i
   ]
-  
+
+  // Check for platform-specific queries
   for (const pattern of platformPerfPatterns) {
     const match = query.match(pattern)
     if (match) {
-      const platform = match[1]
-      const platformData = data.filter(row => row.dimensions.platform.toLowerCase() === platform.toLowerCase())
+      const platformName = match[1].toUpperCase()
+      const platformData = data.filter(row => row.dimensions.platform === platformName)
       
       if (platformData.length > 0) {
-        const totalSpend = platformData.reduce((sum, row) => sum + row.metrics.spend, 0)
-        const totalRevenue = platformData.reduce((sum, row) => sum + row.metrics.revenue, 0)
-        const totalImpressions = platformData.reduce((sum, row) => sum + row.metrics.impressions, 0)
-        const totalClicks = platformData.reduce((sum, row) => sum + row.metrics.clicks, 0)
-        const totalConversions = platformData.reduce((sum, row) => sum + row.metrics.conversions, 0)
+        const aggregated = aggregateByDimension(platformData, 'platform')
+        const analysis = createAnalysisItems(aggregated)
+        const platform = analysis[0]
         
-        const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-        const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
-        const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
-        const cpc = totalClicks > 0 ? totalSpend / totalClicks : 0
-        const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+        const content = `${platformName} Performance:\n\n` +
+          `💰 Spend: ${formatCurrency(platform.metrics.spend)}\n` +
+          `💵 Revenue: ${formatCurrency(platform.metrics.revenue)}\n` +
+          `📊 Impressions: ${platform.metrics.impressions.toLocaleString()}\n` +
+          `🖱️ Clicks: ${platform.metrics.clicks.toLocaleString()}\n` +
+          `🎯 Conversions: ${platform.metrics.conversions.toLocaleString()}\n` +
+          `📈 CTR: ${formatPercentage(platform.metrics.ctr)}\n` +
+          `💎 ROAS: ${formatROAS(platform.metrics.roas)}\n` +
+          `💸 CPA: ${formatCurrency(platform.metrics.cpa)}`
         
-        const content = `${platform} Performance:\n\n` +
-          `💰 Spend: $${totalSpend.toLocaleString()}\n` +
-          `💵 Revenue: $${totalRevenue.toLocaleString()}\n` +
-          `📊 Impressions: ${totalImpressions.toLocaleString()}\n` +
-          `🖱️ Clicks: ${totalClicks.toLocaleString()}\n` +
-          `🎯 Conversions: ${totalConversions.toLocaleString()}\n` +
-          `📈 CTR: ${(ctr * 100).toFixed(2)}%\n` +
-          `💎 ROAS: ${roas.toFixed(2)}x\n` +
-          `💸 CPA: $${cpa.toFixed(2)}\n` +
-          `🖱️ CPC: $${cpc.toFixed(2)}\n` +
-          `📊 CPM: $${cpm.toFixed(2)}`
-        
-        const result = {
-          content,
-          data: {
-            type: 'platform_performance',
-            platform,
-            metrics: {
-              spend: totalSpend,
-              revenue: totalRevenue,
-              impressions: totalImpressions,
-              clicks: totalClicks,
-              conversions: totalConversions,
-              ctr,
-              roas,
-              cpa,
-              cpc,
-              cpm
-            },
-            query: query
-          }
-        }
+        const result = createResponse(content, {
+          type: 'platform_performance',
+          platform: platformName,
+          metrics: platform.metrics
+        }, query)
         
         updateConversationContext(sessionId, query, result)
         return result
@@ -358,24 +422,228 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     }
   }
 
-  // CPA HANDLER (HIGH PRIORITY)
+  // Platform comparison queries
+  const platformComparisonKeywords = [
+    'platform comparison', 'compare platform', 'which platform', 'platform should i focus on',
+    'show me platform comparison', 'top performing platform', 'platform rankings'
+  ]
+  
+  if (platformComparisonKeywords.some(keyword => lowerQuery.includes(keyword))) {
+    const aggregated = aggregateByDimension(data, 'platform')
+    const analysis = createAnalysisItems(aggregated)
+    
+    const topPlatform = analysis[0]
+    const bottomPlatform = analysis[analysis.length - 1]
+    
+    let content = `🏆 PLATFORM COMPARISON:\n\n` +
+      `🥇 Top Platform: ${topPlatform.name}\n` +
+      `• ROAS: ${formatROAS(topPlatform.metrics.roas)}\n` +
+      `• Spend: ${formatCurrency(topPlatform.metrics.spend)}\n` +
+      `• Revenue: ${formatCurrency(topPlatform.metrics.revenue)}\n\n` +
+      `📊 All Platforms by ROAS:\n`
+    
+    analysis.forEach((platform, index) => {
+      content += `${index + 1}. ${platform.name}: ${formatROAS(platform.metrics.roas)} ROAS\n`
+    })
+    
+    const result = createResponse(content, {
+      type: 'platform_comparison',
+      platforms: analysis,
+      top: topPlatform.name,
+      bottom: bottomPlatform.name
+    }, query)
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // ============================================================================
+  // CAMPAIGN ANALYSIS HANDLERS (HIGH PRIORITY)
+  // ============================================================================
+  
+  // Campaign-specific queries
+  const campaignKeywords = [
+    'campaign', 'campaigns', 'best campaign', 'top campaign', 'worst campaign',
+    'campaign rankings', 'campaign performance', 'campaigns doing well',
+    'campaigns performing', 'performance of each campaign'
+  ]
+  
+  if (campaignKeywords.some(keyword => lowerQuery.includes(keyword))) {
+    const aggregated = aggregateByDimension(data, 'campaign_name')
+    const analysis = createAnalysisItems(aggregated)
+    
+    const bestCampaign = analysis[0]
+    const worstCampaign = analysis[analysis.length - 1]
+    
+    let content = `🎯 CAMPAIGN ANALYSIS:\n\n` +
+      `🏆 Best Performing Campaign: ${bestCampaign.name}\n` +
+      `• ROAS: ${formatROAS(bestCampaign.metrics.roas)}\n` +
+      `• Spend: ${formatCurrency(bestCampaign.metrics.spend)}\n` +
+      `• Revenue: ${formatCurrency(bestCampaign.metrics.revenue)}\n\n` +
+      `📉 Worst Performing Campaign: ${worstCampaign.name}\n` +
+      `• ROAS: ${formatROAS(worstCampaign.metrics.roas)}\n` +
+      `• Spend: ${formatCurrency(worstCampaign.metrics.spend)}\n` +
+      `• Revenue: ${formatCurrency(worstCampaign.metrics.revenue)}\n\n` +
+      `📊 Campaign Rankings by ROAS:\n`
+    
+    analysis.forEach((campaign, index) => {
+      content += `${index + 1}. ${campaign.name}: ${formatROAS(campaign.metrics.roas)} ROAS\n`
+    })
+    
+    const result = createResponse(content, {
+      type: 'campaign_analysis',
+      campaigns: analysis,
+      best: bestCampaign.name,
+      worst: worstCampaign.name
+    }, query)
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // ============================================================================
+  // AUDIENCE ANALYSIS HANDLERS (HIGH PRIORITY)
+  // ============================================================================
+  
+  // Audience-specific queries
+  const audienceKeywords = [
+    'audience', 'audiences', 'audience performance', 'audience breakdown',
+    'audience segments', 'audience targeting', 'audience insights',
+    'segments', 'targeting', 'audience recommendations'
+  ]
+  
+  if (audienceKeywords.some(keyword => lowerQuery.includes(keyword))) {
+    const aggregated = aggregateByDimension(data, 'audience')
+    const analysis = createAnalysisItems(aggregated)
+    
+    const topAudience = analysis[0]
+    
+    let content = `👥 AUDIENCE PERFORMANCE:\n\n` +
+      `🏆 Top Performing Audience: ${topAudience.name}\n` +
+      `• ROAS: ${formatROAS(topAudience.metrics.roas)}\n` +
+      `• Spend: ${formatCurrency(topAudience.metrics.spend)}\n` +
+      `• Revenue: ${formatCurrency(topAudience.metrics.revenue)}\n` +
+      `• Conversions: ${topAudience.metrics.conversions.toLocaleString()}\n\n` +
+      `📊 All Audiences by ROAS:\n`
+    
+    analysis.forEach((audience, index) => {
+      content += `${index + 1}. ${audience.name}: ${formatROAS(audience.metrics.roas)} ROAS\n`
+    })
+    
+    const result = createResponse(content, {
+      type: 'audience_performance',
+      audiences: analysis,
+      top: topAudience.name
+    }, query)
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // ============================================================================
+  // CREATIVE ANALYSIS HANDLERS (HIGH PRIORITY)
+  // ============================================================================
+  
+  // Creative-specific queries
+  const creativeKeywords = [
+    'creative', 'creatives', 'creative performance', 'creative formats',
+    'creative elements', 'creative optimization', 'creative recommendations',
+    'creative by platform', 'creative breakdown', 'creative insights'
+  ]
+  
+  if (creativeKeywords.some(keyword => lowerQuery.includes(keyword))) {
+    // Calculate overall creative metrics
+    const totalMetrics = data.reduce((acc, row) => ({
+      spend: acc.spend + row.metrics.spend,
+      revenue: acc.revenue + row.metrics.revenue,
+      impressions: acc.impressions + row.metrics.impressions,
+      clicks: acc.clicks + row.metrics.clicks,
+      conversions: acc.conversions + row.metrics.conversions
+    }), { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 })
+    
+    const metrics = calculateMetrics(totalMetrics)
+    
+    const content = `🎨 CREATIVE PERFORMANCE:\n\n` +
+      `📊 Overall Metrics:\n` +
+      `• Impressions: ${metrics.impressions.toLocaleString()}\n` +
+      `• Clicks: ${metrics.clicks.toLocaleString()}\n` +
+      `• Conversions: ${metrics.conversions.toLocaleString()}\n` +
+      `• CTR: ${formatPercentage(metrics.ctr)}\n` +
+      `• ROAS: ${formatROAS(metrics.roas)}\n` +
+      `• CPA: ${formatCurrency(metrics.cpa)}\n\n` +
+      `💡 Creative Performance Insights:\n` +
+      `• Your creatives are generating ${metrics.conversions.toLocaleString()} conversions\n` +
+      `• Average cost per conversion is ${formatCurrency(metrics.cpa)}\n` +
+      `• Overall ROAS of ${formatROAS(metrics.roas)} indicates ${metrics.roas > 2 ? 'strong' : 'moderate'} performance`
+    
+    const result = createResponse(content, {
+      type: 'creative_performance',
+      metrics
+    }, query)
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // ============================================================================
+  // OPTIMIZATION & OPPORTUNITIES HANDLERS (HIGH PRIORITY)
+  // ============================================================================
+  
+  // Optimization-specific queries
+  const optimizationKeywords = [
+    'optimize', 'optimization', 'opportunities', 'recommendations',
+    'where should we put more money', 'focus on improving', 'biggest opportunities',
+    'what should we optimize', 'optimization opportunities', 'strategic recommendations'
+  ]
+  
+  if (optimizationKeywords.some(keyword => lowerQuery.includes(keyword))) {
+    const platformAggregated = aggregateByDimension(data, 'platform')
+    const platformAnalysis = createAnalysisItems(platformAggregated)
+    
+    const bestPlatform = platformAnalysis[0]
+    const worstPlatform = platformAnalysis[platformAnalysis.length - 1]
+    
+    const content = `💡 OPTIMIZATION OPPORTUNITIES:\n\n` +
+      `🚀 **Scale Up**: ${bestPlatform.name}\n` +
+      `• Current ROAS: ${formatROAS(bestPlatform.metrics.roas)}\n` +
+      `• Current Spend: ${formatCurrency(bestPlatform.metrics.spend)}\n` +
+      `• Opportunity: Increase budget allocation\n\n` +
+      `🔧 **Optimize**: ${worstPlatform.name}\n` +
+      `• Current ROAS: ${formatROAS(worstPlatform.metrics.roas)}\n` +
+      `• Current Spend: ${formatCurrency(worstPlatform.metrics.spend)}\n` +
+      `• Action: Review targeting and creative strategy\n\n` +
+      `📊 **Platform Rankings by ROAS**:\n` +
+      platformAnalysis.map((p, i) => `${i + 1}. ${p.name}: ${formatROAS(p.metrics.roas)}`).join('\n')
+    
+    const result = createResponse(content, {
+      type: 'optimization_opportunities',
+      platforms: platformAnalysis,
+      best: bestPlatform.name,
+      worst: worstPlatform.name
+    }, query)
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // ============================================================================
+  // FINANCIAL METRICS HANDLERS (HIGH PRIORITY)
+  // ============================================================================
+  
+  // CPA queries
   if (lowerQuery.includes('cpa') || lowerQuery.includes('cost per acquisition')) {
     const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
     const totalConversions = data.reduce((sum, row) => sum + row.metrics.conversions, 0)
     const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
     
-    const content = `💸 Overall CPA: $${cpa.toFixed(2)}\n` +
-      `💰 Total Spend: $${totalSpend.toLocaleString()}\n` +
+    const content = `💸 Overall CPA: ${formatCurrency(cpa)}\n` +
+      `💰 Total Spend: ${formatCurrency(totalSpend)}\n` +
       `🎯 Total Conversions: ${totalConversions.toLocaleString()}`
     
-    const result = {
-      content,
-      data: {
-        type: 'cpa_summary',
-        metrics: { spend: totalSpend, conversions: totalConversions, cpa },
-        query: query
-      }
-    }
+    const result = createResponse(content, {
+      type: 'cpa_summary',
+      metrics: { spend: totalSpend, conversions: totalConversions, cpa }
+    }, query)
     
     updateConversationContext(sessionId, query, result)
     return result

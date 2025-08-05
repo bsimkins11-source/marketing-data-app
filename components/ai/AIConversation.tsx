@@ -45,7 +45,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
   const recognitionRef = useRef<any>(null)
   const synthesisRef = useRef<any>(null)
 
-  // Comprehensive prompt categories (pre-tested for accuracy)
+  // Comprehensive prompt categories (impressive, unique, and demo-worthy)
   const promptCategories: PromptCategory[] = [
     {
       title: "📈 Executive Summary & Overview",
@@ -53,12 +53,12 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <BarChart3 className="w-5 h-5" />,
       color: "blue",
       examples: [
-        "Give me an executive summary",
-        "What is our overall performance?",
-        "What are the key metrics?",
-        "Give me an executive summary",
-        "What is our overall performance?",
-        "What are the key metrics?"
+        "Give me an executive summary of all campaigns in June 2024.",
+        "Summarize the top 3 takeaways from our June 2024 campaign data.",
+        "What are the most important trends across all platforms?",
+        "Which metric improved the most compared to last month?",
+        "What is the biggest risk to our current performance?",
+        "What is the single most impressive result from June 2024?"
       ]
     },
     {
@@ -67,18 +67,14 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <DollarSign className="w-5 h-5" />,
       color: "green",
       examples: [
-        "What is our total spend?",
-        "What is our total revenue?",
-        "What is our ROAS?",
-        "What is our revenue?",
-        "What is our cost per acquisition?",
-        "What is our CPA?",
-        "What is our cost per click?",
-        "What is our CPM?",
-        "What is our return on investment?",
-        "What is our ROI?",
-        "What is our profit margin?",
-        "What is our total spend?"
+        "What was our total spend and revenue in June 2024?",
+        "Which platform delivered the highest ROI?",
+        "Compare CPA and ROAS for Meta vs. Amazon.",
+        "Which campaign had the lowest cost per acquisition?",
+        "Show the profit margin for each platform.",
+        "Which week had the highest revenue?",
+        "What is the trend in CPM across all platforms?",
+        "How did our total spend change week by week?"
       ]
     },
     {
@@ -87,18 +83,14 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <Target className="w-5 h-5" />,
       color: "purple",
       examples: [
-        "How is Meta performing?",
-        "What is DV360's performance?",
-        "Show me Amazon's metrics",
-        "What are SA360's results?",
-        "How is TradeDesk performing?",
-        "Which platform is doing the best?",
-        "Compare platform performance",
-        "What is the top performing platform?",
-        "What is each platform's ROAS?",
-        "How is Meta performing?",
-        "What is DV360's performance?",
-        "Show me Amazon's metrics"
+        "Compare Meta and DV360 performance in June 2024.",
+        "Which platform had the highest conversion rate?",
+        "Show ROAS for each platform side by side.",
+        "Which platform improved the most from week 1 to week 4?",
+        "What is the biggest weakness of Amazon's performance?",
+        "Which platform should we increase budget for next month?",
+        "How did TradeDesk's CTR compare to Meta's?",
+        "Which platform had the most consistent results?"
       ]
     },
     {
@@ -107,18 +99,14 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <Calendar className="w-5 h-5" />,
       color: "orange",
       examples: [
-        "How did we perform in week 1?",
-        "Show me week 2 results",
-        "What happened in week 3?",
-        "How was week 4?",
-        "Compare all weeks",
-        "Which week performed best?",
-        "What is our weekly trend?",
-        "Show me week-by-week performance",
+        "Show week-by-week spend and revenue breakdown.",
         "Which week had the highest ROAS?",
-        "What was our best week?",
-        "Show me weekly spend breakdown",
-        "How did performance change week over week?"
+        "Compare week 2 and week 4 performance for Meta.",
+        "What was the biggest week-over-week improvement?",
+        "Which week saw the largest drop in conversions?",
+        "How did audience performance change each week?",
+        "Which week should we try to replicate in future campaigns?",
+        "What was the trend in creative performance across weeks?"
       ]
     },
     {
@@ -127,18 +115,14 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <TrendingUp className="w-5 h-5" />,
       color: "red",
       examples: [
-        "What is our best campaign?",
-        "What is our top campaign?",
-        "What is our worst campaign?",
-        "Which campaign has the highest ROAS?",
-        "Which campaigns should I pause?",
-        "Show me campaign rankings",
-        "Which campaigns are most efficient?",
-        "Compare campaign performance",
-        "What is the performance of each campaign?",
-        "What is our best campaign?",
-        "What is our top campaign?",
-        "What is our best campaign?"
+        "Which campaign had the highest ROAS in June 2024?",
+        "Compare FreshNest Summer Grilling to all other campaigns.",
+        "Which campaign should we pause based on performance?",
+        "Show the top 3 campaigns by conversions.",
+        "Which campaign had the lowest CPM?",
+        "What is the biggest opportunity for campaign optimization?",
+        "Which campaign had the most consistent week-over-week growth?",
+        "What is the most underperforming campaign and why?"
       ]
     },
     {
@@ -147,18 +131,14 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <Lightbulb className="w-5 h-5" />,
       color: "yellow",
       examples: [
-        "What should we optimize?",
-        "Give me optimization recommendations",
-        "What can we improve?",
-        "What are our opportunities?",
-        "How can we improve performance?",
-        "Where should we put more money?",
-        "What optimization opportunities exist?",
-        "What should I focus on improving?",
-        "Give me strategic recommendations",
-        "What are the biggest opportunities?",
-        "How can we increase ROAS?",
-        "What should we optimize?"
+        "Where should we shift budget for maximum impact?",
+        "Which campaigns should be scaled up or down?",
+        "What are the top 3 optimization opportunities right now?",
+        "Which creative should we pause to improve ROI?",
+        "What is the best way to increase conversions next month?",
+        "Which audience segment should we target more?",
+        "What is the most actionable insight from June 2024?",
+        "How can we improve performance for underperforming platforms?"
       ]
     },
     {
@@ -167,18 +147,16 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <BarChart3 className="w-5 h-5" />,
       color: "teal",
       examples: [
-        "What is our click-through rate?",
-        "How many conversions did we get?",
-        "Show me audience performance",
-        "How are our creatives performing?",
-        "What is our CTR?",
-        "What is our conversion rate?",
-        "What is our audience performance?",
-        "What is our creative performance?",
-        "What is our click-through rate?",
-        "How many conversions did we get?",
-        "Show me audience performance",
-        "How are our creatives performing?"
+        "What was the click-through rate for Meta in week 2?",
+        "How many conversions did FreshNest Summer Grilling get?",
+        "What is the conversion rate for Amazon campaigns?",
+        "Show audience performance by platform for week 3.",
+        "How did creative performance change from week 1 to week 4?",
+        "Which campaign had the highest CTR in June 2024?",
+        "What was the lowest conversion rate among all platforms?",
+        "Compare creative performance between Meta and DV360.",
+        "Show the audience segment with the most conversions.",
+        "What was the trend in creative performance over June 2024?"
       ]
     },
     {
@@ -187,17 +165,16 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       icon: <Users className="w-5 h-5" />,
       color: "pink",
       examples: [
-        "How did our creatives perform?",
-        "Which creative formats worked best?",
-        "Show me audience performance breakdown",
-        "What creative optimizations should we make?",
-        "Which audience segments performed best?",
-        "What audience insights do you have?",
-        "Which creative elements drove the most conversions?",
-        "Show me creative performance by platform",
-        "What audience targeting worked best?",
-        "What creative recommendations do you have?",
-        "How did our creatives perform?"
+        "Which creative format had the highest conversion rate?",
+        "Compare static vs. video creative performance on Meta.",
+        "Which audience segment performed best on Amazon?",
+        "What creative drove the most conversions in week 4?",
+        "Which platform had the most effective creative?",
+        "What audience targeting strategy worked best overall?",
+        "Which creative element contributed most to high CTR?",
+        "What is the biggest opportunity for creative optimization?",
+        "Show the top 3 audience insights from June 2024.",
+        "Which creative should we use more in future campaigns?"
       ]
     }
   ]
