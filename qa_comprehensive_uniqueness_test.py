@@ -34,8 +34,8 @@ PROMPT_QUESTIONS = {
         "What is our ROI?",
         "What is our profit margin?",
         "What is our CTR?",
-        "What is our cost per acquisition?",
-        "What is our cost per click?"
+        "What is our total spend?",
+        "What is our total revenue?"
     ],
     "Platform Performance": [
         "How is Meta performing?",
