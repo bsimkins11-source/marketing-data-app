@@ -188,8 +188,8 @@
       },
       {
         "status": "GOOD",
-        "data_type": "chart_response",
-        "content_preview": "\ud83d\udcca Here's a chart showing Meta's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $404,859.21\n\u2022 Revenue...",
+        "data_type": "platform_performance",
+        "content_preview": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 5...",
         "query": "Show me Amazon's metrics"
       }
     ],
@@ -564,5 +564,5 @@
       }
     ]
   },
-  "timestamp": 1754362268.428195
+  "timestamp": 1754362535.36589
 }

@@ -74,9 +74,9 @@ PROMPT_QUESTIONS = {
         "Which campaigns are most efficient?",
         "Compare campaign performance",
         "What is the performance of each campaign?",
-        "What is FreshNest Summer Grilling performance?",
         "What is our best campaign?",
-        "What is our top campaign?"
+        "What is our top campaign?",
+        "What is our best campaign?"
     ],
     "Optimization Insights": [
         "What should we optimize?",
