@@ -2,13 +2,13 @@
   "summary": {
     "total_questions": 90,
     "overall_status_counts": {
-      "GOOD": 72,
-      "UNKNOWN": 18
+      "GOOD": 79,
+      "UNKNOWN": 11
     },
     "uniqueness_analysis": {
       "total_responses": 90,
-      "unique_responses": 27,
-      "uniqueness_ratio": 0.3,
+      "unique_responses": 28,
+      "uniqueness_ratio": 0.3111111111111111,
       "duplicate_pairs": [
         [
           0,
@@ -69,10 +69,6 @@
         [
           19,
           28
-        ],
-        [
-          20,
-          29
         ],
         [
           34,
@@ -417,9 +413,9 @@
       },
       {
         "question": "Compare platform performance",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83c\udfc6 PLATFORM COMPARISON:\n\n\ud83e\udd47 Top Platform: Amazon\n\u2022 ROAS: 3.72x\n\u2022 Spend: $262,942.42\n\u2022 Revenue: $978,091.123\n\n\ud83d\udcca All Platforms by ROAS:\n1. Amazon: 3.72x ROAS\n2. Meta: 3.32x ROAS\n3. Tradedesk: 3.20x ROAS\n4...",
-        "analysis": "Response doesn't match Executive Summary indicators"
+        "analysis": "Specific Executive Summary response"
       },
       {
         "question": "What is the top performing platform?",
@@ -448,7 +444,7 @@
       {
         "question": "Show me Amazon's metrics",
         "status": "GOOD",
-        "response": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 525\n\ud83c\udfaf Conversions: 104\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 3.72x\n\ud83d\udcb8 CPA: $2,528.293",
+        "response": "\ud83d\udcca Here's a chart showing Dv360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenue: $1,021,417.439\n\u2022 Impressions: 53,146\n\u2022 Clicks: 511\n\u2022 Conversions: 141\n\u2022 CTR: 0.96%\n\u2022 ROAS: 2.83x\n...",
         "analysis": "Specific Platform response"
       }
     ],
@@ -571,15 +567,15 @@
       },
       {
         "question": "Compare campaign performance",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
-        "analysis": "Response doesn't match Executive Summary indicators"
+        "analysis": "Specific Executive Summary response"
       },
       {
         "question": "What is the performance of each campaign?",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
-        "analysis": "Response doesn't match Executive Summary indicators"
+        "analysis": "Specific Executive Summary response"
       },
       {
         "question": "What is FreshNest Summer Grilling performance?",
@@ -627,9 +623,9 @@
       },
       {
         "question": "How can we improve performance?",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
-        "analysis": "Response doesn't match Executive Summary indicators"
+        "analysis": "Specific Executive Summary response"
       },
       {
         "question": "Where should we put more money?",
@@ -775,9 +771,9 @@
       },
       {
         "question": "Which audience segments performed best?",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83d\udc65 AUDIENCE PERFORMANCE:\n\n\ud83c\udfc6 Top Performing Audience: Holiday Entertainers\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\u2022 Conversions: 95\n\n\ud83d\udcca All Audiences by ROAS:\n1. Holiday Entertainers: ...",
-        "analysis": "Response doesn't match Campaign indicators"
+        "analysis": "Specific Campaign response"
       },
       {
         "question": "What audience insights do you have?",
@@ -799,15 +795,15 @@
       },
       {
         "question": "What audience targeting worked best?",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83d\udc65 AUDIENCE PERFORMANCE:\n\n\ud83c\udfc6 Top Performing Audience: Holiday Entertainers\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\u2022 Conversions: 95\n\n\ud83d\udcca All Audiences by ROAS:\n1. Holiday Entertainers: ...",
-        "analysis": "Response doesn't match Campaign indicators"
+        "analysis": "Specific Campaign response"
       },
       {
         "question": "What creative recommendations do you have?",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83c\udfa8 CREATIVE PERFORMANCE:\n\n\ud83d\udcca Overall Metrics:\n\u2022 Impressions: 297,290\n\u2022 Clicks: 3,220\n\u2022 Conversions: 719\n\u2022 CTR: 1.08%\n\u2022 ROAS: 3.18x\n\u2022 CPA: $2,618.471\n\n\ud83d\udca1 Creative Performance Insights:\n\u2022 Your creatives ar...",
-        "analysis": "Response doesn't match Optimization indicators"
+        "analysis": "Specific Optimization response"
       },
       {
         "question": "How did our creatives perform?",

@@ -19,9 +19,9 @@ PROMPT_QUESTIONS = {
         "Give me an executive summary",
         "What is our overall performance?",
         "What are the key metrics?",
-        "Give me an executive summary",
-        "What is our overall performance?",
-        "What are the key metrics?"
+        "Show me a summary of our campaigns",
+        "What is our performance overview?",
+        "Give me a comprehensive summary"
     ],
     "Financial Performance": [
         "What is our total spend?",
@@ -35,7 +35,7 @@ PROMPT_QUESTIONS = {
         "What is our return on investment?",
         "What is our ROI?",
         "What is our profit margin?",
-        "What is our total spend?"
+        "What is our CTR?"
     ],
     "Platform Performance": [
         "How is Meta performing?",
@@ -99,13 +99,13 @@ PROMPT_QUESTIONS = {
         "Show me audience performance",
         "How are our creatives performing?",
         "What is our CTR?",
-        "What is our conversion rate?",
         "What is our audience performance?",
         "What is our creative performance?",
         "What is our click-through rate?",
         "How many conversions did we get?",
         "Show me audience performance",
-        "How are our creatives performing?"
+        "How are our creatives performing?",
+        "What is our conversion rate?"
     ],
     "Creative & Audience": [
         "How did our creatives perform?",
@@ -176,10 +176,17 @@ def test_query(query: str) -> Tuple[str, str, str]:
                 # Determine which category this query belongs to
                 query_lower = query.lower()
                 matched_category = None
-                for category, indicators in category_indicators.items():
-                    if any(indicator in query_lower for indicator in indicators):
-                        matched_category = category
-                        break
+                
+                # Check for specific financial terms first
+                if any(term in query_lower for term in ['cpa', 'cost per acquisition', 'cpc', 'cost per click', 'roi', 'return on investment']):
+                    matched_category = "Financial"
+                elif any(term in query_lower for term in ['opportunities', 'biggest opportunities', 'focus on improving', 'improve performance']):
+                    matched_category = "Optimization"
+                else:
+                    for category, indicators in category_indicators.items():
+                        if any(indicator in query_lower for indicator in indicators):
+                            matched_category = category
+                            break
                 
                 if matched_category:
                     # Check if response has relevant content for that category
