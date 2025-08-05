@@ -549,79 +549,82 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
   }
 
   const getPromptGuide = () => {
-    return `🤖 AI Marketing Data Query Guide
+    return `🚀 **AI Marketing Data Analytics Platform**
 
-📊 CAMPAIGN PERFORMANCE QUERIES
-• What were the top performing campaigns?
-• Show me the best campaigns by ROAS
-• Which campaigns had the highest CTR?
-• List campaigns ranked by performance
+## 🎯 **Vision & Purpose**
+This platform represents the future of marketing analytics - where natural language queries meet powerful data visualization. Built for CMOs and marketing executives who need instant, actionable insights without the complexity of traditional BI tools.
 
-🏢 BRAND ANALYTICS
-• Brand analytics
-• How are my brands performing?
-• Show me brand-level metrics
-• Which brand has the best ROAS?
+## 🔧 **Core Functionality**
 
-🌐 PLATFORM ANALYSIS
-• Which platform performed best?
-• Show me platform spend breakdown
-• What's the ROAS by platform?
-• Platform performance comparison
+### **📊 Natural Language Analytics**
+• Ask questions in plain English: "How is Meta performing?"
+• Get instant, comprehensive responses with key metrics
+• No need to learn complex query languages or SQL
 
-📈 TIME-BASED ANALYSIS
-• Show me spend by platform in Q2 2024
-• What was performance in June 2024?
-• Q1 vs Q2 performance comparison
-• Monthly performance breakdown
+### **📈 Interactive Data Visualization**
+• One-click chart generation from any analysis
+• Professional charts with hover tooltips and zoom capabilities
+• Multiple chart types: bar charts, line charts, area charts
 
-💰 SPEND & BUDGET OPTIMIZATION
-• How should I allocate my budget?
-• Spend optimization recommendations
-• Budget reallocation strategy
-• ROI and ROAS analysis
+### **🎯 Intelligent Insights**
+• AI-powered recommendations and optimization suggestions
+• Context-aware responses that build on previous questions
+• Actionable insights for budget allocation and strategy
 
-📊 CHART & VISUALIZATION
-• Can I get a chart of this for download?
-• Produce a graph of this information
-• Show me a chart of campaign performance
-• Generate a visualization of platform spend
+### **🔍 Multi-Dimensional Analysis**
+• Platform performance (Meta, Amazon, DV360, SA360, TradeDesk)
+• Campaign analysis and ranking
+• Financial metrics (ROAS, CPA, CPC, CPM, ROI)
+• Creative and audience performance
+• Time-based trends and comparisons
 
-🎯 STRATEGIC INSIGHTS & OPTIMIZATION
-• What can we learn from these campaigns?
-• Optimization recommendations
-• How can I improve performance?
-• Universal optimization recommendations
+## 🎮 **How to Use**
 
-🎨 CREATIVE & AUDIENCE ANALYSIS
-• How did my creatives perform?
-• Which creative formats worked best?
-• Audience performance breakdown
-• Creative optimization recommendations
+### **1. Start with the Prompt Guide**
+• Click any question below the chat to instantly analyze your data
+• Questions are pre-tested for guaranteed accurate responses
+• No typing required - just click and get insights
 
-💡 BEST PRACTICE QUERIES
-1. What were the top performing campaigns?
-2. Show me platform spend for Q2 2024
-3. Can I get a chart of this for download?
-4. What can we learn from these campaigns?
-5. Optimization recommendations
-6. Brand analytics
-7. Which platform had the highest ROAS?
+### **2. Ask Follow-up Questions**
+• Build on previous responses: "Show me a chart of this data"
+• Ask for specific metrics: "What's our ROAS by platform?"
+• Request optimization: "Where should I put more budget?"
 
-💬 NATURAL LANGUAGE EXAMPLES
-• I want to understand how my campaigns are doing
-• Help me figure out where to put my marketing budget
-• What's working and what's not?
-• How can I make my campaigns better?
-• Give me the highlights of my performance
+### **3. Generate Visualizations**
+• Click the "📊 Chart This Data" button after any analysis
+• Or type "show me a graph" for instant chart generation
+• Charts are interactive with professional styling
 
-🎯 TIPS FOR BEST RESULTS
-• Be specific: Show me ROAS by platform for Q2 2024
-• Use natural language: Which campaigns should I invest more in?
-• Ask follow-up questions: Can I get a chart of this?
-• Request actionable insights: What should I do differently next time?
+### **4. Voice Interaction (Optional)**
+• Click the microphone to ask questions by voice
+• Perfect for hands-free analysis during meetings
+• Voice responses for comprehensive insights
 
-I can handle complex queries, maintain conversation context, and provide detailed analysis with charts and actionable recommendations!`
+## 💡 **Pro Tips**
+
+### **For Best Results:**
+• Be specific: "Show me ROAS by platform for June 2024"
+• Use natural language: "Which campaigns should I invest more in?"
+• Ask for charts: "Can I get a visualization of this data?"
+• Request insights: "What should I do differently next time?"
+
+### **Advanced Features:**
+• Session persistence - your conversation context is maintained
+• Export capabilities - download your analysis and charts
+• Real-time data processing - instant responses to complex queries
+• Professional formatting - ready for executive presentations
+
+## 🎯 **Perfect For:**
+• **CMO Presentations** - Instant insights for board meetings
+• **Budget Planning** - Data-driven allocation recommendations
+• **Campaign Optimization** - AI-powered improvement suggestions
+• **Performance Reviews** - Comprehensive analytics summaries
+• **Strategy Sessions** - Real-time analysis during planning
+
+## 🔮 **The Future of Marketing Analytics**
+This platform demonstrates how AI can transform marketing data analysis from a technical exercise into an intuitive, conversational experience. No more waiting for reports, no more complex dashboards - just ask questions and get answers.
+
+**Ready to transform your marketing analytics? Start by clicking any question below!** 🚀`
   }
 
   const getDownloadablePromptGuide = () => {
