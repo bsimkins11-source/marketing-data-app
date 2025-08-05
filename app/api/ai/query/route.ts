@@ -864,7 +864,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   )) {
     // Analyze all campaigns
     const campaignMetrics = data.reduce((acc, row) => {
-      const campaign = row.dimensions.campaign_name
+      const campaign = row.dimensions.campaign
       if (!acc[campaign]) {
         acc[campaign] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
       }
@@ -1296,7 +1296,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   if (lowerQuery.includes('campaigns are doing well') || lowerQuery.includes('campaigns performing') || lowerQuery.includes('performance of each campaign')) {
     // Use the same logic as campaign analysis
     const campaignMetrics = data.reduce((acc, row) => {
-      const campaign = row.dimensions.campaign_name
+      const campaign = row.dimensions.campaign
       if (!acc[campaign]) {
         acc[campaign] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
       }
@@ -1494,7 +1494,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     
     for (const campaign of campaigns) {
       if (lowerQuery.includes(campaign.toLowerCase())) {
-        const campaignData = data.filter(row => row.dimensions.campaign_name === campaign)
+        const campaignData = data.filter(row => row.dimensions.campaign === campaign)
         
         if (campaignData.length > 0) {
           const totalSpend = campaignData.reduce((sum, row) => sum + row.metrics.spend, 0)
@@ -1545,7 +1545,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
 
   // SPECIFIC CAMPAIGN HANDLER (HIGHEST PRIORITY)
   if (lowerQuery.includes('freshnest summer grilling performance')) {
-    const campaignData = data.filter(row => row.dimensions.campaign_name === 'FreshNest Summer Grilling')
+    const campaignData = data.filter(row => row.dimensions.campaign === 'FreshNest Summer Grilling')
     
     if (campaignData.length > 0) {
       const totalSpend = campaignData.reduce((sum, row) => sum + row.metrics.spend, 0)
@@ -1588,7 +1588,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     
     // Data context analysis
     const uniqueBrands = Array.from(new Set(data.map(row => row.dimensions.brand)))
-    const uniqueCampaigns = Array.from(new Set(data.map(row => row.dimensions.campaign_name)))
+    const uniqueCampaigns = Array.from(new Set(data.map(row => row.dimensions.campaign)))
     const uniquePlatforms = Array.from(new Set(data.map(row => row.dimensions.platform)))
     const uniqueAudiences = Array.from(new Set(data.map(row => row.dimensions.audience)))
     
@@ -1636,7 +1636,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     
     // Campaign breakdown
     const campaignMetrics = data.reduce((acc, row) => {
-      const campaign = row.dimensions.campaign_name
+      const campaign = row.dimensions.campaign
       if (!acc[campaign]) {
         acc[campaign] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
       }
@@ -1777,7 +1777,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     // Campaign comparison
     if (lowerQuery.includes('campaign')) {
       const campaignMetrics = data.reduce((acc, row) => {
-        const campaign = row.dimensions.campaign_name
+        const campaign = row.dimensions.campaign
         if (!acc[campaign]) {
           acc[campaign] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
         }
