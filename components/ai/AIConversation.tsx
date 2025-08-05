@@ -655,15 +655,18 @@ I can handle complex queries, maintain conversation context, and provide detaile
     // Set the input value to the clicked prompt
     setInputValue(prompt)
     
-    // Submit the prompt automatically
-    await handleSendMessage('text')
-    
-    // Ensure we scroll to the bottom to see the new message as it populates
-    setTimeout(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
-      }
-    }, 100)
+    // Small delay to ensure the input value is set before sending
+    setTimeout(async () => {
+      // Submit the prompt automatically
+      await handleSendMessage('text')
+      
+      // Ensure we scroll to the bottom to see the new message as it populates
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        }
+      }, 100)
+    }, 50)
   }
 
   const getColorClasses = (color: string) => {

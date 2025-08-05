@@ -1,8 +1,8 @@
 {
   "summary": {
     "total_questions": 90,
-    "good_responses": 89,
-    "generic_responses": 1,
+    "good_responses": 90,
+    "generic_responses": 0,
     "error_responses": 0,
     "unknown": 0
   },
@@ -188,8 +188,8 @@
       },
       {
         "status": "GOOD",
-        "data_type": "platform_performance",
-        "content_preview": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 5...",
+        "data_type": "chart_response",
+        "content_preview": "\ud83d\udcca Here's a chart showing DV360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenu...",
         "query": "Show me Amazon's metrics"
       }
     ],
@@ -323,12 +323,6 @@
         "query": "What is the performance of each campaign?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What is FreshNest Summer Grilling performance?\". I can help you an...",
-        "query": "What is FreshNest Summer Grilling performance?"
-      },
-      {
         "status": "GOOD",
         "data_type": "campaign_analysis",
         "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 R...",
@@ -339,6 +333,12 @@
         "data_type": "campaign_analysis",
         "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 R...",
         "query": "What is our top campaign?"
+      },
+      {
+        "status": "GOOD",
+        "data_type": "campaign_analysis",
+        "content_preview": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: undefined\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 R...",
+        "query": "What is our best campaign?"
       }
     ],
     "Optimization Insights": [
@@ -564,5 +564,5 @@
       }
     ]
   },
-  "timestamp": 1754362535.36589
+  "timestamp": 1754362708.5566132
 }
