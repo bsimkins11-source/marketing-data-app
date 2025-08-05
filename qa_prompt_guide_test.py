@@ -236,7 +236,7 @@ def run_comprehensive_qa():
         "total_questions": 0,
         "good_responses": 0,
         "generic_responses": 0,
-        "errors": 0,
+        "error_responses": 0,
         "unknown": 0
     }
     
@@ -256,7 +256,11 @@ def run_comprehensive_qa():
             
             # Update summary
             summary["total_questions"] += 1
-            summary[analysis["status"].lower() + "_responses"] += 1
+            status_key = analysis["status"].lower() + "_responses"
+            if status_key in summary:
+                summary[status_key] += 1
+            else:
+                summary["unknown"] += 1
             
             # Print result
             status_emoji = {
@@ -280,7 +284,7 @@ def run_comprehensive_qa():
     print(f"Total Questions Tested: {summary['total_questions']}")
     print(f"✅ Good Responses: {summary['good_responses']} ({summary['good_responses']/summary['total_questions']*100:.1f}%)")
     print(f"❌ Generic Responses: {summary['generic_responses']} ({summary['generic_responses']/summary['total_questions']*100:.1f}%)")
-    print(f"💥 Errors: {summary['errors']} ({summary['errors']/summary['total_questions']*100:.1f}%)")
+    print(f"💥 Errors: {summary['error_responses']} ({summary['error_responses']/summary['total_questions']*100:.1f}%)")
     print(f"❓ Unknown: {summary['unknown']} ({summary['unknown']/summary['total_questions']*100:.1f}%)")
     
     # Detailed breakdown by category

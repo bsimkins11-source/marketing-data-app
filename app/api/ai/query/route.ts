@@ -674,6 +674,223 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     return result
   }
 
+  // EXECUTIVE SUMMARY ALTERNATIVE HANDLERS (HIGH PRIORITY)
+  if (lowerQuery.includes('how are we doing overall') || lowerQuery.includes('big picture') || lowerQuery.includes('high-level overview')) {
+    // Use the same logic as executive summary but with different triggers
+    const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, row) => sum + row.metrics.revenue, 0)
+    const totalImpressions = data.reduce((sum, row) => sum + row.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, row) => sum + row.metrics.clicks, 0)
+    const totalConversions = data.reduce((sum, row) => sum + row.metrics.conversions, 0)
+    
+    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+    
+    const content = `📊 OVERALL PERFORMANCE SUMMARY:\n\n` +
+      `💰 Total Spend: $${totalSpend.toLocaleString()}\n` +
+      `💵 Total Revenue: $${totalRevenue.toLocaleString()}\n` +
+      `💎 Overall ROAS: ${roas.toFixed(2)}x\n` +
+      `🎯 Total Conversions: ${totalConversions.toLocaleString()}\n` +
+      `💸 Overall CPA: $${cpa.toFixed(2)}\n` +
+      `📈 Overall CTR: ${(ctr * 100).toFixed(2)}%`
+    
+    const result = {
+      content,
+      data: {
+        type: 'overall_summary',
+        metrics: { spend: totalSpend, revenue: totalRevenue, roas, conversions: totalConversions, cpa, ctr },
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // FINANCIAL PERFORMANCE HANDLER (HIGH PRIORITY)
+  if (lowerQuery.includes('financial performance') || lowerQuery.includes('show me our financial')) {
+    const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, row) => sum + row.metrics.revenue, 0)
+    const totalConversions = data.reduce((sum, row) => sum + row.metrics.conversions, 0)
+    const totalClicks = data.reduce((sum, row) => sum + row.metrics.clicks, 0)
+    const totalImpressions = data.reduce((sum, row) => sum + row.metrics.impressions, 0)
+    
+    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+    const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+    const cpc = totalClicks > 0 ? totalSpend / totalClicks : 0
+    const cpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    const roi = totalSpend > 0 ? ((totalRevenue - totalSpend) / totalSpend) * 100 : 0
+    const profitMargin = totalRevenue > 0 ? ((totalRevenue - totalSpend) / totalRevenue) * 100 : 0
+    
+    const content = `💰 FINANCIAL PERFORMANCE SUMMARY:\n\n` +
+      `💵 Total Revenue: $${totalRevenue.toLocaleString()}\n` +
+      `💰 Total Spend: $${totalSpend.toLocaleString()}\n` +
+      `💎 Overall ROAS: ${roas.toFixed(2)}x\n` +
+      `💸 Overall CPA: $${cpa.toFixed(2)}\n` +
+      `🖱️ Overall CPC: $${cpc.toFixed(2)}\n` +
+      `👁️ Overall CPM: $${cpm.toFixed(2)}\n` +
+      `📈 ROI: ${roi.toFixed(2)}%\n` +
+      `📊 Profit Margin: ${profitMargin.toFixed(2)}%`
+    
+    const result = {
+      content,
+      data: {
+        type: 'financial_performance_summary',
+        metrics: { spend: totalSpend, revenue: totalRevenue, roas, cpa, cpc, cpm, roi, profitMargin },
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // PLATFORM ALTERNATIVE HANDLERS (HIGH PRIORITY)
+  if (lowerQuery.includes('cm360') || lowerQuery.includes('how did cm360')) {
+    const cm360Data = data.filter(row => row.dimensions.platform === 'CM360')
+    
+    if (cm360Data.length > 0) {
+      const totalSpend = cm360Data.reduce((sum, row) => sum + row.metrics.spend, 0)
+      const totalRevenue = cm360Data.reduce((sum, row) => sum + row.metrics.revenue, 0)
+      const totalImpressions = cm360Data.reduce((sum, row) => sum + row.metrics.impressions, 0)
+      const totalClicks = cm360Data.reduce((sum, row) => sum + row.metrics.clicks, 0)
+      const totalConversions = cm360Data.reduce((sum, row) => sum + row.metrics.conversions, 0)
+      
+      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+      
+      const content = `📊 CM360 Performance:\n\n` +
+        `💰 Spend: $${totalSpend.toLocaleString()}\n` +
+        `💵 Revenue: $${totalRevenue.toLocaleString()}\n` +
+        `📊 Impressions: ${totalImpressions.toLocaleString()}\n` +
+        `🖱️ Clicks: ${totalClicks.toLocaleString()}\n` +
+        `🎯 Conversions: ${totalConversions.toLocaleString()}\n` +
+        `📈 CTR: ${(ctr * 100).toFixed(2)}%\n` +
+        `💎 ROAS: ${roas.toFixed(2)}x\n` +
+        `💸 CPA: $${cpa.toFixed(2)}`
+      
+      const result = {
+        content,
+        data: {
+          type: 'platform_performance',
+          platform: 'CM360',
+          metrics: { spend: totalSpend, revenue: totalRevenue, impressions: totalImpressions, clicks: totalClicks, conversions: totalConversions, roas, ctr, cpa },
+          query: query
+        }
+      }
+      
+      updateConversationContext(sessionId, query, result)
+      return result
+    }
+  }
+
+  if (lowerQuery.includes('platform should i focus on') || lowerQuery.includes('platform comparison') || lowerQuery.includes('show me platform comparison')) {
+    // Use the same logic as platform comparison
+    const platformMetrics = data.reduce((acc, row) => {
+      const platform = row.dimensions.platform
+      if (!acc[platform]) {
+        acc[platform] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      acc[platform].spend += row.metrics.spend
+      acc[platform].revenue += row.metrics.revenue
+      acc[platform].impressions += row.metrics.impressions
+      acc[platform].clicks += row.metrics.clicks
+      acc[platform].conversions += row.metrics.conversions
+      return acc
+    }, {} as any)
+    
+    const platformAnalysis = Object.entries(platformMetrics)
+      .map(([platform, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        return { platform, metrics: { ...metrics, roas, ctr, cpa } }
+      })
+      .sort((a, b) => b.metrics.roas - a.metrics.roas)
+    
+    const topPlatform = platformAnalysis[0]
+    const bottomPlatform = platformAnalysis[platformAnalysis.length - 1]
+    
+    let content = `🏆 PLATFORM COMPARISON:\n\n` +
+      `🥇 Top Platform: ${topPlatform.platform}\n` +
+      `• ROAS: ${topPlatform.metrics.roas.toFixed(2)}x\n` +
+      `• Spend: $${topPlatform.metrics.spend.toLocaleString()}\n` +
+      `• Revenue: $${topPlatform.metrics.revenue.toLocaleString()}\n\n` +
+      `📊 All Platforms by ROAS:\n`
+    
+    platformAnalysis.forEach((platform, index) => {
+      content += `${index + 1}. ${platform.platform}: ${platform.metrics.roas.toFixed(2)}x ROAS\n`
+    })
+    
+    const result = {
+      content,
+      data: {
+        type: 'platform_comparison',
+        platforms: platformAnalysis,
+        top: topPlatform.platform,
+        bottom: bottomPlatform.platform,
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // CAMPAIGN ALTERNATIVE HANDLERS (HIGH PRIORITY)
+  if (lowerQuery.includes('campaigns are doing well') || lowerQuery.includes('campaigns performing') || lowerQuery.includes('performance of each campaign')) {
+    // Use the same logic as campaign analysis
+    const campaignMetrics = data.reduce((acc, row) => {
+      const campaign = row.dimensions.campaign_name
+      if (!acc[campaign]) {
+        acc[campaign] = { spend: 0, revenue: 0, impressions: 0, clicks: 0, conversions: 0 }
+      }
+      acc[campaign].spend += row.metrics.spend
+      acc[campaign].revenue += row.metrics.revenue
+      acc[campaign].impressions += row.metrics.impressions
+      acc[campaign].clicks += row.metrics.clicks
+      acc[campaign].conversions += row.metrics.conversions
+      return acc
+    }, {} as any)
+    
+    const campaignAnalysis = Object.entries(campaignMetrics)
+      .map(([campaign, metrics]: [string, any]) => {
+        const roas = metrics.spend > 0 ? metrics.revenue / metrics.spend : 0
+        const ctr = metrics.impressions > 0 ? metrics.clicks / metrics.impressions : 0
+        const cpa = metrics.conversions > 0 ? metrics.spend / metrics.conversions : 0
+        return { campaign, metrics: { ...metrics, roas, ctr, cpa } }
+      })
+      .sort((a, b) => b.metrics.roas - a.metrics.roas)
+    
+    const bestCampaign = campaignAnalysis[0]
+    
+    let content = `🎯 CAMPAIGN PERFORMANCE:\n\n` +
+      `🏆 Best Campaign: ${bestCampaign.campaign}\n` +
+      `• ROAS: ${bestCampaign.metrics.roas.toFixed(2)}x\n` +
+      `• Spend: $${bestCampaign.metrics.spend.toLocaleString()}\n` +
+      `• Revenue: $${bestCampaign.metrics.revenue.toLocaleString()}\n\n` +
+      `📊 All Campaigns by ROAS:\n`
+    
+    campaignAnalysis.forEach((campaign, index) => {
+      content += `${index + 1}. ${campaign.campaign}: ${campaign.metrics.roas.toFixed(2)}x ROAS\n`
+    })
+    
+    const result = {
+      content,
+      data: {
+        type: 'campaign_performance',
+        campaigns: campaignAnalysis,
+        best: bestCampaign.campaign,
+        query: query
+      }
+    }
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
   // CREATIVE PERFORMANCE HANDLER (HIGH PRIORITY)
   if (lowerQuery.includes('creative') || lowerQuery.includes('creatives')) {
     const totalImpressions = data.reduce((sum, row) => sum + row.metrics.impressions, 0)

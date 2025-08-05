@@ -56,9 +56,9 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "Give me an executive summary",
         "What is our overall performance?",
         "What are the key metrics?",
-        "What is our performance overview?",
-        "What is our big picture performance?",
-        "What is our high-level overview?"
+        "How are we doing overall?",
+        "What's the big picture of our campaigns?",
+        "Give me a high-level overview"
       ]
     },
     {
@@ -78,7 +78,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "What is our return on investment?",
         "What is our ROI?",
         "What is our profit margin?",
-        "What is our financial performance?"
+        "Show me our financial performance"
       ]
     },
     {
@@ -135,10 +135,10 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "Show me campaign rankings",
         "Which campaigns are most efficient?",
         "Compare campaign performance",
-        "What is FreshNest Summer Grilling performance?",
-        "What is FreshNest Back to School performance?",
-        "What is FreshNest Holiday Recipes performance?",
-        "What is FreshNest Pantry Staples performance?"
+        "Which campaigns are doing well?",
+        "How are our campaigns performing?",
+        "What is the performance of each campaign?",
+        "What is FreshNest Summer Grilling performance?"
       ]
     },
     {
@@ -150,15 +150,15 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "What should we optimize?",
         "Give me optimization recommendations",
         "What can we improve?",
+        "What are our opportunities?",
         "How can we improve performance?",
+        "Where should we put more money?",
+        "What optimization opportunities exist?",
+        "What should I focus on improving?",
         "Give me strategic recommendations",
+        "What are the biggest opportunities?",
         "How can we increase ROAS?",
-        "What should we optimize?",
-        "What optimization recommendations do you have?",
-        "What can we improve?",
-        "How can we improve performance?",
-        "What strategic recommendations do you have?",
-        "How can we increase ROAS?"
+        "What should we change in our strategy?"
       ]
     },
     {
@@ -192,13 +192,12 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "Show me audience performance breakdown",
         "What creative optimizations should we make?",
         "Which audience segments performed best?",
-        "How did different ad formats perform?",
         "What audience insights do you have?",
         "Which creative elements drove the most conversions?",
         "Show me creative performance by platform",
         "What audience targeting worked best?",
-        "How did video vs static ads perform?",
-        "What creative recommendations do you have?"
+        "What creative recommendations do you have?",
+        "How did our creatives perform?"
       ]
     }
   ]
