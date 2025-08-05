@@ -2,8 +2,7 @@
   "summary": {
     "total_questions": 90,
     "overall_status_counts": {
-      "GOOD": 88,
-      "UNKNOWN": 2
+      "GOOD": 90
     },
     "uniqueness_analysis": {
       "total_responses": 90,
@@ -35,11 +34,11 @@
           14
         ],
         [
-          10,
+          6,
           16
         ],
         [
-          11,
+          7,
           17
         ],
         [
@@ -362,16 +361,16 @@
         "analysis": "Specific Analytics response"
       },
       {
-        "question": "What is our cost per acquisition?",
-        "status": "UNKNOWN",
-        "response": "\ud83d\udcb8 Overall CPA: $2,618.471\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83c\udfaf Total Conversions: 719",
-        "analysis": "Could not determine category"
+        "question": "What is our total spend?",
+        "status": "GOOD",
+        "response": "\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udc8e Overall ROAS: 3.18x",
+        "analysis": "Specific Financial response"
       },
       {
-        "question": "What is our cost per click?",
-        "status": "UNKNOWN",
-        "response": "\ud83d\uddb1\ufe0f Overall CPC: $584.683\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\uddb1\ufe0f Total Clicks: 3,220",
-        "analysis": "Could not determine category"
+        "question": "What is our total revenue?",
+        "status": "GOOD",
+        "response": "\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udc8e Overall ROAS: 3.18x",
+        "analysis": "Specific Financial response"
       }
     ],
     "Platform Performance": [
@@ -390,7 +389,7 @@
       {
         "question": "Show me Amazon's metrics",
         "status": "GOOD",
-        "response": "\ud83d\udcca Here's a chart showing Dv360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenue: $1,021,417.439\n\u2022 Impressions: 53,146\n\u2022 Clicks: 511\n\u2022 Conversions: 141\n\u2022 CTR: 0.96%\n\u2022 ROAS: 2.83x\n...",
+        "response": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 525\n\ud83c\udfaf Conversions: 104\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 3.72x\n\ud83d\udcb8 CPA: $2,528.293",
         "analysis": "Specific Platform response"
       },
       {
@@ -444,7 +443,7 @@
       {
         "question": "Show me Amazon's metrics",
         "status": "GOOD",
-        "response": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 525\n\ud83c\udfaf Conversions: 104\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 3.72x\n\ud83d\udcb8 CPA: $2,528.293",
+        "response": "\ud83d\udcca Here's a chart showing Dv360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenue: $1,021,417.439\n\u2022 Impressions: 53,146\n\u2022 Clicks: 511\n\u2022 Conversions: 141\n\u2022 CTR: 0.96%\n\u2022 ROAS: 2.83x\n...",
         "analysis": "Specific Platform response"
       }
     ],
