@@ -669,6 +669,59 @@ I can handle complex queries, maintain conversation context, and provide detaile
     }, 100)
   }
 
+  const handleChartRequest = async (data: any) => {
+    if (!data || !data.chartData) return
+    
+    // Create a chart request message
+    const chartRequestMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: 'show me a graph',
+      timestamp: new Date(),
+      inputMethod: 'text'
+    }
+    
+    setMessages(prev => [...prev, chartRequestMessage])
+    setIsLoading(true)
+    
+    try {
+      // Process the chart request through the AI
+      const response = await processAIQuery('show me a graph', campaignData)
+      
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: response.content,
+        timestamp: new Date(),
+        data: response.data
+      }
+      
+      setMessages(prev => [...prev, aiMessage])
+      
+      // Auto-scroll to the new message
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+      
+      // Auto-speak the response
+      if (synthesisRef.current) {
+        const utterance = new SpeechSynthesisUtterance(response.content)
+        utterance.rate = 0.9
+        utterance.pitch = 1
+        utterance.volume = 0.8
+        utterance.onstart = () => setIsSpeaking(true)
+        utterance.onend = () => setIsSpeaking(false)
+        utterance.onerror = () => setIsSpeaking(false)
+        synthesisRef.current.speak(utterance)
+      }
+    } catch (error) {
+      console.error('Error generating chart:', error)
+      setError('Failed to generate chart. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const getColorClasses = (color: string) => {
     const colorMap: { [key: string]: string } = {
       blue: 'bg-blue-50 border-blue-200 text-blue-800',
@@ -757,6 +810,19 @@ I can handle complex queries, maintain conversation context, and provide detaile
                     )}
                   </div>
                 </div>
+                
+                {/* Chart button for AI responses with chartable data */}
+                {message.type === 'ai' && message.data && message.data.chartData && !message.data.type?.includes('chart') && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => handleChartRequest(message.data)}
+                      className="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors border border-blue-200"
+                      title="Generate a chart from this data"
+                    >
+                      📊 Chart This Data
+                    </button>
+                  </div>
+                )}
                 
                 {message.data && message.data.type === 'chart_response' && message.data.chartData && (
                   <div className="mt-4">

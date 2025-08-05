@@ -1955,7 +1955,13 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
         data: {
           type: 'weekly_comparison',
           weeklyData,
-          query: query
+          query: query,
+          chartData: Object.entries(weeklyData).map(([week, metrics]: [string, any]) => ({
+            week: `Week ${week}`,
+            spend: metrics.spend,
+            revenue: metrics.revenue,
+            roas: metrics.roas
+          }))
         }
       }
       
