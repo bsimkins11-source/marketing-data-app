@@ -2478,6 +2478,38 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     const context = getConversationContext(sessionId)
     const lastResponse = context.lastContext
     
+    console.log('Chart request - Session ID:', sessionId)
+    console.log('Chart request - Context:', context)
+    console.log('Chart request - Last response:', lastResponse)
+    
+    // If no last context, try to create a default chart from the data
+    if (!lastResponse || !lastResponse.type) {
+      // Create a default platform comparison chart
+      const platformData = data.reduce((acc, row) => {
+        const platform = row.dimensions.platform
+        if (!acc[platform]) {
+          acc[platform] = { platform, spend: 0, revenue: 0, roas: 0 }
+        }
+        acc[platform].spend += row.metrics.spend
+        acc[platform].revenue += row.metrics.revenue
+        acc[platform].roas = acc[platform].spend > 0 ? acc[platform].revenue / acc[platform].spend : 0
+        return acc
+      }, {})
+      
+      const content = `📊 **Platform Performance Overview**\n\nI've generated a chart showing platform performance across all your campaigns. The chart displays spend, revenue, and ROAS for each platform.`
+      
+      const result = createResponse(content, {
+        type: 'chart_response',
+        chartData: Object.values(platformData),
+        chartType: 'bar',
+        chartTitle: 'Platform Performance Overview',
+        originalQuery: query
+      }, query)
+      
+      updateConversationContext(sessionId, query, result)
+      return result
+    }
+    
     if (lastResponse && lastResponse.type) {
       let chartData = null
       let chartType = 'bar'
@@ -2553,7 +2585,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       
       const result = createResponse(content, {
         type: 'chart_response',
-        chartData: Object.values(chartData),
+        chartData: Array.isArray(chartData) ? chartData : Object.values(chartData),
         chartType,
         chartTitle,
         originalQuery: query
