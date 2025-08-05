@@ -425,7 +425,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   // Platform comparison queries
   const platformComparisonKeywords = [
     'platform comparison', 'compare platform', 'which platform', 'platform should i focus on',
-    'show me platform comparison', 'top performing platform', 'platform rankings'
+    'show me platform comparison', 'top performing platform', 'platform rankings',
+    'compare platform performance'
   ]
   
   if (platformComparisonKeywords.some(keyword => lowerQuery.includes(keyword))) {
@@ -500,7 +501,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   const campaignKeywords = [
     'campaign', 'campaigns', 'best campaign', 'top campaign', 'worst campaign',
     'campaign rankings', 'campaign performance', 'campaigns doing well',
-    'campaigns performing', 'performance of each campaign'
+    'campaigns performing', 'performance of each campaign',
+    'compare campaign performance', 'performance of each campaign'
   ]
   
   if (campaignKeywords.some(keyword => lowerQuery.includes(keyword))) {
@@ -585,7 +587,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     'audience', 'audiences', 'audience performance', 'audience breakdown',
     'audience segments', 'audience targeting', 'audience insights',
     'segments', 'targeting', 'audience recommendations',
-    'audience segments performed best', 'audience targeting worked best'
+    'audience segments performed best', 'audience targeting worked best',
+    'audience segments', 'audience targeting'
   ]
   
   if (audienceKeywords.some(keyword => lowerQuery.includes(keyword))) {
@@ -625,7 +628,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     'creative', 'creatives', 'creative performance', 'creative formats',
     'creative elements', 'creative optimization', 'creative recommendations',
     'creative by platform', 'creative breakdown', 'creative insights',
-    'creative formats worked best', 'creative elements drove', 'creative recommendations do you have'
+    'creative formats worked best', 'creative elements drove', 'creative recommendations do you have',
+    'creative formats', 'creative elements', 'creative recommendations'
   ]
   
   if (creativeKeywords.some(keyword => lowerQuery.includes(keyword))) {
@@ -672,7 +676,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     'where should we put more money', 'focus on improving', 'biggest opportunities',
     'what should we optimize', 'optimization opportunities', 'strategic recommendations',
     'what are our opportunities', 'how can we improve performance', 'what optimization opportunities exist',
-    'what should i focus on improving', 'what are the biggest opportunities', 'improve', 'improvement'
+    'what should i focus on improving', 'what are the biggest opportunities', 'improve', 'improvement',
+    'opportunities', 'biggest opportunities', 'focus on improving', 'improve performance'
   ]
   
   if (optimizationKeywords.some(keyword => lowerQuery.includes(keyword))) {

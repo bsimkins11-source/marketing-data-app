@@ -2,14 +2,13 @@
   "summary": {
     "total_questions": 90,
     "overall_status_counts": {
-      "GOOD": 71,
-      "UNKNOWN": 18,
-      "GENERIC": 1
+      "GOOD": 72,
+      "UNKNOWN": 18
     },
     "uniqueness_analysis": {
       "total_responses": 90,
-      "unique_responses": 28,
-      "uniqueness_ratio": 0.3111111111111111,
+      "unique_responses": 27,
+      "uniqueness_ratio": 0.3,
       "duplicate_pairs": [
         [
           0,
@@ -70,6 +69,10 @@
         [
           19,
           28
+        ],
+        [
+          20,
+          29
         ],
         [
           34,
@@ -341,7 +344,7 @@
       {
         "question": "What is our cost per click?",
         "status": "UNKNOWN",
-        "response": "\ud83d\uddb1\ufe0f Overall CPC: $584.68\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\uddb1\ufe0f Total Clicks: 3,220",
+        "response": "\ud83d\uddb1\ufe0f Overall CPC: $584.683\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\uddb1\ufe0f Total Clicks: 3,220",
         "analysis": "Could not determine category"
       },
       {
@@ -391,7 +394,7 @@
       {
         "question": "Show me Amazon's metrics",
         "status": "GOOD",
-        "response": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 525\n\ud83c\udfaf Conversions: 104\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 3.72x\n\ud83d\udcb8 CPA: $2,528.293",
+        "response": "\ud83d\udcca Here's a chart showing Dv360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenue: $1,021,417.439\n\u2022 Impressions: 53,146\n\u2022 Clicks: 511\n\u2022 Conversions: 141\n\u2022 CTR: 0.96%\n\u2022 ROAS: 2.83x\n...",
         "analysis": "Specific Platform response"
       },
       {
@@ -527,73 +530,73 @@
       {
         "question": "What is our best campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "What is our top campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "What is our worst campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "Which campaign has the highest ROAS?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Financial response"
       },
       {
         "question": "Which campaigns should I pause?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "Show me campaign rankings",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "Which campaigns are most efficient?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "Compare campaign performance",
         "status": "UNKNOWN",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Response doesn't match Executive Summary indicators"
       },
       {
         "question": "What is the performance of each campaign?",
         "status": "UNKNOWN",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Response doesn't match Executive Summary indicators"
       },
       {
         "question": "What is FreshNest Summer Grilling performance?",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"What is FreshNest Summer Grilling performance?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performan...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "FreshNest Summer Grilling Performance:\n\n\ud83d\udcb0 Spend: $178,791.88\n\ud83d\udcb5 Revenue: $601,344.013\n\ud83d\udcca Impressions: 5,472\n\ud83d\uddb1\ufe0f Clicks: 139\n\ud83c\udfaf Conversions: 90\n\ud83d\udcc8 CTR: 2.54%\n\ud83d\udc8e ROAS: 3.36x\n\ud83d\udcb8 CPA: $1,986.576",
+        "analysis": "Specific Executive Summary response"
       },
       {
         "question": "What is our best campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Campaign response"
       },
       {
         "question": "What is our top campaign?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Revenue: $5,979,849.456\n\n\ud83d\udcc9 Worst Performing Campaign: Unknown\n\u2022 ROAS: 3.18x\n\u2022 Spend: $1,882,680.74\n\u2022 Re...",
+        "response": "\ud83c\udfaf CAMPAIGN ANALYSIS:\n\n\ud83c\udfc6 Best Performing Campaign: FreshNest Holiday Recipes\n\u2022 ROAS: 3.38x\n\u2022 Spend: $98,284.97\n\u2022 Revenue: $331,763.462\n\n\ud83d\udcc9 Worst Performing Campaign: TasteBuds Farm Fresh\n\u2022 ROAS: 2.89x\n\u2022...",
         "analysis": "Specific Campaign response"
       }
     ],
