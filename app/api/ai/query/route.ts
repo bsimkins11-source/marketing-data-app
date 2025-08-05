@@ -624,7 +624,13 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     const result = createResponse(content, {
       type: 'audience_performance',
       audiences: analysis,
-      top: topAudience.name
+      top: topAudience.name,
+      chartData: analysis.map(audience => ({
+        audience: audience.name,
+        spend: audience.metrics.spend,
+        revenue: audience.metrics.revenue,
+        roas: audience.metrics.roas
+      }))
     }, query)
     
     updateConversationContext(sessionId, query, result)
@@ -2543,6 +2549,21 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
           }, {})
           chartType = 'line'
           chartTitle = 'Weekly Performance Trends'
+          break
+          
+        case 'audience_performance':
+          chartData = data.reduce((acc, row) => {
+            const audience = row.dimensions.audience
+            if (!acc[audience]) {
+              acc[audience] = { audience, spend: 0, revenue: 0, roas: 0 }
+            }
+            acc[audience].spend += row.metrics.spend
+            acc[audience].revenue += row.metrics.revenue
+            acc[audience].roas = acc[audience].spend > 0 ? acc[audience].revenue / acc[audience].spend : 0
+            return acc
+          }, {})
+          chartType = 'bar'
+          chartTitle = 'Audience Performance Analysis'
           break
           
         default:
