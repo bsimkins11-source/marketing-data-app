@@ -163,14 +163,14 @@ def test_query(query: str) -> Tuple[str, str, str]:
             else:
                 # Check if it's a specific response based on category
                 category_indicators = {
-                    "Executive Summary": ["executive", "summary", "overview", "key metrics", "performance"],
-                    "Financial": ["spend", "revenue", "roas", "cpa", "cpc", "cpm", "roi", "profit"],
-                    "Platform": ["meta", "dv360", "amazon", "sa360", "tradedesk", "platform"],
-                    "Weekly": ["week", "weekly", "trend", "breakdown"],
-                    "Campaign": ["campaign", "freshnest", "best", "worst", "ranking"],
-                    "Optimization": ["optimize", "improve", "opportunity", "recommendation", "strategy"],
-                    "Analytics": ["ctr", "conversion", "audience", "creative", "performance"],
-                    "Creative": ["creative", "audience", "format", "segment", "targeting", "recommendation"]
+                    "Executive Summary": ["executive", "summary", "overview", "key metrics", "performance", "📊", "💰", "💎"],
+                    "Financial": ["spend", "revenue", "roas", "cpa", "cpc", "cpm", "roi", "profit", "💸", "💰", "💵", "📈"],
+                    "Platform": ["meta", "dv360", "amazon", "sa360", "tradedesk", "platform", "🏆", "🥇"],
+                    "Weekly": ["week", "weekly", "trend", "breakdown", "📅"],
+                    "Campaign": ["campaign", "freshnest", "best", "worst", "ranking", "🎯", "🏆", "📉"],
+                    "Optimization": ["optimize", "improve", "opportunity", "recommendation", "strategy", "💡", "🚀", "🔧"],
+                    "Analytics": ["ctr", "conversion", "audience", "creative", "performance", "📊", "🎯", "🖱️"],
+                    "Creative": ["creative", "audience", "format", "segment", "targeting", "recommendation", "🎨", "👥"]
                 }
                 
                 # Determine which category this query belongs to
@@ -183,7 +183,40 @@ def test_query(query: str) -> Tuple[str, str, str]:
                 
                 if matched_category:
                     # Check if response has relevant content for that category
-                    has_relevant_content = any(indicator in content.lower() for indicator in category_indicators[matched_category])
+                    content_lower = content.lower()
+                    has_relevant_content = any(indicator in content_lower for indicator in category_indicators[matched_category])
+                    
+                    # Additional checks for specific response types
+                    if matched_category == "Financial":
+                        # Check for financial metrics in response
+                        financial_metrics = ["spend", "revenue", "roas", "cpa", "cpc", "roi", "profit", "💸", "💰", "💵"]
+                        has_relevant_content = has_relevant_content or any(metric in content_lower for metric in financial_metrics)
+                    
+                    elif matched_category == "Platform":
+                        # Check for platform-specific content
+                        platform_content = ["platform", "meta", "dv360", "amazon", "sa360", "tradedesk", "🏆", "🥇"]
+                        has_relevant_content = has_relevant_content or any(platform in content_lower for platform in platform_content)
+                    
+                    elif matched_category == "Campaign":
+                        # Check for campaign-specific content
+                        campaign_content = ["campaign", "freshnest", "best", "worst", "ranking", "🎯", "🏆"]
+                        has_relevant_content = has_relevant_content or any(campaign in content_lower for campaign in campaign_content)
+                    
+                    elif matched_category == "Optimization":
+                        # Check for optimization-specific content
+                        optimization_content = ["optimize", "improve", "opportunity", "recommendation", "strategy", "💡", "🚀", "🔧"]
+                        has_relevant_content = has_relevant_content or any(opt in content_lower for opt in optimization_content)
+                    
+                    elif matched_category == "Analytics":
+                        # Check for analytics-specific content
+                        analytics_content = ["ctr", "conversion", "audience", "creative", "performance", "📊", "🎯", "🖱️"]
+                        has_relevant_content = has_relevant_content or any(analytics in content_lower for analytics in analytics_content)
+                    
+                    elif matched_category == "Creative":
+                        # Check for creative/audience-specific content
+                        creative_content = ["creative", "audience", "format", "segment", "targeting", "recommendation", "🎨", "👥"]
+                        has_relevant_content = has_relevant_content or any(creative in content_lower for creative in creative_content)
+                    
                     if has_relevant_content:
                         return "GOOD", content, f"Specific {matched_category} response"
                     else:
