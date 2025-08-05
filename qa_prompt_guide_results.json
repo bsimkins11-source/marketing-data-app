@@ -1,8 +1,8 @@
 {
   "summary": {
     "total_questions": 90,
-    "good_responses": 88,
-    "generic_responses": 2,
+    "good_responses": 89,
+    "generic_responses": 1,
     "error_responses": 0,
     "unknown": 0
   },
@@ -189,7 +189,7 @@
       {
         "status": "GOOD",
         "data_type": "chart_response",
-        "content_preview": "\ud83d\udcca Here's a chart showing DV360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenu...",
+        "content_preview": "\ud83d\udcca Here's a chart showing Meta's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $404,859.21\n\u2022 Revenue...",
         "query": "Show me Amazon's metrics"
       }
     ],
@@ -447,9 +447,9 @@
         "query": "What is our CTR?"
       },
       {
-        "status": "GENERIC",
-        "data_type": "generic_response",
-        "content_preview": "I understand you're asking about \"What is our conversion rate?\". I can help you analyze your campaig...",
+        "status": "GOOD",
+        "data_type": "conversion_rate",
+        "content_preview": "\ud83d\udcc8 CONVERSION RATE:\n\n\ud83c\udfaf Overall Conversion Rate: 22.33%\n\ud83d\udcca Total Conversions: 719\n\ud83d\uddb1\ufe0f Total Clicks: 3,22...",
         "query": "What is our conversion rate?"
       },
       {
@@ -564,5 +564,5 @@
       }
     ]
   },
-  "timestamp": 1754361933.7683468
+  "timestamp": 1754362268.428195
 }

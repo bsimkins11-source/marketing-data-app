@@ -427,46 +427,6 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     return result
   }
 
-  // SPECIFIC CAMPAIGN HANDLER (HIGH PRIORITY)
-  if (lowerQuery.includes('freshnest summer grilling')) {
-    const campaignData = data.filter(row => row.dimensions.campaign_name === 'FreshNest Summer Grilling')
-    
-    if (campaignData.length > 0) {
-      const totalSpend = campaignData.reduce((sum, row) => sum + row.metrics.spend, 0)
-      const totalRevenue = campaignData.reduce((sum, row) => sum + row.metrics.revenue, 0)
-      const totalImpressions = campaignData.reduce((sum, row) => sum + row.metrics.impressions, 0)
-      const totalClicks = campaignData.reduce((sum, row) => sum + row.metrics.clicks, 0)
-      const totalConversions = campaignData.reduce((sum, row) => sum + row.metrics.conversions, 0)
-      
-      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
-      const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
-      const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
-      
-      const content = `🎯 FreshNest Summer Grilling Performance:\n\n` +
-        `💰 Spend: $${totalSpend.toLocaleString()}\n` +
-        `💵 Revenue: $${totalRevenue.toLocaleString()}\n` +
-        `📊 Impressions: ${totalImpressions.toLocaleString()}\n` +
-        `🖱️ Clicks: ${totalClicks.toLocaleString()}\n` +
-        `🎯 Conversions: ${totalConversions.toLocaleString()}\n` +
-        `📈 CTR: ${(ctr * 100).toFixed(2)}%\n` +
-        `💎 ROAS: ${roas.toFixed(2)}x\n` +
-        `💸 CPA: $${cpa.toFixed(2)}`
-      
-      const result = {
-        content,
-        data: {
-          type: 'specific_campaign_performance',
-          campaign: 'FreshNest Summer Grilling',
-          metrics: { spend: totalSpend, revenue: totalRevenue, impressions: totalImpressions, clicks: totalClicks, conversions: totalConversions, roas, ctr, cpa },
-          query: query
-        }
-      }
-      
-      updateConversationContext(sessionId, query, result)
-      return result
-    }
-  }
-
   // CAMPAIGN ANALYSIS HANDLERS (HIGH PRIORITY)
   if (lowerQuery.includes('campaign') && (
     lowerQuery.includes('best') || lowerQuery.includes('top') || lowerQuery.includes('worst') ||
@@ -1151,6 +1111,46 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
           return result
         }
       }
+    }
+  }
+
+  // SPECIFIC CAMPAIGN HANDLER (HIGHEST PRIORITY)
+  if (lowerQuery.includes('freshnest summer grilling performance')) {
+    const campaignData = data.filter(row => row.dimensions.campaign_name === 'FreshNest Summer Grilling')
+    
+    if (campaignData.length > 0) {
+      const totalSpend = campaignData.reduce((sum, row) => sum + row.metrics.spend, 0)
+      const totalRevenue = campaignData.reduce((sum, row) => sum + row.metrics.revenue, 0)
+      const totalImpressions = campaignData.reduce((sum, row) => sum + row.metrics.impressions, 0)
+      const totalClicks = campaignData.reduce((sum, row) => sum + row.metrics.clicks, 0)
+      const totalConversions = campaignData.reduce((sum, row) => sum + row.metrics.conversions, 0)
+      
+      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0
+      const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+      const cpa = totalConversions > 0 ? totalSpend / totalConversions : 0
+      
+      const content = `🎯 FreshNest Summer Grilling Performance:\n\n` +
+        `💰 Spend: $${totalSpend.toLocaleString()}\n` +
+        `💵 Revenue: $${totalRevenue.toLocaleString()}\n` +
+        `📊 Impressions: ${totalImpressions.toLocaleString()}\n` +
+        `🖱️ Clicks: ${totalClicks.toLocaleString()}\n` +
+        `🎯 Conversions: ${totalConversions.toLocaleString()}\n` +
+        `📈 CTR: ${(ctr * 100).toFixed(2)}%\n` +
+        `💎 ROAS: ${roas.toFixed(2)}x\n` +
+        `💸 CPA: $${cpa.toFixed(2)}`
+      
+      const result = {
+        content,
+        data: {
+          type: 'specific_campaign_performance',
+          campaign: 'FreshNest Summer Grilling',
+          metrics: { spend: totalSpend, revenue: totalRevenue, impressions: totalImpressions, clicks: totalClicks, conversions: totalConversions, roas, ctr, cpa },
+          query: query
+        }
+      }
+      
+      updateConversationContext(sessionId, query, result)
+      return result
     }
   }
 
