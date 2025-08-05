@@ -2,14 +2,13 @@
   "summary": {
     "total_questions": 90,
     "overall_status_counts": {
-      "GOOD": 85,
-      "GENERIC": 1,
-      "UNKNOWN": 4
+      "GOOD": 82,
+      "UNKNOWN": 8
     },
     "uniqueness_analysis": {
       "total_responses": 90,
-      "unique_responses": 29,
-      "uniqueness_ratio": 0.32222222222222224,
+      "unique_responses": 28,
+      "uniqueness_ratio": 0.3111111111111111,
       "duplicate_pairs": [
         [
           0,
@@ -22,6 +21,10 @@
         [
           0,
           4
+        ],
+        [
+          0,
+          5
         ],
         [
           7,
@@ -292,9 +295,9 @@
       },
       {
         "question": "Give me a comprehensive summary",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"Give me a comprehensive summary\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaig...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "\ud83d\udcca EXECUTIVE SUMMARY\n\n\ud83d\udcc5 **Data Context**:\n\u2022 Time Period: May 2024 - June 2024\n\u2022 Brands: FreshNest, TasteBuds\n\u2022 Campaigns: 1 campaigns across 6 platforms\n\u2022 Audiences: 10 target segments\n\n\ud83d\udcb0 **Financial P...",
+        "analysis": "Specific Executive Summary response"
       }
     ],
     "Financial Performance": [
@@ -324,9 +327,9 @@
       },
       {
         "question": "What is our cost per acquisition?",
-        "status": "GOOD",
+        "status": "UNKNOWN",
         "response": "\ud83d\udcb8 Overall CPA: $2,618.471\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83c\udfaf Total Conversions: 719",
-        "analysis": "Specific Financial response"
+        "analysis": "Could not determine category"
       },
       {
         "question": "What is our CPA?",
@@ -336,9 +339,9 @@
       },
       {
         "question": "What is our cost per click?",
-        "status": "GOOD",
+        "status": "UNKNOWN",
         "response": "\ud83d\uddb1\ufe0f Overall CPC: $584.683\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\uddb1\ufe0f Total Clicks: 3,220",
-        "analysis": "Specific Financial response"
+        "analysis": "Could not determine category"
       },
       {
         "question": "What is our CPM?",
@@ -348,9 +351,9 @@
       },
       {
         "question": "What is our return on investment?",
-        "status": "GOOD",
+        "status": "UNKNOWN",
         "response": "\ud83d\udc8e ROI: 217.62%\n\ud83d\udcb0 Total Spend: $1,882,680.74\n\ud83d\udcb5 Total Revenue: $5,979,849.456\n\ud83d\udcc8 Profit Margin: 68.52%",
-        "analysis": "Specific Financial response"
+        "analysis": "Could not determine category"
       },
       {
         "question": "What is our ROI?",
@@ -387,7 +390,7 @@
       {
         "question": "Show me Amazon's metrics",
         "status": "GOOD",
-        "response": "\ud83d\udcca Here's a chart showing Dv360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenue: $1,021,417.439\n\u2022 Impressions: 53,146\n\u2022 Clicks: 511\n\u2022 Conversions: 141\n\u2022 CTR: 0.96%\n\u2022 ROAS: 2.83x\n...",
+        "response": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 525\n\ud83c\udfaf Conversions: 104\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 3.72x\n\ud83d\udcb8 CPA: $2,528.293",
         "analysis": "Specific Platform response"
       },
       {
@@ -441,7 +444,7 @@
       {
         "question": "Show me Amazon's metrics",
         "status": "GOOD",
-        "response": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 525\n\ud83c\udfaf Conversions: 104\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 3.72x\n\ud83d\udcb8 CPA: $2,528.293",
+        "response": "\ud83d\udcca Here's a chart showing Dv360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenue: $1,021,417.439\n\u2022 Impressions: 53,146\n\u2022 Clicks: 511\n\u2022 Conversions: 141\n\u2022 CTR: 0.96%\n\u2022 ROAS: 2.83x\n...",
         "analysis": "Specific Platform response"
       }
     ],
@@ -614,33 +617,33 @@
       },
       {
         "question": "What are our opportunities?",
-        "status": "GOOD",
-        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
-        "analysis": "Specific Optimization response"
-      },
-      {
-        "question": "How can we improve performance?",
-        "status": "GOOD",
-        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
-        "analysis": "Specific Optimization response"
-      },
-      {
-        "question": "Where should we put more money?",
         "status": "UNKNOWN",
         "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
         "analysis": "Could not determine category"
       },
       {
-        "question": "What optimization opportunities exist?",
+        "question": "How can we improve performance?",
+        "status": "GOOD",
+        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
+        "analysis": "Specific Executive Summary response"
+      },
+      {
+        "question": "Where should we put more money?",
         "status": "GOOD",
         "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
         "analysis": "Specific Optimization response"
       },
       {
-        "question": "What should I focus on improving?",
-        "status": "GOOD",
+        "question": "What optimization opportunities exist?",
+        "status": "UNKNOWN",
         "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
-        "analysis": "Specific Optimization response"
+        "analysis": "Could not determine category"
+      },
+      {
+        "question": "What should I focus on improving?",
+        "status": "UNKNOWN",
+        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
+        "analysis": "Could not determine category"
       },
       {
         "question": "Give me strategic recommendations",
@@ -650,9 +653,9 @@
       },
       {
         "question": "What are the biggest opportunities?",
-        "status": "GOOD",
+        "status": "UNKNOWN",
         "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
-        "analysis": "Specific Optimization response"
+        "analysis": "Could not determine category"
       },
       {
         "question": "How can we increase ROAS?",
@@ -670,9 +673,9 @@
     "Detailed Analytics": [
       {
         "question": "What is our click-through rate?",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83d\uddb1\ufe0f Overall CTR: 1.08%\n\ud83d\udc41\ufe0f Total Impressions: 297,290\n\ud83d\uddb1\ufe0f Total Clicks: 3,220",
-        "analysis": "Could not determine category"
+        "analysis": "Specific Analytics response"
       },
       {
         "question": "How many conversions did we get?",
@@ -712,9 +715,9 @@
       },
       {
         "question": "What is our click-through rate?",
-        "status": "UNKNOWN",
+        "status": "GOOD",
         "response": "\ud83d\uddb1\ufe0f Overall CTR: 1.08%\n\ud83d\udc41\ufe0f Total Impressions: 297,290\n\ud83d\uddb1\ufe0f Total Clicks: 3,220",
-        "analysis": "Could not determine category"
+        "analysis": "Specific Analytics response"
       },
       {
         "question": "How many conversions did we get?",

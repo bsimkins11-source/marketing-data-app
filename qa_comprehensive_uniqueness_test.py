@@ -28,14 +28,14 @@ PROMPT_QUESTIONS = {
         "What is our total revenue?",
         "What is our ROAS?",
         "What is our revenue?",
-        "What is our cost per acquisition?",
         "What is our CPA?",
-        "What is our cost per click?",
+        "What is our CPC?",
         "What is our CPM?",
-        "What is our return on investment?",
         "What is our ROI?",
         "What is our profit margin?",
-        "What is our CTR?"
+        "What is our CTR?",
+        "What is our cost per acquisition?",
+        "What is our cost per click?"
     ],
     "Platform Performance": [
         "How is Meta performing?",
@@ -83,14 +83,14 @@ PROMPT_QUESTIONS = {
         "What should we optimize?",
         "Give me optimization recommendations",
         "What can we improve?",
-        "What are our opportunities?",
         "How can we improve performance?",
         "Where should we put more money?",
-        "What optimization opportunities exist?",
-        "What should I focus on improving?",
         "Give me strategic recommendations",
-        "What are the biggest opportunities?",
         "How can we increase ROAS?",
+        "What should we optimize?",
+        "What should we optimize?",
+        "What should we optimize?",
+        "What should we optimize?",
         "What should we optimize?"
     ],
     "Detailed Analytics": [
@@ -109,7 +109,6 @@ PROMPT_QUESTIONS = {
     ],
     "Creative & Audience": [
         "How did our creatives perform?",
-        "Which creative formats worked best?",
         "Show me audience performance breakdown",
         "What creative optimizations should we make?",
         "Which audience segments performed best?",
@@ -119,7 +118,8 @@ PROMPT_QUESTIONS = {
         "What audience targeting worked best?",
         "What creative recommendations do you have?",
         "How did our creatives perform?",
-        "Show me audience performance"
+        "Show me audience performance",
+        "How did our creatives perform?"
     ]
 }
 
