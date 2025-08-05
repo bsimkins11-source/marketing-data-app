@@ -2443,25 +2443,8 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     return result
   }
 
-  // Generic response for unrecognized queries
-  const content = `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n\n` +
-    `• Platform performance (e.g., "What is Meta's performance?")\n` +
-    `• Campaign metrics (e.g., "How is FreshNest Summer Grilling performing?")\n` +
-    `• Financial metrics (e.g., "What's our ROAS?")\n` +
-    `• Comparative analysis (e.g., "Which platform is doing the best?")\n` +
-    `• Executive summary (e.g., "Give me an executive summary")\n` +
-    `• Optimization insights (e.g., "What should I optimize?")`
-  
-  return {
-    content,
-    data: {
-      type: 'generic_response',
-      query: query
-    }
-  }
-
   // ============================================================================
-  // CHART REQUEST HANDLERS (HIGH PRIORITY - AFTER ALL OTHER HANDLERS)
+  // CHART REQUEST HANDLERS (HIGH PRIORITY - BEFORE GENERIC FALLBACK)
   // ============================================================================
   
   // Chart request queries
@@ -2604,6 +2587,27 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
       
       updateConversationContext(sessionId, query, result)
       return result
+    }
+  }
+
+  // ============================================================================
+  // GENERIC FALLBACK HANDLER (LOWEST PRIORITY - AFTER ALL OTHER HANDLERS)
+  // ============================================================================
+  
+  // Generic response for unrecognized queries
+  const content = `I understand you're asking about "${query}". I can help you analyze your campaign data. Try asking about:\n\n` +
+    `• Platform performance (e.g., "What is Meta's performance?")\n` +
+    `• Campaign metrics (e.g., "How is FreshNest Summer Grilling performing?")\n` +
+    `• Financial metrics (e.g., "What's our ROAS?")\n` +
+    `• Comparative analysis (e.g., "Which platform is doing the best?")\n` +
+    `• Executive summary (e.g., "Give me an executive summary")\n` +
+    `• Optimization insights (e.g., "What should I optimize?")`
+  
+  return {
+    content,
+    data: {
+      type: 'generic_response',
+      query: query
     }
   }
 }
