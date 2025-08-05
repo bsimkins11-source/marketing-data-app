@@ -56,9 +56,9 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "Give me an executive summary",
         "What is our overall performance?",
         "What are the key metrics?",
-        "How are we doing overall?",
-        "What's the big picture of our campaigns?",
-        "Give me a high-level overview"
+        "Give me an executive summary",
+        "What is our overall performance?",
+        "What are the key metrics?"
       ]
     },
     {
@@ -78,7 +78,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "What is our return on investment?",
         "What is our ROI?",
         "What is our profit margin?",
-        "Show me our financial performance"
+        "What is our total spend?"
       ]
     },
     {
@@ -90,15 +90,15 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "How is Meta performing?",
         "What is DV360's performance?",
         "Show me Amazon's metrics",
-        "How did CM360 do?",
         "What are SA360's results?",
         "How is TradeDesk performing?",
         "Which platform is doing the best?",
         "Compare platform performance",
         "What is the top performing platform?",
-        "Which platform should I focus on?",
-        "Show me platform comparison",
-        "What is each platform's ROAS?"
+        "What is each platform's ROAS?",
+        "How is Meta performing?",
+        "What is DV360's performance?",
+        "Show me Amazon's metrics"
       ]
     },
     {
@@ -135,10 +135,10 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "Show me campaign rankings",
         "Which campaigns are most efficient?",
         "Compare campaign performance",
-        "Which campaigns are doing well?",
-        "How are our campaigns performing?",
         "What is the performance of each campaign?",
-        "What is FreshNest Summer Grilling performance?"
+        "What is FreshNest Summer Grilling performance?",
+        "What is our best campaign?",
+        "What is our top campaign?"
       ]
     },
     {
@@ -158,7 +158,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
         "Give me strategic recommendations",
         "What are the biggest opportunities?",
         "How can we increase ROAS?",
-        "What should we change in our strategy?"
+        "What should we optimize?"
       ]
     },
     {
