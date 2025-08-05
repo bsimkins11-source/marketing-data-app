@@ -2,9 +2,9 @@
   "summary": {
     "total_questions": 90,
     "overall_status_counts": {
-      "GOOD": 63,
+      "GOOD": 71,
       "UNKNOWN": 18,
-      "GENERIC": 9
+      "GENERIC": 1
     },
     "uniqueness_analysis": {
       "total_responses": 90,
@@ -70,10 +70,6 @@
         [
           19,
           28
-        ],
-        [
-          20,
-          29
         ],
         [
           34,
@@ -149,10 +145,14 @@
         ],
         [
           54,
+          56
+        ],
+        [
+          54,
           57
         ],
         [
-          56,
+          54,
           58
         ],
         [
@@ -378,33 +378,33 @@
     "Platform Performance": [
       {
         "question": "How is Meta performing?",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"How is Meta performing?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metric...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "Meta Performance:\n\n\ud83d\udcb0 Spend: $404,859.21\n\ud83d\udcb5 Revenue: $1,344,372.713\n\ud83d\udcca Impressions: 46,448\n\ud83d\uddb1\ufe0f Clicks: 665\n\ud83c\udfaf Conversions: 181\n\ud83d\udcc8 CTR: 1.43%\n\ud83d\udc8e ROAS: 3.32x\n\ud83d\udcb8 CPA: $2,236.791",
+        "analysis": "Specific Platform response"
       },
       {
         "question": "What is DV360's performance?",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"What is DV360's performance?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign m...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "Dv360 Performance:\n\n\ud83d\udcb0 Spend: $360,723.25\n\ud83d\udcb5 Revenue: $1,021,417.439\n\ud83d\udcca Impressions: 53,146\n\ud83d\uddb1\ufe0f Clicks: 511\n\ud83c\udfaf Conversions: 141\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 2.83x\n\ud83d\udcb8 CPA: $2,558.321",
+        "analysis": "Specific Executive Summary response"
       },
       {
         "question": "Show me Amazon's metrics",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"Show me Amazon's metrics\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metri...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "Amazon Performance:\n\n\ud83d\udcb0 Spend: $262,942.42\n\ud83d\udcb5 Revenue: $978,091.123\n\ud83d\udcca Impressions: 54,749\n\ud83d\uddb1\ufe0f Clicks: 525\n\ud83c\udfaf Conversions: 104\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 3.72x\n\ud83d\udcb8 CPA: $2,528.293",
+        "analysis": "Specific Platform response"
       },
       {
         "question": "What are SA360's results?",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"What are SA360's results?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metr...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "Sa360 Performance:\n\n\ud83d\udcb0 Spend: $275,875.7\n\ud83d\udcb5 Revenue: $834,945.913\n\ud83d\udcca Impressions: 45,260\n\ud83d\uddb1\ufe0f Clicks: 760\n\ud83c\udfaf Conversions: 102\n\ud83d\udcc8 CTR: 1.68%\n\ud83d\udc8e ROAS: 3.03x\n\ud83d\udcb8 CPA: $2,704.664",
+        "analysis": "Specific Platform response"
       },
       {
         "question": "How is TradeDesk performing?",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"How is TradeDesk performing?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign m...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "Tradedesk Performance:\n\n\ud83d\udcb0 Spend: $183,671.37\n\ud83d\udcb5 Revenue: $588,144.855\n\ud83d\udcca Impressions: 41,343\n\ud83d\uddb1\ufe0f Clicks: 346\n\ud83c\udfaf Conversions: 72\n\ud83d\udcc8 CTR: 0.84%\n\ud83d\udc8e ROAS: 3.20x\n\ud83d\udcb8 CPA: $2,550.991",
+        "analysis": "Specific Platform response"
       },
       {
         "question": "Which platform is doing the best?",
@@ -432,21 +432,21 @@
       },
       {
         "question": "How is Meta performing?",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"How is Meta performing?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metric...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "Meta Performance:\n\n\ud83d\udcb0 Spend: $404,859.21\n\ud83d\udcb5 Revenue: $1,344,372.713\n\ud83d\udcca Impressions: 46,448\n\ud83d\uddb1\ufe0f Clicks: 665\n\ud83c\udfaf Conversions: 181\n\ud83d\udcc8 CTR: 1.43%\n\ud83d\udc8e ROAS: 3.32x\n\ud83d\udcb8 CPA: $2,236.791",
+        "analysis": "Specific Platform response"
       },
       {
         "question": "What is DV360's performance?",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"What is DV360's performance?\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign m...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "Dv360 Performance:\n\n\ud83d\udcb0 Spend: $360,723.25\n\ud83d\udcb5 Revenue: $1,021,417.439\n\ud83d\udcca Impressions: 53,146\n\ud83d\uddb1\ufe0f Clicks: 511\n\ud83c\udfaf Conversions: 141\n\ud83d\udcc8 CTR: 0.96%\n\ud83d\udc8e ROAS: 2.83x\n\ud83d\udcb8 CPA: $2,558.321",
+        "analysis": "Specific Executive Summary response"
       },
       {
         "question": "Show me Amazon's metrics",
-        "status": "GENERIC",
-        "response": "I understand you're asking about \"Show me Amazon's metrics\". I can help you analyze your campaign data. Try asking about:\n\n\u2022 Platform performance (e.g., \"What is Meta's performance?\")\n\u2022 Campaign metri...",
-        "analysis": "Generic response detected"
+        "status": "GOOD",
+        "response": "\ud83d\udcca Here's a chart showing Dv360's performance metrics:\n\n**Chart Data:**\n\u2022 Spend: $360,723.25\n\u2022 Revenue: $1,021,417.439\n\u2022 Impressions: 53,146\n\u2022 Clicks: 511\n\u2022 Conversions: 141\n\u2022 CTR: 0.96%\n\u2022 ROAS: 2.83x\n...",
+        "analysis": "Specific Platform response"
       }
     ],
     "Weekly Performance": [
@@ -613,7 +613,7 @@
       {
         "question": "What can we improve?",
         "status": "GOOD",
-        "response": "\ud83c\udfaf OPTIMIZATION INSIGHTS:\n\n\ud83c\udfc6 **Best Performing Platform**: Amazon\n\u2022 ROAS: 3.72x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2528.29\n\n\ud83d\udcc9 **Opportunity for Improvement**: Dv360\n\u2022 ROAS: 2.83x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2558.32\n\n\ud83d\udca1 **Re...",
+        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
         "analysis": "Specific Optimization response"
       },
       {
@@ -625,7 +625,7 @@
       {
         "question": "How can we improve performance?",
         "status": "UNKNOWN",
-        "response": "\ud83c\udfaf OPTIMIZATION INSIGHTS:\n\n\ud83c\udfc6 **Best Performing Platform**: Amazon\n\u2022 ROAS: 3.72x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2528.29\n\n\ud83d\udcc9 **Opportunity for Improvement**: Dv360\n\u2022 ROAS: 2.83x\n\u2022 CTR: 0.96%\n\u2022 CPA: $2558.32\n\n\ud83d\udca1 **Re...",
+        "response": "\ud83d\udca1 OPTIMIZATION OPPORTUNITIES:\n\n\ud83d\ude80 **Scale Up**: Amazon\n\u2022 Current ROAS: 3.72x\n\u2022 Current Spend: $262,942.42\n\u2022 Opportunity: Increase budget allocation\n\n\ud83d\udd27 **Optimize**: Dv360\n\u2022 Current ROAS: 2.83x\n\u2022 Curren...",
         "analysis": "Response doesn't match Executive Summary indicators"
       },
       {

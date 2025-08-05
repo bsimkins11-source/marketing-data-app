@@ -504,7 +504,7 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   ]
   
   if (campaignKeywords.some(keyword => lowerQuery.includes(keyword))) {
-    const aggregated = aggregateByDimension(data, 'campaign_name')
+    const aggregated = aggregateByDimension(data, 'campaign')
     const analysis = createAnalysisItems(aggregated)
     
     const bestCampaign = analysis[0]
@@ -545,12 +545,12 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
   for (const campaignName of specificCampaignNames) {
     if (lowerQuery.includes(campaignName.toLowerCase())) {
       const campaignData = data.filter(row => 
-        row.dimensions.campaign_name && 
-        row.dimensions.campaign_name.toLowerCase().includes(campaignName.toLowerCase())
+        row.dimensions.campaign && 
+        row.dimensions.campaign.toLowerCase().includes(campaignName.toLowerCase())
       )
       
       if (campaignData.length > 0) {
-        const aggregated = aggregateByDimension(campaignData, 'campaign_name')
+        const aggregated = aggregateByDimension(campaignData, 'campaign')
         const analysis = createAnalysisItems(aggregated)
         const campaign = analysis[0]
         
@@ -722,6 +722,65 @@ async function processAIQuery(query: string, data: any[], sessionId?: string) {
     const result = createResponse(content, {
       type: 'cpa_summary',
       metrics: { spend: totalSpend, conversions: totalConversions, cpa }
+    }, query)
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // CPC queries
+  if (lowerQuery.includes('cpc') || lowerQuery.includes('cost per click')) {
+    const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
+    const totalClicks = data.reduce((sum, row) => sum + row.metrics.clicks, 0)
+    const cpc = totalClicks > 0 ? totalSpend / totalClicks : 0
+    
+    const content = `🖱️ Overall CPC: ${formatCurrency(cpc)}\n` +
+      `💰 Total Spend: ${formatCurrency(totalSpend)}\n` +
+      `🖱️ Total Clicks: ${totalClicks.toLocaleString()}`
+    
+    const result = createResponse(content, {
+      type: 'cpc_summary',
+      metrics: { spend: totalSpend, clicks: totalClicks, cpc }
+    }, query)
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // ROI queries
+  if (lowerQuery.includes('roi') || lowerQuery.includes('return on investment')) {
+    const totalSpend = data.reduce((sum, row) => sum + row.metrics.spend, 0)
+    const totalRevenue = data.reduce((sum, row) => sum + row.metrics.revenue, 0)
+    const roi = totalSpend > 0 ? ((totalRevenue - totalSpend) / totalSpend) * 100 : 0
+    const profitMargin = totalRevenue > 0 ? ((totalRevenue - totalSpend) / totalRevenue) * 100 : 0
+    
+    const content = `💎 ROI: ${formatPercentage(roi / 100)}\n` +
+      `💰 Total Spend: ${formatCurrency(totalSpend)}\n` +
+      `💵 Total Revenue: ${formatCurrency(totalRevenue)}\n` +
+      `📈 Profit Margin: ${formatPercentage(profitMargin / 100)}`
+    
+    const result = createResponse(content, {
+      type: 'roi_summary',
+      metrics: { spend: totalSpend, revenue: totalRevenue, roi, profitMargin }
+    }, query)
+    
+    updateConversationContext(sessionId, query, result)
+    return result
+  }
+
+  // CTR queries
+  if (lowerQuery.includes('ctr') || lowerQuery.includes('click-through rate') || lowerQuery.includes('click through rate')) {
+    const totalImpressions = data.reduce((sum, row) => sum + row.metrics.impressions, 0)
+    const totalClicks = data.reduce((sum, row) => sum + row.metrics.clicks, 0)
+    const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : 0
+    
+    const content = `🖱️ Overall CTR: ${formatPercentage(ctr)}\n` +
+      `👁️ Total Impressions: ${totalImpressions.toLocaleString()}\n` +
+      `🖱️ Total Clicks: ${totalClicks.toLocaleString()}`
+    
+    const result = createResponse(content, {
+      type: 'ctr_summary',
+      metrics: { impressions: totalImpressions, clicks: totalClicks, ctr }
     }, query)
     
     updateConversationContext(sessionId, query, result)
