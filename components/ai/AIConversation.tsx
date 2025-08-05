@@ -737,17 +737,7 @@ I can handle complex queries, maintain conversation context, and provide detaile
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
       }, 100)
       
-      // Auto-speak the response
-      if (synthesisRef.current) {
-        const utterance = new SpeechSynthesisUtterance(response.content)
-        utterance.rate = 0.9
-        utterance.pitch = 1
-        utterance.volume = 0.8
-        utterance.onstart = () => setIsSpeaking(true)
-        utterance.onend = () => setIsSpeaking(false)
-        utterance.onerror = () => setIsSpeaking(false)
-        synthesisRef.current.speak(utterance)
-      }
+      // Note: No auto-speak for chart requests to avoid voice interruption
     } catch (error) {
       console.error('Error generating chart:', error)
       setError('Failed to generate chart. Please try again.')
