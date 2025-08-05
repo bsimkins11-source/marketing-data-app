@@ -366,6 +366,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
     }
 
     try {
+      console.log('Making API call with query:', query, 'sessionId:', sessionId)
       const response = await fetch('/api/ai/query', {
         method: 'POST',
         headers: {
@@ -383,6 +384,7 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
       }
 
       const result = await response.json()
+      console.log('API response:', result)
       return result
     } catch (error) {
       console.error('API call failed:', error)
@@ -394,6 +396,38 @@ export default function AIConversation({ campaignData, onSessionStart, onSession
   const processLocalQuery = async (query: string, data: MarketingData[]): Promise<{ content: string; data?: any }> => {
     // Simple local processing for basic queries
     const lowerQuery = query.toLowerCase()
+    
+    // Handle chart requests
+    const chartKeywords = ['show me a graph', 'create a chart', 'visualize this data', 'put this in a chart',
+      'show me a bar chart', 'make this into a graph', 'chart this data', 'graph this',
+      'show me a chart', 'visualize', 'graph', 'chart', 'plot this data']
+    
+    const isChartRequest = chartKeywords.some(keyword => lowerQuery.includes(keyword))
+    
+    if (isChartRequest) {
+      // Create a default platform comparison chart
+      const platformData = data.reduce((acc: { [key: string]: { platform: string; spend: number; revenue: number; roas: number } }, item) => {
+        const platform = item.dimensions.platform
+        if (!acc[platform]) {
+          acc[platform] = { platform, spend: 0, revenue: 0, roas: 0 }
+        }
+        acc[platform].spend += item.metrics.spend || 0
+        acc[platform].revenue += item.metrics.revenue || 0
+        acc[platform].roas = acc[platform].spend > 0 ? acc[platform].revenue / acc[platform].spend : 0
+        return acc
+      }, {})
+      
+      return {
+        content: `📊 **Platform Performance Overview**\n\nI've generated a chart showing platform performance across all your campaigns. The chart displays spend, revenue, and ROAS for each platform.`,
+        data: {
+          type: 'chart_response',
+          chartData: Object.values(platformData),
+          chartType: 'bar',
+          chartTitle: 'Platform Performance Overview',
+          originalQuery: query
+        }
+      }
+    }
     
     if (lowerQuery.includes('total') || lowerQuery.includes('sum')) {
       const totalSpend = data.reduce((sum, item) => sum + (item.metrics.spend || 0), 0)
